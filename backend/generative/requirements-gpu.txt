@@ -1,0 +1,13 @@
+torch
+torchvision
+opencv-python
+pillow
+numpy
+diffusers
+transformers
+accelerate
+safetensors
+simple-lama
+paddleocr
+paddlepaddle
+easyocr

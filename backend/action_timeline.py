@@ -23,6 +23,7 @@ MAX_KEYFRAME_GAP = float(os.getenv("ACTION_MAX_KEYFRAME_GAP", "6"))
 BG_UPDATE_SEC = float(os.getenv("ACTION_BG_UPDATE_SEC", "5"))
 BG_WINDOW_SEC = float(os.getenv("ACTION_BG_WINDOW_SEC", "10"))
 INCLUDE_AUDIO = os.getenv("ACTION_INCLUDE_AUDIO", "1") == "1"
+FRAME_SCALE = int(os.getenv("ACTION_FRAME_SCALE", "512"))
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -54,7 +55,7 @@ def _extract_frames(video_path: str, frames_dir: Path) -> None:
         "-i",
         video_path,
         "-vf",
-        f"fps={FPS},scale=512:-1",
+        f"fps={FPS},scale={FRAME_SCALE}:-1",
         "-q:v",
         "3",
         str(frames_dir / "%06d.jpg"),

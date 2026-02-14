@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GenerativeVideoJob",
+  "type": "object",
+  "properties": {
+    "id": {"type": "string"},
+    "job_type": {"type": "string"},
+    "inputVideo": {"type": "string"},
+    "outputVideo": {"type": "string"},
+    "prompt": {"type": "string"},
+    "backgroundImage": {"type": "string"},
+    "subject": {"type": "string"},
+    "objectPrompt": {"type": "string"},
+    "boxThreshold": {"type": "number"},
+    "textThreshold": {"type": "number"},
+    "targetText": {"type": "string"},
+    "newText": {"type": "string"},
+    "fontPath": {"type": "string"},
+    "fontSize": {"type": "integer"},
+    "color": {"type": "string"},
+    "seed": {"type": "integer"}
+  },
+  "required": ["id", "job_type", "inputVideo", "outputVideo"]
+}

@@ -8,6 +8,12 @@ from video import (
     apply_combo,
     change_speed_video,
     color_grade_video,
+    add_film_grain_video,
+    add_text_overlay_video,
+    blur_backdrop_video,
+    reframe_vertical_video,
+    redact_region_video,
+    replace_text_region_video,
     reverse_video,
     speed_up_video,
     trim_video,
@@ -53,7 +59,13 @@ SYSTEM_PROMPT = (
     "Always call the speed_up_video tool to perform the work."
 )
 
-COMBOS = ["warm_boost", "cool_slow", "punchy_trim", "reverse_pop"]
+COMBOS = [
+    "vertical_focus",
+    "hook_caption",
+    "cutdown_fast",
+    "focus_backdrop",
+    "cinematic_grain",
+]
 
 EDIT_TOOLS = [
     {
@@ -143,6 +155,110 @@ EDIT_TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "add_text_overlay_video",
+            "description": "Overlay text on the video at a given position.",
+            "parameters": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "inputPath": {"type": "string"},
+                    "outputPath": {"type": "string"},
+                    "text": {"type": "string"},
+                    "x": {"type": "integer"},
+                    "y": {"type": "integer"},
+                    "fontSize": {"type": "integer"},
+                    "color": {"type": "string"},
+                    "boxColor": {"type": "string"},
+                    "fontPath": {"type": "string"},
+                    "start": {"type": "number"},
+                    "end": {"type": "number"},
+                },
+                "required": ["inputPath", "outputPath", "text"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "replace_text_region_video",
+            "description": "Redact a rectangular region and overlay new text in the same area.",
+            "parameters": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "inputPath": {"type": "string"},
+                    "outputPath": {"type": "string"},
+                    "x": {"type": "integer"},
+                    "y": {"type": "integer"},
+                    "w": {"type": "integer"},
+                    "h": {"type": "integer"},
+                    "text": {"type": "string"},
+                    "fontSize": {"type": "integer"},
+                    "color": {"type": "string"},
+                    "boxColor": {"type": "string"},
+                    "fontPath": {"type": "string"},
+                },
+                "required": ["inputPath", "outputPath", "x", "y", "w", "h", "text"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "blur_backdrop_video",
+            "description": "Create a blurred backdrop with a scaled foreground (centered subject).",
+            "parameters": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "inputPath": {"type": "string"},
+                    "outputPath": {"type": "string"},
+                    "scale": {"type": "number"},
+                    "blur": {"type": "number"},
+                },
+                "required": ["inputPath", "outputPath"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "reframe_vertical_video",
+            "description": "Reframe to a vertical canvas with a blurred background.",
+            "parameters": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "inputPath": {"type": "string"},
+                    "outputPath": {"type": "string"},
+                    "width": {"type": "integer"},
+                    "height": {"type": "integer"},
+                    "blur": {"type": "number"},
+                },
+                "required": ["inputPath", "outputPath"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "add_film_grain_video",
+            "description": "Add film grain/noise for a textured look.",
+            "parameters": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "inputPath": {"type": "string"},
+                    "outputPath": {"type": "string"},
+                    "strength": {"type": "number"},
+                },
+                "required": ["inputPath", "outputPath"],
+            },
+        },
+    },
 ]
 
 
@@ -180,6 +296,55 @@ def _dispatch_tool(name: str, args: dict, input_path: str, output_path: str) -> 
     elif name == "apply_combo":
         combo = args.get("comboName") or "warm_boost"
         apply_combo(resolved_input, resolved_output, combo)
+    elif name == "add_text_overlay_video":
+        add_text_overlay_video(
+            resolved_input,
+            resolved_output,
+            text=str(args.get("text", "")),
+            x=int(args.get("x", 24)),
+            y=int(args.get("y", 24)),
+            font_size=int(args.get("fontSize", 36)),
+            color=str(args.get("color", "white")),
+            box_color=str(args.get("boxColor", "black@0.5")),
+            font_path=args.get("fontPath"),
+            start=args.get("start"),
+            end=args.get("end"),
+        )
+    elif name == "replace_text_region_video":
+        replace_text_region_video(
+            resolved_input,
+            resolved_output,
+            x=int(args.get("x", 0)),
+            y=int(args.get("y", 0)),
+            w=int(args.get("w", 200)),
+            h=int(args.get("h", 80)),
+            text=str(args.get("text", "")),
+            font_size=int(args.get("fontSize", 32)),
+            color=str(args.get("color", "white")),
+            box_color=str(args.get("boxColor", "black@0.6")),
+            font_path=args.get("fontPath"),
+        )
+    elif name == "blur_backdrop_video":
+        blur_backdrop_video(
+            resolved_input,
+            resolved_output,
+            scale=float(args.get("scale", 0.85)),
+            blur=float(args.get("blur", 20.0)),
+        )
+    elif name == "reframe_vertical_video":
+        reframe_vertical_video(
+            resolved_input,
+            resolved_output,
+            width=int(args.get("width", 1080)),
+            height=int(args.get("height", 1920)),
+            blur=float(args.get("blur", 28.0)),
+        )
+    elif name == "add_film_grain_video":
+        add_film_grain_video(
+            resolved_input,
+            resolved_output,
+            strength=float(args.get("strength", 15.0)),
+        )
     elif name == "speed_up_video":
         factor = args.get("factor", 1.05)
         speed_up_video(resolved_input, resolved_output, float(factor))
