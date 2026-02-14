@@ -6,11 +6,14 @@
 
 ## Backend setup (Python)
 1. `cd backend`
-2. Create a virtualenv and install deps: `pip install -r requirements.txt`
+2. Create a venv and install deps:
+   - `python -m venv venv`
+   - `source venv/bin/activate`
+   - `pip install -r requirements.txt`
 3. Copy env: `cp .env.example .env` and set `OPENAI_API_KEY`
 4. Set `JWT_SECRET` in `.env` (for auth)
 5. Ensure `ffmpeg` is installed and on your PATH
-6. Run: `uvicorn app:app --reload --port 8000 --env-file .env`
+6. Run: `./venv/bin/python -m uvicorn app:app --reload --port 8000 --env-file .env`
 
 Endpoints:
 - `POST /api/transform` (multipart form, field name `video`)
