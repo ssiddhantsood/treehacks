@@ -77,6 +77,18 @@ input[type="file"] {
   overflow-y: auto;
 }
 
+.variants {
+  display: grid;
+  gap: 12px;
+}
+
+.variant-title {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 6px;
+}
+
 .timeline-item {
   display: grid;
   grid-template-columns: 64px 1fr;

@@ -12,6 +12,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
   const [processedUrl, setProcessedUrl] = useState("");
+  const [variants, setVariants] = useState([]);
   const [analysis, setAnalysis] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
 
@@ -20,6 +21,7 @@ export default function Home() {
     setError("");
     setStatus("uploading");
     setAnalysis(null);
+    setVariants([]);
 
     const file = inputRef.current?.files?.[0];
     if (!file) {
@@ -45,6 +47,14 @@ export default function Home() {
       const payload = await response.json();
       setOriginalUrl(`${API_BASE}${payload.originalUrl}`);
       setProcessedUrl(`${API_BASE}${payload.processedUrl}`);
+      if (Array.isArray(payload.variants)) {
+        setVariants(
+          payload.variants.map(item => ({
+            name: item.name,
+            url: `${API_BASE}${item.url}`
+          }))
+        );
+      }
 
       if (payload.analysisUrl) {
         const analysisResponse = await fetch(`${API_BASE}${payload.analysisUrl}`);
@@ -106,6 +116,22 @@ export default function Home() {
         <section>
           <h2>Speed +5%</h2>
           {processedUrl ? <video src={processedUrl} controls /> : <div className="box">No video</div>}
+        </section>
+
+        <section>
+          <h2>Variants</h2>
+          {variants.length === 0 ? (
+            <div className="box">No variants yet.</div>
+          ) : (
+            <div className="variants">
+              {variants.map(variant => (
+                <div key={variant.url} className="variant">
+                  <div className="variant-title">{variant.name}</div>
+                  <video src={variant.url} controls />
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         <section>

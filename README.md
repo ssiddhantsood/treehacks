@@ -28,3 +28,4 @@ Optional: set `NEXT_PUBLIC_API_BASE` in `frontend/.env` (default `http://localho
 - The video processing logic is isolated in `backend/video.py`.
 - Action timeline extraction is in `backend/action_timeline.py` and uses a VLM + optional audio transcription.
 - If you want timestamped audio segments, set `OPENAI_ASR_MODEL=whisper-1` (it supports `verbose_json` segments).
+- The backend now also generates a couple of random edit variants (combos) and returns them in `variants`.

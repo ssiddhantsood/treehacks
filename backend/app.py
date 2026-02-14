@@ -1,5 +1,6 @@
 import os
 import shutil
+import random
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,7 +12,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from agent import run_speedup_agent
+from agent import COMBOS, run_combo_agent, run_speedup_agent
 from action_timeline import analyze_video
 
 load_dotenv()
@@ -68,6 +69,7 @@ async def transform(video: UploadFile = File(...)):
 
     analysis_filename = f"{upload_id}.json"
     analysis_path = ANALYSIS_DIR / analysis_filename
+    variants = []
 
     try:
         await run_in_threadpool(
@@ -81,6 +83,23 @@ async def transform(video: UploadFile = File(...)):
             str(original_path),
             str(analysis_path),
         )
+
+        chosen_combos = random.sample(COMBOS, k=min(2, len(COMBOS)))
+        for combo_name in chosen_combos:
+            variant_filename = f"{upload_id}-{combo_name}.mp4"
+            variant_path = PROCESSED_DIR / variant_filename
+            await run_in_threadpool(
+                run_combo_agent,
+                str(original_path),
+                str(variant_path),
+                combo_name,
+            )
+            variants.append(
+                {
+                    "name": combo_name,
+                    "url": f"/media/processed/{variant_filename}",
+                }
+            )
     except Exception as exc:
         traceback.print_exc()
         detail = "Video processing failed"
@@ -93,6 +112,7 @@ async def transform(video: UploadFile = File(...)):
         "originalUrl": f"/media/original/{original_filename}",
         "processedUrl": f"/media/processed/{processed_filename}",
         "analysisUrl": f"/media/analysis/{analysis_filename}",
+        "variants": variants,
     }
 
 
