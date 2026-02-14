@@ -1,0 +1,94 @@
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  background: #fafafa;
+  color: #111;
+}
+
+.page {
+  max-width: 960px;
+  margin: 24px auto;
+  padding: 0 16px 40px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-top: 24px;
+}
+
+video {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #000;
+}
+
+button {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+input[type="file"] {
+  padding: 6px 0;
+}
+
+.status {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.error {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #ffe5e5;
+  border: 1px solid #ffcccc;
+  border-radius: 6px;
+  color: #a00000;
+}
+
+.box {
+  border: 1px dashed #ccc;
+  border-radius: 6px;
+  padding: 16px;
+  color: #666;
+}
+
+.timeline {
+  display: grid;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  text-align: left;
+}
+
+.timeline-item.active {
+  border-color: #000;
+}
