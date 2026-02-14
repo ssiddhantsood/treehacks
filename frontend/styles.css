@@ -1,0 +1,125 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f0ea;
+  --ink: #1b1b1d;
+  --muted: #5a5a64;
+  --card: #ffffff;
+  --accent: #2c6e49;
+  --accent-soft: #e7f3ed;
+  --border: #e0dbd3;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Avenir Next", "Gill Sans", "Trebuchet MS", sans-serif;
+  background: radial-gradient(circle at top left, #ffffff 0%, #f7f3ee 35%, #efe7dd 100%);
+  color: var(--ink);
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  padding: 48px clamp(24px, 6vw, 80px) 24px;
+}
+
+.brand {
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.tagline {
+  color: var(--muted);
+  margin-top: 8px;
+}
+
+.content {
+  display: grid;
+  gap: 24px;
+  padding: 0 clamp(24px, 6vw, 80px) 48px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+.status {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.label {
+  color: var(--muted);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+form {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  font-size: 16px;
+}
+
+button {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.output {
+  margin-top: 12px;
+  background: #111827;
+  color: #e5e7eb;
+  padding: 12px;
+  border-radius: 10px;
+  min-height: 70px;
+  overflow-x: auto;
+}
+
+.footer {
+  margin-top: auto;
+  padding: 24px clamp(24px, 6vw, 80px) 32px;
+  color: var(--muted);
+}
+
+code {
+  background: #f1ebe3;
+  padding: 2px 6px;
+  border-radius: 6px;
+}

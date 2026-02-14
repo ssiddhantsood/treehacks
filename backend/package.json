@@ -1,0 +1,10 @@
+{
+  "name": "treehacks-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Basic backend starter",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js"
+  }
+}
