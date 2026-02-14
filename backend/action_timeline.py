@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -24,6 +25,8 @@ BG_UPDATE_SEC = float(os.getenv("ACTION_BG_UPDATE_SEC", "5"))
 BG_WINDOW_SEC = float(os.getenv("ACTION_BG_WINDOW_SEC", "10"))
 INCLUDE_AUDIO = os.getenv("ACTION_INCLUDE_AUDIO", "1") == "1"
 FRAME_SCALE = int(os.getenv("ACTION_FRAME_SCALE", "512"))
+SCENE_THRESHOLD = float(os.getenv("ACTION_SCENE_THRESHOLD", "0.3"))
+DENSE_INTERVAL = float(os.getenv("ACTION_DENSE_INTERVAL", "0.5"))
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -95,6 +98,192 @@ def _image_to_data_url(path: Path) -> str:
     return f"data:image/jpeg;base64,{encoded}"
 
 
+def _detect_scene_cuts(video_path: str) -> list[float]:
+    cmd = [
+        "ffmpeg",
+        "-i",
+        video_path,
+        "-an",
+        "-sn",
+        "-dn",
+        "-vf",
+        f"select='gt(scene,{SCENE_THRESHOLD})',showinfo",
+        "-f",
+        "null",
+        "-",
+    ]
+    try:
+        result = subprocess.run(
+            cmd,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        return []
+
+    timestamps = []
+    for line in result.stderr.splitlines():
+        if "pts_time:" not in line:
+            continue
+        match = re.search(r"pts_time:(\d+(?:\.\d+)?)", line)
+        if not match:
+            continue
+        timestamps.append(float(match.group(1)))
+
+    if not timestamps:
+        return []
+
+    rounded = [round(t, 3) for t in timestamps]
+    seen = set()
+    deduped = []
+    for value in rounded:
+        if value in seen:
+            continue
+        seen.add(value)
+        deduped.append(value)
+    return deduped
+
+
+def _frame_index_for_timestamp(timestamp: float, frame_count: int) -> int:
+    if frame_count <= 0:
+        return 0
+    index = int(round(timestamp * FPS))
+    return max(0, min(frame_count - 1, index))
+
+
+def _caption_frames_at_times(
+    frame_files: list[Path],
+    timestamps: list[float],
+    known_entities: list[str],
+) -> list[dict]:
+    if not frame_files or not timestamps:
+        return []
+
+    captions = []
+    last_index = None
+    frame_count = len(frame_files)
+
+    for timestamp in timestamps:
+        index = _frame_index_for_timestamp(timestamp, frame_count)
+        if index == last_index:
+            continue
+        payload = _caption_frame(frame_files[index], known_entities)
+        captions.append({"t": round(timestamp, 3), **payload})
+        last_index = index
+
+    return captions
+
+
+def _strip_code_fences(text: str) -> str:
+    if not text:
+        return ""
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+    return cleaned.strip()
+
+
+def _extract_json_object(text: str) -> str:
+    if not text:
+        return ""
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        return ""
+    return text[start : end + 1]
+
+
+def _extract_caption_field(text: str) -> str:
+    if not text:
+        return ""
+    patterns = [
+        r'"caption"\s*:\s*"([^"]+)"',
+        r"'caption'\s*:\s*'([^']+)'",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1).strip()
+    return ""
+
+
+def _fallback_caption_text(text: str) -> str:
+    cleaned = _strip_code_fences(text)
+    extracted = _extract_caption_field(cleaned)
+    return extracted or cleaned
+
+
+def _coerce_list(value) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        items = value
+    elif isinstance(value, str):
+        items = [value]
+    else:
+        items = [str(value)]
+
+    seen = set()
+    output = []
+    for item in items:
+        if item is None:
+            continue
+        label = str(item).strip()
+        if not label or label in seen:
+            continue
+        seen.add(label)
+        output.append(label)
+    return output
+
+
+def _coerce_setting(value) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, list):
+        parts = [str(item).strip() for item in value if str(item).strip()]
+        return ", ".join(parts)
+    if isinstance(value, str):
+        return value.strip()
+    return str(value).strip()
+
+
+def _coerce_confidence(value) -> float:
+    try:
+        score = float(value)
+    except (TypeError, ValueError):
+        return 0.0
+    return max(0.0, min(1.0, score))
+
+
+def _parse_caption_payload(content: str) -> tuple[dict, str]:
+    cleaned = _strip_code_fences(content or "")
+    for candidate in (cleaned, _extract_json_object(cleaned)):
+        if not candidate:
+            continue
+        try:
+            payload = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, dict):
+            return payload, cleaned
+    return {}, cleaned
+
+
+def _normalize_caption_payload(payload: dict, fallback_caption: str) -> dict:
+    caption_text = _fallback_caption_text(str(payload.get("caption") or fallback_caption or ""))
+    return {
+        "caption": caption_text,
+        "actions": _coerce_list(payload.get("actions")),
+        "objects": _coerce_list(payload.get("objects")),
+        "people": _coerce_list(payload.get("people")),
+        "setting": _coerce_setting(payload.get("setting")),
+        "confidence": _coerce_confidence(payload.get("confidence")),
+    }
+
+
 def _caption_frame(image_path: Path, known_entities: list[str]) -> dict:
     system_prompt = (
         "You are a vision model that describes visible actions. "
@@ -103,7 +292,8 @@ def _caption_frame(image_path: Path, known_entities: list[str]) -> dict:
     user_text = (
         "Describe the current frame with 1-2 short sentences focused on actions. "
         "If you reference people or objects, keep names consistent with known_entities. "
-        "Return valid JSON with keys: caption, actions, objects, people, setting, confidence. "
+        "Return ONLY valid JSON with keys: caption, actions, objects, people, setting, confidence. "
+        "Do not wrap in code fences or add extra text. "
         "confidence is 0-1. actions/objects/people are arrays of short strings."
     )
     if known_entities:
@@ -123,19 +313,11 @@ def _caption_frame(image_path: Path, known_entities: list[str]) -> dict:
         ],
     )
 
-    content = response.choices[0].message.content or "{}"
-    try:
-        payload = json.loads(content)
-    except json.JSONDecodeError:
-        payload = {
-            "caption": content.strip(),
-            "actions": [],
-            "objects": [],
-            "people": [],
-            "setting": "",
-            "confidence": 0.3,
-        }
-    return payload
+    content = response.choices[0].message.content or ""
+    payload, cleaned = _parse_caption_payload(content)
+    if not isinstance(payload, dict):
+        payload = {}
+    return _normalize_caption_payload(payload, cleaned)
 
 
 def _transcribe_audio(audio_path: Path) -> list[dict]:
@@ -222,6 +404,7 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
         audio_path = tmp_path / "audio.wav"
 
         duration = _get_duration(video_path)
+        scene_cuts = _detect_scene_cuts(video_path)
         _extract_frames(video_path, frames_dir)
 
         if INCLUDE_AUDIO:
@@ -298,6 +481,20 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
                 }
             )
 
+        dense_captions = []
+        if DENSE_INTERVAL > 0:
+            dense_times = []
+            t = 0.0
+            while t <= duration:
+                dense_times.append(t)
+                t += DENSE_INTERVAL
+            dense_captions = _caption_frames_at_times(frame_files, dense_times, known_entities)
+
+        scene_captions = []
+        if scene_cuts:
+            scene_marks = sorted(set([0.0] + scene_cuts))
+            scene_captions = _caption_frames_at_times(frame_files, scene_marks, known_entities)
+
         background_updates = []
         state = {"summary": "", "entities": known_entities}
         last_caption_marker = -1
@@ -325,8 +522,11 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
         result = {
             "fps": FPS,
             "duration": round(duration, 3),
+            "scene_cuts": scene_cuts,
             "captions": captions,
             "events": events,
+            "dense_captions": dense_captions,
+            "scene_captions": scene_captions,
             "background_updates": background_updates,
             "audio_segments": audio_segments,
         }

@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Video Speedup",
-  description: "Minimal UI for video speedup and action timeline"
+  title: "Personalized Ad Generator",
+  description: "Create personalized ad cuts, variants, and highlights from your footage."
 };
 
 export default function RootLayout({ children }) {
