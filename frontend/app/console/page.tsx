@@ -7,14 +7,6 @@ import { api } from "@/lib/api";
 import type { Video } from "@/lib/types";
 import { getMockCampaigns } from "@/lib/mock";
 
-const COMBO_LABELS: Record<string, string> = {
-  hook_caption: "Hook Caption",
-  cinematic_grain: "Cinematic Grain",
-  vertical_focus: "Vertical Focus",
-  cutdown_fast: "Fast Cutdown",
-  focus_backdrop: "Focus Backdrop",
-};
-
 interface Profile {
   age: string;
   gender: string;
@@ -25,9 +17,7 @@ interface Profile {
 function parseCSV(text: string): Profile[] {
   const lines = text.trim().split("\n");
   if (lines.length < 2) return [];
-
   const profiles: Profile[] = [];
-  // Simple CSV parse that handles quoted fields
   for (let i = 1; i < lines.length; i++) {
     const row = lines[i];
     const fields: string[] = [];
@@ -35,24 +25,12 @@ function parseCSV(text: string): Profile[] {
     let inQuotes = false;
     for (let j = 0; j < row.length; j++) {
       const ch = row[j];
-      if (ch === '"') {
-        inQuotes = !inQuotes;
-      } else if (ch === "," && !inQuotes) {
-        fields.push(current.trim());
-        current = "";
-      } else {
-        current += ch;
-      }
+      if (ch === '"') inQuotes = !inQuotes;
+      else if (ch === "," && !inQuotes) { fields.push(current.trim()); current = ""; }
+      else current += ch;
     }
     fields.push(current.trim());
-    if (fields.length >= 4) {
-      profiles.push({
-        age: fields[0],
-        gender: fields[1],
-        demographic_info: fields[2],
-        previous_search_history: fields[3],
-      });
-    }
+    if (fields.length >= 4) profiles.push({ age: fields[0], gender: fields[1], demographic_info: fields[2], previous_search_history: fields[3] });
   }
   return profiles;
 }
@@ -63,9 +41,8 @@ export default function ConsolePage() {
   const csvInputRef = useRef<HTMLInputElement>(null);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // modal state
   const [showModal, setShowModal] = useState(false);
+  const [modalStep, setModalStep] = useState<1 | 2 | 3>(1);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [campaignName, setCampaignName] = useState("");
   const [productDesc, setProductDesc] = useState("");
@@ -74,31 +51,69 @@ export default function ConsolePage() {
   const [clusterCount, setClusterCount] = useState(3);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [draggingVideo, setDraggingVideo] = useState(false);
+  const [draggingCSV, setDraggingCSV] = useState(false);
+  const recentSectionRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const [gridViewportHeight, setGridViewportHeight] = useState(0);
+  const gridTopPadding = 32;
+  // Grid layout state
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
 
-  const defaultClusters = useMemo(
-    () => Math.max(1, Math.round(Math.sqrt(profiles.length))),
-    [profiles.length]
-  );
+  const handleMouseEnter = (id: string, index: number) => {
+    setHoveredCard(index);
+    const video = videoRefs.current[id];
+    if (video) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+    }
+  };
 
-  // sync cluster count to default when profiles change
+  const handleMouseLeave = (id: string) => {
+    setHoveredCard(null);
+    const video = videoRefs.current[id];
+    if (video) {
+        video.pause();
+        video.currentTime = 0;
+    }
+  };
+
+  const defaultClusters = useMemo(() => Math.max(1, Math.round(Math.sqrt(profiles.length))), [profiles.length]);
+
+  useEffect(() => { setClusterCount(defaultClusters); }, [defaultClusters]);
+
   useEffect(() => {
-    setClusterCount(defaultClusters);
-  }, [defaultClusters]);
-
-  useEffect(() => {
-    api.videos
-      .list()
-      .then((res) => {
-        setVideos([...res.videos, ...getMockCampaigns()]);
-      })
-      .catch(() => {
-        setVideos(getMockCampaigns());
-      })
+    api.videos.list()
+      .then((res) => setVideos([...res.videos, ...getMockCampaigns()]))
+      .catch(() => setVideos(getMockCampaigns()))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const section = recentSectionRef.current;
+    const rightPanel = rightPanelRef.current;
+    if (!section || !rightPanel) return;
+
+    const updateHeight = () => {
+      const sectionRect = section.getBoundingClientRect();
+      const rightRect = rightPanel.getBoundingClientRect();
+      const height = Math.max(0, Math.round(sectionRect.bottom - rightRect.top - gridTopPadding));
+      setGridViewportHeight(height);
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(section);
+    observer.observe(rightPanel);
+    return () => observer.disconnect();
   }, []);
 
   const openModal = () => {
     setShowModal(true);
+    setModalStep(1);
     setSelectedFile(null);
     setCampaignName("");
     setProductDesc("");
@@ -110,25 +125,38 @@ export default function ConsolePage() {
 
   const closeModal = () => setShowModal(false);
 
-  const handleVideoSelect = () => {
-    const file = videoInputRef.current?.files?.[0];
+  const handleVideoSelect = (e?: React.ChangeEvent<HTMLInputElement> | File) => {
+    if (e instanceof File) { setSelectedFile(e); return; }
+    const file = e?.target.files?.[0] || videoInputRef.current?.files?.[0];
     if (file) setSelectedFile(file);
   };
 
-  const handleCSVSelect = async () => {
-    const file = csvInputRef.current?.files?.[0];
+  const handleCSVSelect = async (e?: React.ChangeEvent<HTMLInputElement> | File) => {
+    let file: File | undefined;
+    if (e instanceof File) file = e;
+    else file = e?.target.files?.[0] || csvInputRef.current?.files?.[0];
     if (!file) return;
-    const text = await file.text();
-    const parsed = parseCSV(text);
-    setProfiles(parsed);
+    setProfiles(parseCSV(await file.text()));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleDropVideo = (e: React.DragEvent) => {
     e.preventDefault();
+    setDraggingVideo(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file?.type.startsWith("video/")) handleVideoSelect(file);
+  };
+
+  const handleDropCSV = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDraggingCSV(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && (file.type === "text/csv" || file.name.endsWith(".csv"))) handleCSVSelect(file);
+  };
+
+  const handleSubmit = async () => {
     if (!selectedFile) return;
     setSubmitting(true);
     setSubmitError("");
-
     try {
       const res = await api.videos.upload(selectedFile);
       setSubmitting(false);
@@ -140,405 +168,590 @@ export default function ConsolePage() {
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  };
-
-  const timeAgo = (dateStr: string) => {
-    const now = new Date();
-    const date = new Date(dateStr);
-    const diffMs = now.getTime() - date.getTime();
-    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-    if (diffHrs < 1) return "Just now";
-    if (diffHrs < 24) return `${diffHrs}h ago`;
-    const diffDays = Math.floor(diffHrs / 24);
-    if (diffDays === 1) return "Yesterday";
-    return `${diffDays}d ago`;
-  };
-
+  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   const totalVariants = videos.reduce((acc, v) => acc + (v.variants?.length || 0), 0);
 
   return (
-    <div className="mx-auto max-w-7xl px-8 py-12">
-      {/* --- new campaign modal --- */}
+    <div className="h-full w-full overflow-hidden bg-background">
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODAL - Full Redesign with Steps
+      ═══════════════════════════════════════════════════════════════════════ */}
       {showModal && (
-        <div className="fixed inset-0 z-99999 bg-background flex flex-col">
-          <div className="animate-modal-in flex flex-col w-screen h-screen">
-            {/* modal header */}
-            <div className="flex items-center justify-between px-8 py-5 border-b border-border shrink-0">
-              <div className="flex items-center gap-6">
+        <div className="fixed inset-0 z-[99999] bg-background">
+          <div className="animate-modal-in h-full flex flex-col">
+            {/* Modal Nav */}
+            <div className="shrink-0 flex items-center justify-between px-8 h-16 border-b border-border">
+              <div className="flex items-center gap-8">
                 <span className="text-sm font-medium tracking-widest uppercase">ADAPT</span>
-                <span className="text-muted text-xs">→</span>
-                <span className="font-mono text-[11px] uppercase tracking-widest text-foreground">New campaign</span>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3].map((step) => (
+                    <button
+                      key={step}
+                      onClick={() => step < modalStep && setModalStep(step as 1 | 2 | 3)}
+                      className={`flex items-center gap-2 px-3 py-1.5 text-xs font-mono transition-all cursor-pointer ${
+                        modalStep === step
+                          ? "text-foreground"
+                          : modalStep > step
+                            ? "text-foreground/50"
+                            : "text-muted/40"
+                      }`}
+                    >
+                      <span className="text-[10px]">
+                        {modalStep > step ? "✓" : `0${step}`}
+                      </span>
+                      <span className="hidden sm:inline uppercase tracking-widest">
+                        {step === 1 ? "Creative" : step === 2 ? "Details" : "Audience"}
+                      </span>
+                    </button>
+                  ))}
+                  {/* Dividers between steps */}
+                </div>
               </div>
               <button
                 onClick={closeModal}
-                className="text-muted hover:text-foreground transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full hover:bg-foreground/5 flex items-center justify-center text-muted hover:text-foreground transition-colors cursor-pointer"
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M4 4l12 12M16 4L4 16" />
                 </svg>
               </button>
             </div>
 
-            {/* modal body */}
-            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-              <div className="flex-1 grid grid-cols-2 min-h-0">
-                {/* --- left column: creative + details --- */}
-                <div className="border-r border-border px-8 py-8 overflow-y-auto flex flex-col gap-8">
-                  {/* video upload */}
-                  <div>
-                    <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-                      Base creative
-                    </span>
-                    <input
-                      ref={videoInputRef}
-                      type="file"
-                      accept="video/*"
-                      onChange={handleVideoSelect}
-                      className="hidden"
-                    />
-                    <div
-                      onClick={() => videoInputRef.current?.click()}
-                      className={`mt-3 border border-dashed rounded-lg px-6 py-10 text-center cursor-pointer transition-all ${
-                        selectedFile ? "border-foreground bg-foreground/5" : "border-border hover:border-foreground/30"
-                      }`}
-                    >
-                      {selectedFile ? (
-                        <div className="flex items-center justify-center gap-3">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-foreground">
-                            <path d="M20 6L9 17l-5-5" />
-                          </svg>
-                          <span className="text-sm font-medium">{selectedFile.name}</span>
-                          <span className="text-xs text-muted">
-                            ({(selectedFile.size / (1024 * 1024)).toFixed(1)} MB)
-                          </span>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-muted">
-                          Click to select a video · <span className="text-foreground font-medium">MP4, MOV, WebM</span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* campaign details */}
-                  <div className="border-t border-border pt-8">
-                    <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-                      Campaign details
-                    </span>
-                    <div className="mt-4 flex flex-col gap-5">
-                      <div className="flex flex-col gap-2">
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-muted">
-                          Campaign name
-                        </label>
-                        <input
-                          type="text"
-                          value={campaignName}
-                          onChange={(e) => setCampaignName(e.target.value)}
-                          placeholder="e.g. Nike — Summer 2026"
-                          className="w-full border-b border-border bg-transparent px-0 py-2 text-sm text-foreground placeholder:text-muted/50 outline-none transition-colors focus:border-foreground"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-muted">
-                          Product description
-                        </label>
-                        <textarea
-                          value={productDesc}
-                          onChange={(e) => setProductDesc(e.target.value)}
-                          placeholder="Describe the product or brand being advertised..."
-                          rows={3}
-                          className="w-full border-b border-border bg-transparent px-0 py-2 text-sm text-foreground placeholder:text-muted/50 outline-none transition-colors focus:border-foreground resize-none"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="font-mono text-[10px] uppercase tracking-widest text-muted">
-                          Campaign goal
-                        </label>
-                        <input
-                          type="text"
-                          value={goal}
-                          onChange={(e) => setGoal(e.target.value)}
-                          placeholder="e.g. Increase brand awareness in new markets"
-                          className="w-full border-b border-border bg-transparent px-0 py-2 text-sm text-foreground placeholder:text-muted/50 outline-none transition-colors focus:border-foreground"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* --- right column: profiles + clustering --- */}
-                <div className="px-8 py-8 overflow-y-auto flex flex-col gap-8">
-                  {/* CSV import */}
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-                        Audience profiles
-                      </span>
-                      <a
-                        href="/mock_profiles.csv"
-                        download
-                        className="font-mono text-[10px] uppercase tracking-widest text-muted hover:text-foreground transition-colors"
-                      >
-                        Download template ↓
-                      </a>
-                    </div>
-                    <input
-                      ref={csvInputRef}
-                      type="file"
-                      accept=".csv"
-                      onChange={handleCSVSelect}
-                      className="hidden"
-                    />
-                    <div
-                      onClick={() => csvInputRef.current?.click()}
-                      className={`mt-3 border border-dashed rounded-lg px-6 py-8 text-center cursor-pointer transition-all ${
-                        profiles.length > 0 ? "border-foreground bg-foreground/5" : "border-border hover:border-foreground/30"
-                      }`}
-                    >
-                      {profiles.length > 0 ? (
-                        <div className="flex items-center justify-center gap-3">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-foreground">
-                            <path d="M20 6L9 17l-5-5" />
-                          </svg>
-                          <span className="text-sm font-medium">{profiles.length} profiles imported</span>
+            {/* Modal Content */}
+            <div className="flex-1 overflow-hidden">
+              {/* Step 1: Upload Creative */}
+              {modalStep === 1 && (
+                <div className="h-full flex">
+                  {/* Left - Upload Zone */}
+                  <div className="flex-1 flex items-center justify-center p-12">
+                    <input ref={videoInputRef} type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" />
+                    
+                    {selectedFile ? (
+                      <div className="w-full max-w-2xl">
+                        <div className="aspect-video bg-black rounded-2xl overflow-hidden border border-border relative group">
+                          <video
+                            src={URL.createObjectURL(selectedFile)}
+                            className="w-full h-full object-contain"
+                            controls
+                            autoPlay
+                            muted
+                          />
                           <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); setProfiles([]); }}
-                            className="text-xs text-muted hover:text-foreground ml-2 cursor-pointer"
+                            onClick={() => setSelectedFile(null)}
+                            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                           >
-                            Clear
+                            <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <path d="M4 4l12 12M16 4L4 16" />
+                            </svg>
                           </button>
                         </div>
-                      ) : (
-                        <p className="text-sm text-muted">
-                          Import a CSV · <span className="text-foreground font-medium">age, gender, demographic_info, search_history</span>
-                        </p>
-                      )}
+                        <div className="mt-6 flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">{selectedFile.name}</p>
+                            <p className="text-xs text-muted mt-1">{(selectedFile.size / (1024 * 1024)).toFixed(1)} MB</p>
+                          </div>
+                          <button
+                            onClick={() => videoInputRef.current?.click()}
+                            className="px-4 py-2 text-sm text-muted hover:text-foreground transition-colors cursor-pointer"
+                          >
+                            Change file
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => videoInputRef.current?.click()}
+                        onDragOver={(e) => { e.preventDefault(); setDraggingVideo(true); }}
+                        onDragLeave={() => setDraggingVideo(false)}
+                        onDrop={handleDropVideo}
+                        className={`w-full max-w-2xl aspect-video rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
+                          draggingVideo
+                            ? "border-foreground bg-foreground/5 scale-[1.02]"
+                            : "border-border hover:border-foreground/30 hover:bg-foreground/2"
+                        }`}
+                      >
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className={`mb-6 transition-colors ${draggingVideo ? "text-foreground" : "text-muted/40"}`}>
+                          <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        <p className="text-sm font-medium">Drop your video here</p>
+                        <p className="text-xs text-muted mt-2">or click to browse</p>
+                        <p className="font-mono text-[10px] text-muted/40 mt-6 uppercase tracking-widest">MP4 · MOV · WebM · up to 500MB</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right - Info Panel */}
+                  <div className="w-80 border-l border-border p-8 flex flex-col">
+                    <div>
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Step 1 of 3</span>
+                      <h2 className="mt-2 text-xl font-bold">Base Creative</h2>
+                      <p className="mt-3 text-sm text-muted leading-relaxed">
+                        Upload your master video. This will be analyzed and transformed into multiple localized variants.
+                      </p>
+                    </div>
+
+                    <div className="mt-8 pt-8 border-t border-border">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Supported formats</span>
+                      <div className="mt-3 flex flex-wrap gap-3">
+                        {["MP4", "MOV", "WebM", "AVI"].map((f) => (
+                          <span key={f} className="font-mono text-[10px] text-muted uppercase tracking-widest">{f}</span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-8 pt-8 border-t border-border">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">What happens next</span>
+                      <ul className="mt-3 space-y-3">
+                        {["AI analyzes your video", "Scenes & subjects detected", "Ready for localization"].map((item, i) => (
+                          <li key={i} className="flex items-center gap-3 text-xs text-muted">
+                            <span className="font-mono text-[9px] text-muted/40">{String(i + 1).padStart(2, "0")}</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="mt-auto pt-8">
+                      <button
+                        onClick={() => setModalStep(2)}
+                        disabled={!selectedFile}
+                        className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-foreground/90 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-all"
+                      >
+                        Continue
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Campaign Details */}
+              {modalStep === 2 && (
+                <div className="h-full flex">
+                  <div className="flex-1 flex items-center justify-center p-12">
+                    <div className="w-full max-w-lg">
+                      <div className="space-y-8">
+                        <div>
+                          <label className="font-mono text-[10px] uppercase tracking-widest text-muted">Campaign name</label>
+                          <input
+                            type="text"
+                            value={campaignName}
+                            onChange={(e) => setCampaignName(e.target.value)}
+                            placeholder="e.g. Nike — Summer 2026"
+                            className="mt-3 w-full px-0 py-4 text-2xl font-semibold bg-transparent border-b-2 border-border focus:border-foreground outline-none transition-colors placeholder:text-muted/30"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="font-mono text-[10px] uppercase tracking-widest text-muted">Product description</label>
+                          <textarea
+                            value={productDesc}
+                            onChange={(e) => setProductDesc(e.target.value)}
+                            placeholder="Describe what's being advertised..."
+                            rows={4}
+                            className="mt-3 w-full px-0 py-3 text-sm bg-transparent border-b border-border focus:border-foreground outline-none transition-colors resize-none placeholder:text-muted/50"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="font-mono text-[10px] uppercase tracking-widest text-muted">Campaign goal</label>
+                          <input
+                            type="text"
+                            value={goal}
+                            onChange={(e) => setGoal(e.target.value)}
+                            placeholder="e.g. Increase brand awareness in new markets"
+                            className="mt-3 w-full px-0 py-3 text-sm bg-transparent border-b border-border focus:border-foreground outline-none transition-colors placeholder:text-muted/50"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* cluster count */}
-                  {profiles.length > 0 && (
-                    <div className="border-t border-border pt-8">
-                      <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-                        Clusters
-                      </span>
-                      <p className="mt-1 text-xs text-muted">
-                        Group profiles into audience segments. Default is √n ≈ {defaultClusters}.
+                  <div className="w-80 border-l border-border p-8 flex flex-col">
+                    <div>
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Step 2 of 3</span>
+                      <h2 className="mt-2 text-xl font-bold">Campaign Details</h2>
+                      <p className="mt-3 text-sm text-muted leading-relaxed">
+                        Tell us about your campaign. This helps our AI make better localization decisions.
                       </p>
-                      <div className="mt-4 flex items-center gap-4">
-                        <input
-                          type="range"
-                          min={1}
-                          max={profiles.length}
-                          value={clusterCount}
-                          onChange={(e) => setClusterCount(Number(e.target.value))}
-                          className="flex-1 accent-foreground"
-                        />
-                        <span className="font-mono text-sm tabular-nums w-8 text-right">
-                          {clusterCount}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex justify-between text-[10px] text-muted font-mono">
-                        <span>1</span>
-                        <span>{profiles.length}</span>
-                      </div>
                     </div>
-                  )}
 
-                  {/* profiles table */}
-                  {profiles.length > 0 && (
-                    <div className="border-t border-border pt-8">
-                      <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-                        Imported profiles ({profiles.length})
-                      </span>
-                      <div className="mt-4 border border-border rounded-lg overflow-hidden">
-                        {/* table header */}
-                        <div className="grid grid-cols-[50px_60px_1fr_1fr] gap-2 px-3 py-2 bg-foreground/[0.03] border-b border-border">
-                          <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Age</span>
-                          <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Gender</span>
-                          <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Demographic</span>
-                          <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Search History</span>
+                    {selectedFile && (
+                      <div className="mt-8 pt-8 border-t border-border">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Selected file</span>
+                        <div className="mt-3 aspect-video rounded-lg overflow-hidden border border-border bg-black">
+                          <video src={URL.createObjectURL(selectedFile)} className="w-full h-full object-cover" muted />
                         </div>
-                        {/* rows */}
-                        <div className="max-h-[280px] overflow-y-auto">
-                          {profiles.map((p, i) => (
-                            <div
-                              key={i}
-                              className="grid grid-cols-[50px_60px_1fr_1fr] gap-2 px-3 py-2 border-b border-border last:border-b-0 text-xs"
-                            >
-                              <span className="tabular-nums">{p.age}</span>
-                              <span className="text-muted">{p.gender}</span>
-                              <span className="text-muted truncate" title={p.demographic_info}>
-                                {p.demographic_info}
-                              </span>
-                              <span className="text-muted truncate" title={p.previous_search_history}>
-                                {p.previous_search_history}
-                              </span>
+                        <p className="mt-2 text-xs text-muted truncate">{selectedFile.name}</p>
+                      </div>
+                    )}
+
+                    <div className="mt-auto pt-8 space-y-3">
+                      <button
+                        onClick={() => setModalStep(3)}
+                        className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-foreground/90 cursor-pointer transition-all"
+                      >
+                        Continue
+                      </button>
+                      <button
+                        onClick={() => setModalStep(1)}
+                        className="w-full py-3 text-sm text-muted hover:text-foreground cursor-pointer transition-colors"
+                      >
+                        Back
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Audience */}
+              {modalStep === 3 && (
+                <div className="h-full flex">
+                  <div className="flex-1 p-12 overflow-y-auto">
+                    <input ref={csvInputRef} type="file" accept=".csv" onChange={handleCSVSelect} className="hidden" />
+                    
+                    {profiles.length === 0 ? (
+                      <div className="h-full flex items-center justify-center">
+                        <div
+                          onClick={() => csvInputRef.current?.click()}
+                          onDragOver={(e) => { e.preventDefault(); setDraggingCSV(true); }}
+                          onDragLeave={() => setDraggingCSV(false)}
+                          onDrop={handleDropCSV}
+                          className={`w-full max-w-xl aspect-[3/2] rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all ${
+                            draggingCSV
+                              ? "border-foreground bg-foreground/5 scale-[1.02]"
+                              : "border-border hover:border-foreground/30"
+                          }`}
+                        >
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className={`mb-4 transition-colors ${draggingCSV ? "text-foreground" : "text-muted/40"}`}>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                            <path d="M14 2v6h6" />
+                            <path d="M12 18v-6M9 15h6" />
+                          </svg>
+                          <p className="text-sm font-medium">Import audience profiles</p>
+                          <p className="text-xs text-muted mt-2">CSV with age, gender, demographics</p>
+                          <a
+                            href="/mock_profiles.csv"
+                            download
+                            onClick={(e) => e.stopPropagation()}
+                            className="mt-6 text-xs text-muted hover:text-foreground underline"
+                          >
+                            Download template
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="max-w-3xl mx-auto">
+                        <div className="flex items-center justify-between mb-8">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center justify-center">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-foreground">
+                                <path d="M20 6L9 17l-5-5" />
+                              </svg>
                             </div>
-                          ))}
+                            <div>
+                              <p className="font-medium">{profiles.length} profiles imported</p>
+                              <p className="text-xs text-muted">Ready for clustering</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setProfiles([])}
+                            className="text-xs text-muted hover:text-foreground cursor-pointer"
+                          >
+                            Remove
+                          </button>
+                        </div>
+
+                        <div className="p-6 border border-border rounded-2xl mb-8">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
+                              Audience segments
+                            </span>
+                            <span className="text-2xl font-bold">{clusterCount}</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={1}
+                            max={Math.min(profiles.length, 10)}
+                            value={clusterCount}
+                            onChange={(e) => setClusterCount(Number(e.target.value))}
+                            className="w-full h-2 appearance-none bg-foreground/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground"
+                          />
+                          <div className="flex justify-between mt-2 text-xs text-muted font-mono">
+                            <span>1</span>
+                            <span>{Math.min(profiles.length, 10)}</span>
+                          </div>
+                        </div>
+
+                        <div className="border border-border rounded-2xl overflow-hidden">
+                          <div className="grid grid-cols-[60px_80px_1fr_1fr] gap-4 px-4 py-3 bg-foreground/2 border-b border-border">
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Age</span>
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Gender</span>
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Demographic</span>
+                            <span className="font-mono text-[9px] uppercase tracking-widest text-muted">Interests</span>
+                          </div>
+                          <div className="max-h-64 overflow-y-auto">
+                            {profiles.slice(0, 20).map((p, i) => (
+                              <div key={i} className="grid grid-cols-[60px_80px_1fr_1fr] gap-4 px-4 py-3 border-b border-border last:border-b-0 text-sm">
+                                <span className="tabular-nums">{p.age}</span>
+                                <span className="text-muted">{p.gender}</span>
+                                <span className="text-muted truncate">{p.demographic_info}</span>
+                                <span className="text-muted truncate">{p.previous_search_history}</span>
+                              </div>
+                            ))}
+                          </div>
+                          {profiles.length > 20 && (
+                            <div className="px-4 py-3 text-xs text-muted text-center bg-foreground/2">
+                              + {profiles.length - 20} more profiles
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="w-80 border-l border-border p-8 flex flex-col">
+                    <div>
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Step 3 of 3</span>
+                      <h2 className="mt-2 text-xl font-bold">Target Audience</h2>
+                      <p className="mt-3 text-sm text-muted leading-relaxed">
+                        Import your audience data. We&apos;ll cluster them into segments and generate variants for each.
+                      </p>
+                    </div>
+
+                    <div className="mt-8 pt-8 border-t border-border">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Summary</span>
+                      <div className="mt-4 flex flex-col divide-y divide-border">
+                        <div className="flex items-center justify-between py-3">
+                          <span className="text-sm text-muted">Creative</span>
+                          <span className="text-sm font-medium truncate max-w-[140px]">{selectedFile?.name || "—"}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <span className="text-sm text-muted">Campaign</span>
+                          <span className="text-sm font-medium truncate max-w-[140px]">{campaignName || "Untitled"}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <span className="text-sm text-muted">Profiles</span>
+                          <span className="text-sm font-medium">{profiles.length || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <span className="text-sm text-muted">Segments</span>
+                          <span className="text-sm font-medium">{clusterCount}</span>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
 
-              {/* modal footer */}
-              <div className="border-t border-border px-8 py-4 flex items-center justify-between shrink-0">
-                {submitError ? (
-                  <p className="text-sm text-red-400">{submitError}</p>
-                ) : (
-                  <span className="text-xs text-muted">
-                    {selectedFile ? `${selectedFile.name}` : "No file selected"}
-                    {profiles.length > 0 && ` · ${profiles.length} profiles · ${clusterCount} clusters`}
-                  </span>
-                )}
-                <div className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={closeModal}
-                    className="cursor-pointer px-5 py-2.5 text-sm text-muted hover:text-foreground transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!selectedFile || submitting}
-                    className="cursor-pointer px-8 py-2.5 bg-[#1c1c1c] text-white rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {submitting ? "Processing..." : "Launch campaign"}
-                  </button>
+                    {submitError && (
+                      <p className="mt-4 text-sm text-red-500">{submitError}</p>
+                    )}
+
+                    <div className="mt-auto pt-8 space-y-3">
+                      <button
+                        onClick={handleSubmit}
+                        disabled={submitting}
+                        className="w-full py-3 bg-foreground text-background rounded-full text-sm font-medium hover:bg-foreground/90 disabled:opacity-50 cursor-pointer transition-all flex items-center justify-center gap-2"
+                      >
+                        {submitting ? (
+                          <>
+                            <span className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          "Launch Campaign"
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setModalStep(2)}
+                        disabled={submitting}
+                        className="w-full py-3 text-sm text-muted hover:text-foreground cursor-pointer transition-colors disabled:opacity-50"
+                      >
+                        Back
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </form>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      {/* --- header --- */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Campaigns</h1>
-          <p className="mt-2 text-sm text-muted max-w-md">
-            Upload a base creative and generate localized variants for every market.
-          </p>
-        </div>
-        <button
-          onClick={openModal}
-          className="cursor-pointer px-5 py-2.5 bg-[#1c1c1c] text-white rounded-full text-sm font-medium hover:bg-black transition-colors"
-        >
-          New campaign
-        </button>
-      </div>
-
-      {/* --- stats --- */}
-      <div className="mt-10 grid grid-cols-3 border border-border rounded-lg overflow-hidden">
-        {[
-          { value: videos.length.toString(), label: "Campaigns" },
-          { value: totalVariants.toString(), label: "Variants generated" },
-          { value: videos.length > 0 ? timeAgo(videos[0].createdAt) : "—", label: "Last upload" },
-        ].map((stat, i) => (
-          <div
-            key={stat.label}
-            className={`py-6 px-6 ${i > 0 ? "border-l border-border" : ""}`}
-          >
-            <span className="text-2xl font-bold tracking-tight">{stat.value}</span>
-            <span className="mt-1 block font-mono text-[10px] uppercase tracking-widest text-muted">
-              {stat.label}
-            </span>
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MAIN PAGE
+      ═══════════════════════════════════════════════════════════════════════ */}
+      <div className="relative h-full w-full">
+        {/* Left Panel - Info */}
+          <div className="absolute left-0 top-0 bottom-0 w-[400px] p-8 flex flex-col z-10">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
+            <p className="mt-3 text-sm text-muted leading-relaxed max-w-xs">
+              Your localized ad campaigns. Each card represents a master creative with its variants.
+            </p>
           </div>
-        ))}
-      </div>
 
-      {/* --- campaign list --- */}
-      <div className="mt-14">
-        <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
-          All campaigns
-        </span>
-
-        {loading ? (
-          <div className="py-24 flex justify-center">
-            <div className="w-5 h-5 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+          {/* Stats */}
+          <div className="mt-10 grid grid-cols-2 gap-4">
+            {[
+              { value: videos.length, label: "Campaigns" },
+              { value: totalVariants, label: "Variants" },
+              { value: "12", label: "Markets" },
+              { value: "+41%", label: "Avg. lift" },
+            ].map((stat) => (
+              <div key={stat.label} className="py-4 px-4 border border-border rounded-xl">
+                <span className="text-2xl font-bold">{stat.value}</span>
+                <span className="block font-mono text-[9px] uppercase tracking-widest text-muted mt-1">{stat.label}</span>
+              </div>
+            ))}
           </div>
-        ) : videos.length === 0 ? (
-          <div className="mt-6 py-20 text-center border border-dashed border-border rounded-lg">
-            <p className="text-sm text-muted">No campaigns yet. Upload your first creative to get started.</p>
+
+          {/* Actions */}
+          <div className="mt-10">
+            <button
+              onClick={openModal}
+              className="w-full py-3.5 bg-foreground text-background rounded-full text-sm font-medium hover:bg-foreground/90 cursor-pointer transition-all"
+            >
+              New campaign
+            </button>
           </div>
-        ) : (
-          <div className="mt-6 flex flex-col">
-            <div className="grid grid-cols-[1fr_140px_140px_100px] gap-4 px-4 py-3 border-b border-border">
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Campaign</span>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Created</span>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Styles</span>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted text-right">Variants</span>
-            </div>
 
-            {videos.map((video) => {
-              const metadata = (video as unknown as { metadata?: { speedFactor?: number; combos?: string[] } }).metadata;
-              const combos = metadata?.combos || [];
-
-              return (
+          {/* Recent List */}
+            <div ref={recentSectionRef} className="mt-10 flex-1 min-h-0 flex flex-col relative">
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Recent</span>
+            <div className="mt-4 space-y-0 overflow-y-auto flex-1 -mr-4 pr-4">
+              {videos.slice(0, 6).map((video, i) => (
                 <Link
                   key={video.id}
                   href={`/console/campaigns/${video.id}`}
-                  className="group grid grid-cols-[1fr_140px_140px_100px] gap-4 items-center px-4 py-4 border-b border-border transition-colors hover:bg-foreground/[0.02]"
+                  onMouseEnter={() => setHoveredCard(i)}
+                  onMouseLeave={() => setHoveredCard(null)}
+                  className={`flex items-center gap-3 py-3 border-b border-border transition-colors ${
+                    hoveredCard === i ? "bg-foreground/2" : ""
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-md bg-foreground/4 border border-border flex items-center justify-center shrink-0 overflow-hidden">
-                      {video.originalUrl ? (
-                        <video
-                          src={video.originalUrl}
-                          className="w-full h-full object-cover"
-                          muted
-                        />
-                      ) : (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted/50">
-                          <rect x="2" y="4" width="20" height="16" rx="2" />
-                          <path d="M10 9l5 3-5 3V9z" />
-                        </svg>
-                      )}
-                    </div>
-                    <span className="text-sm font-medium group-hover:text-foreground transition-colors truncate">
-                      {video.name || `Campaign ${video.id.slice(0, 8)}`}
-                    </span>
+                  <span className="font-mono text-[10px] text-muted w-5">{String(i + 1).padStart(2, "0")}</span>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium block truncate">{video.name || `Campaign ${video.id.slice(0, 8)}`}</span>
+                    <span className="text-[10px] text-muted">{video.variants?.length || 0} variants</span>
                   </div>
-
-                  <span className="text-xs text-muted tabular-nums">
-                    {formatDate(video.createdAt)}
-                  </span>
-
-                  <div className="flex flex-wrap gap-1">
-                    {combos.slice(0, 2).map((combo) => (
-                      <span
-                        key={combo}
-                        className="inline-block px-2 py-0.5 text-[10px] text-muted bg-foreground/4 rounded-full truncate max-w-[120px]"
-                      >
-                        {COMBO_LABELS[combo] || combo}
-                      </span>
-                    ))}
-                    {combos.length === 0 && (
-                      <span className="text-[10px] text-muted/50">—</span>
-                    )}
-                  </div>
-
-                  <div className="text-right">
-                    {video.variants && video.variants.length > 0 ? (
-                      <span className="text-xs text-foreground font-medium tabular-nums">
-                        {video.variants.length}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted/50">0</span>
-                    )}
-                  </div>
+                  <span className="text-[10px] text-muted">{formatDate(video.createdAt)}</span>
                 </Link>
-              );
-            })}
+              ))}
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 h-12 bg-linear-to-t from-background to-transparent pointer-events-none" />
           </div>
-        )}
+        </div>
+
+        {/* Right Panel - Visual Stack */}
+        {/* Right Panel - Grid */}
+        <div ref={rightPanelRef} className="absolute right-0 top-0 bottom-0 left-[400px] bg-background">
+          {loading ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+            </div>
+          ) : videos.length === 0 ? (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-20 h-20 mx-auto rounded-full bg-foreground/3 border border-dashed border-border flex items-center justify-center mb-6">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-muted/50">
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="M10 9l5 3-5 3V9z" />
+                  </svg>
+                </div>
+                <p className="text-muted">No campaigns yet</p>
+                <button
+                  onClick={openModal}
+                  className="mt-4 px-6 py-2.5 bg-foreground text-background rounded-full text-sm font-medium cursor-pointer"
+                >
+                  Create your first
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="w-full overflow-y-auto px-8"
+              style={{ height: gridViewportHeight ? `${gridViewportHeight}px` : "100%", marginTop: gridTopPadding }}
+            >
+               <div className="grid grid-cols-2 gap-2">
+                {videos.map((video, i) => {
+                  const isHovered = hoveredCard === i;
+
+                  return (
+                    <Link
+                      key={video.id}
+                      href={`/console/campaigns/${video.id}`}
+                      onMouseEnter={() => handleMouseEnter(video.id, i)}
+                      onMouseLeave={() => handleMouseLeave(video.id)}
+                      className={`relative w-full aspect-16/10 transition-all duration-300 ease-out group ${isHovered ? 'z-10 scale-[1.02]' : 'z-0 scale-100'}`}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          padding: "0",
+                          display: "flex",
+                          flexDirection: "column",
+                          position: "relative",
+                        }}
+                      >
+                        <div
+                          className="relative w-full flex-1 overflow-hidden rounded-lg bg-neutral-900"
+                        >
+                            {video.originalUrl ? (
+                              <video
+                                ref={(el) => { if (el) videoRefs.current[video.id] = el; }}
+                                src={video.originalUrl}
+                                className="absolute inset-0 w-full h-full object-cover"
+                                loop
+                                muted
+                                playsInline
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-foreground/20">
+                                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                                  <path d="M10 9l5 3-5 3V9z" />
+                                </svg>
+                              </div>
+                            )}
+                            {/* Default overlay — visible when NOT hovered */}
+                            <div className="absolute inset-0 bg-black/50 flex flex-col justify-between p-4 transition-opacity duration-300 group-hover:opacity-0">
+                              <div />
+                              <div className="flex flex-col items-center text-center gap-1">
+                                <span className="font-mono text-xs text-white font-medium tracking-wide drop-shadow-md">
+                                  {video.name || "Untitled"}
+                                </span>
+                                <span className="font-mono text-[10px] text-white/60 uppercase tracking-widest drop-shadow-md">
+                                  {video.variants?.length || 0} variants
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-end">
+                                <span className="font-mono text-[9px] text-white/50 uppercase tracking-widest drop-shadow-md">
+                                  {formatDate(video.createdAt)}
+                                </span>
+                                <span className="font-mono text-[9px] text-white/50 uppercase tracking-widest drop-shadow-md">
+                                  {String(i + 1).padStart(2, "0")}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Hover overlay — fades in on hover */}
+                            <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                            <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between items-end pointer-events-none">
+                              <span className="font-mono text-[10px] text-white uppercase tracking-widest drop-shadow-sm">
+                                {video.name || "Untitled"}
+                              </span>
+                              <span className="font-mono text-[10px] text-white/80 uppercase tracking-widest drop-shadow-sm">
+                                {video.variants?.length || 0} VARIANTS
+                              </span>
+                            </div>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

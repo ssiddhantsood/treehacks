@@ -17,9 +17,9 @@ export default function ConsoleLayout({
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background">
-        <div className="mx-auto max-w-7xl px-8 flex items-center justify-between h-14">
+    <div className="h-screen w-full overflow-hidden bg-background flex flex-col">
+      <nav className="shrink-0 z-50 bg-background">
+        <div className="w-full px-8 flex items-center justify-between h-14">
           <Link
             href="/"
             className="cursor-pointer text-sm font-medium tracking-widest uppercase hover:opacity-70 transition-opacity"
@@ -35,7 +35,7 @@ export default function ConsoleLayout({
         </div>
       </nav>
 
-      <main className="pt-8">
+      <main className="flex-1 min-h-0 overflow-hidden">
         {children}
       </main>
     </div>
