@@ -22,7 +22,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from starlette.requests import Request
-from starlette.responses import FileResponse, JSONResponse
+from starlette.responses import FileResponse, JSONResponse, PlainTextResponse
 
 from ai_agents.orchestrator import run_orchestrator_agent
 
@@ -46,19 +46,16 @@ for _dir in (ORIGINAL_DIR, PROCESSED_DIR, ANALYSIS_DIR):
 # Base URL for download links
 # ---------------------------------------------------------------------------
 
-RENDER_URL = os.getenv("RENDER_EXTERNAL_URL", "")  # e.g. https://adapt-q15d.onrender.com
+RENDER_URL = os.getenv("RENDER_EXTERNAL_URL", "")
 if _cloud and not RENDER_URL:
-    # Fallback — user can set RENDER_EXTERNAL_URL in Render dashboard
     RENDER_URL = "https://adapt-q15d.onrender.com"
 
 LOCAL_BASE = "http://localhost:{port}"
 
 # ---------------------------------------------------------------------------
-# FastMCP app
+# Port config
 # ---------------------------------------------------------------------------
 
-# On Render, the platform sets PORT and the service must listen on it.
-# Locally, use MCP_PORT (not in .env) so it doesn't clash with FastAPI's PORT=8000.
 if _cloud:
     MCP_PORT = int(os.getenv("PORT", "10000"))
 else:
@@ -70,6 +67,10 @@ def _base_url() -> str:
         return RENDER_URL
     return LOCAL_BASE.format(port=MCP_PORT)
 
+
+# ---------------------------------------------------------------------------
+# FastMCP app
+# ---------------------------------------------------------------------------
 
 mcp = FastMCP(
     "ADAPT Video Editor",
@@ -90,23 +91,25 @@ mcp = FastMCP(
 )
 
 # ---------------------------------------------------------------------------
-# File download endpoint  (serves processed videos over HTTP)
+# Extra HTTP routes (custom_route — served alongside MCP by FastMCP)
 # ---------------------------------------------------------------------------
 
 
-@mcp.custom_route("/files/{filename}", methods=["GET"], name="download_file")
+@mcp.custom_route("/files/{filename}", methods=["GET"])
 async def download_file(request: Request) -> FileResponse | JSONResponse:
+    """Serve a processed video file for download."""
     filename = request.path_params["filename"]
-    # Sanitize — only allow files from processed dir
     safe_name = Path(filename).name
     file_path = PROCESSED_DIR / safe_name
     if file_path.exists() and file_path.is_file():
-        return FileResponse(
-            str(file_path),
-            media_type="video/mp4",
-            filename=safe_name,
-        )
+        return FileResponse(str(file_path), media_type="video/mp4", filename=safe_name)
     return JSONResponse({"error": f"File not found: {safe_name}"}, status_code=404)
+
+
+@mcp.custom_route("/", methods=["GET", "HEAD"])
+async def health_check(request: Request) -> PlainTextResponse:
+    """Health check — Render pings HEAD / to confirm the service is alive."""
+    return PlainTextResponse("ok")
 
 
 # ---------------------------------------------------------------------------
@@ -160,7 +163,7 @@ def _verify_output(file_path: str) -> dict:
     if not p.exists():
         return {"verified": False, "error": "Output file was not created"}
     size = p.stat().st_size
-    if size < 1000:  # less than 1KB is suspicious
+    if size < 1000:
         return {"verified": False, "error": f"Output file is suspiciously small ({size} bytes)"}
     return {"verified": True, "size_mb": round(size / (1024 * 1024), 2)}
 
@@ -223,7 +226,6 @@ def edit_video(video_source: str, instructions: str) -> str:
       - "Reframe for TikTok vertical format"
       - "Color grade with warm tones"
       - "Reverse the video"
-      - "Who is the target audience for this ad?"
 
     Args:
         video_source: Public video URL (https://...) or filename from list_videos.
@@ -237,7 +239,6 @@ def edit_video(video_source: str, instructions: str) -> str:
     except Exception as e:
         return f"Error downloading/finding video: {e}"
 
-    # Verify input exists
     inp_size = Path(inp).stat().st_size / (1024 * 1024)
     print(f"[edit] Input: {inp} ({inp_size:.1f} MB)")
     print(f"[edit] Instructions: {instructions}")
@@ -256,8 +257,8 @@ def edit_video(video_source: str, instructions: str) -> str:
         return f"Error during processing: {e}"
 
     # --- Step 3: Parse orchestrator result ---
-    tool_used = "unknown"
     parsed = {}
+    output_file = out
 
     if isinstance(result, dict) and result.get("role") == "tool":
         content = result.get("content", "{}")
@@ -313,9 +314,10 @@ if __name__ == "__main__":
     print(f"\nEndpoints:")
     print(f"  - /mcp           -- MCP protocol (for Poke)")
     print(f"  - /files/{{name}} -- Download processed videos")
+    print(f"  - /              -- Health check")
     if _cloud:
         print(f"\nRunning in cloud mode (Render).")
-        print(f"Add in Poke → Settings → Connections → Create Integration:")
+        print(f"Add in Poke settings → Connections → Create Integration:")
         print(f"  Server URL: {_base_url()}/mcp")
     else:
         print(f"\nLocal dev — in another terminal, run:")
