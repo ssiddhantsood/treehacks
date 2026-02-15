@@ -145,19 +145,14 @@ function EmbeddingsMap({
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        setViewportSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+        requestAnimationFrame(() => {
+          setViewportSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+        });
       }
     });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    if (!expanded) return;
-    setZoom(1);
-    setOffset({ x: 0, y: 0 });
-    setRotation({ ...DEFAULT_ROTATION });
-  }, [expanded]);
 
   const basePoints: BasePoint[] = useMemo(() => {
     return points.map((point) => {
@@ -881,37 +876,10 @@ export default function CampaignDetailPage() {
               Cluster profiles and generate tailored edits. Each segment gets research, a plan, and a targeted ad cut.
             </p>
             <div className="mt-5">
-              <div className="flex items-center justify-between mb-3">
-                <label className="font-mono text-[9px] uppercase tracking-widest text-muted">
-                  Segments
-                </label>
-                <span className="text-xl font-bold tabular-nums">{effectiveGroupCount}</span>
-              </div>
-                <input
-                  type="range"
-                  min={1}
-                  max={Math.max(1, embeddingsCount || 1)}
-                  value={effectiveGroupCount}
-                  onChange={(e) => {
-                    groupCountTouched.current = true;
-                    setGroupCount(Number(e.target.value));
-                  }}
-                  disabled={groupCountLocked}
-                  className="w-full h-2 appearance-none bg-foreground/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground"
-                />
-                <div className="flex justify-between mt-2 text-xs text-muted font-mono">
-                  <span>1</span>
-                  <span>{Math.max(1, embeddingsCount || 1)}</span>
-                </div>
-                {groupCountLocked && (
-                  <p className="mt-2 text-[10px] text-muted">
-                    Using all embedding groups for this video.
-                  </p>
-                )}
               <button
                 onClick={handleGenerateAds}
                 disabled={generating}
-                className="mt-4 cursor-pointer px-5 py-2.5 bg-foreground text-background rounded-full text-xs font-medium hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="cursor-pointer px-5 py-2.5 bg-foreground text-background rounded-full text-xs font-medium hover:bg-foreground/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {generating ? (
                   <span className="flex items-center gap-2">
