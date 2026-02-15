@@ -2,21 +2,24 @@ import Link from "next/link";
 
 const tiers = [
   {
-    name: "Free",
-    price: "$0",
+    name: "Starter",
+    price: "$499",
     period: "/ month",
-    features: ["5 variants / month", "720p export", "Community support"],
+    features: ["50 variants / month", "1080p export", "Email support", "2 team seats"],
+    cta: "Get started →",
   },
   {
     name: "Pro",
-    price: "$49",
+    price: "$1,499",
     period: "/ month",
     features: [
       "Unlimited variants",
       "4K export",
       "Priority support",
       "Custom demographics",
+      "10 team seats",
     ],
+    cta: "Get started →",
   },
   {
     name: "Enterprise",
@@ -27,7 +30,9 @@ const tiers = [
       "SSO & SAML",
       "SLA guarantee",
       "Custom integrations",
+      "Unlimited seats",
     ],
+    cta: "Contact sales →",
   },
 ];
 
@@ -39,13 +44,13 @@ export function Pricing() {
           Pricing
         </h2>
         <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">
-          Start free. Scale when you&apos;re ready.
+          Simple, transparent pricing that scales with your team.
         </p>
         <div className="mt-14 grid sm:grid-cols-3">
           {tiers.map((tier, i) => (
             <div
               key={tier.name}
-              className={`py-10 ${i > 0 ? "sm:pl-10" : ""} ${i < tiers.length - 1 ? "border-b border-border sm:border-b-0 sm:border-r sm:pr-10" : ""}`}
+              className={`flex flex-col py-16 px-8 ${i < tiers.length - 1 ? "border-b border-border sm:border-b-0 sm:border-r" : ""}`}
             >
               <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
                 {tier.name}
@@ -65,12 +70,12 @@ export function Pricing() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-10">
+              <div className="mt-auto pt-10">
                 <Link
-                  href="/login"
+                  href={tier.name === "Enterprise" ? "#" : "/login"}
                   className="font-mono text-[11px] uppercase tracking-widest text-muted transition-colors hover:text-foreground"
                 >
-                  Get started →
+                  {tier.cta}
                 </Link>
               </div>
             </div>
