@@ -6,5 +6,5 @@ python-multipart==0.0.9
 openai==1.55.3
 python-dotenv==1.0.1
 passlib==1.7.4
-PyJWT==2.9.0
+PyJWT>=2.10.1
 mcp[cli]>=1.26.0
