@@ -2,55 +2,77 @@ import type { AnalysisData, Campaign } from "./types";
 
 const MOCK_CAMPAIGNS: Campaign[] = [
   {
-    id: "d3m0cafe01a1",
-    originalUrl: "",
-    analysisUrl: "",
+    id: "doritos-sb-2026",
+    name: "Doritos — Super Bowl LX",
+    originalUrl: "/ads/doritos_sb.webm",
+    analysisUrl: "doritos-sb-2026",
     createdAt: "2026-02-14T19:12:04Z",
-    variants: [],
+    variants: [
+      { name: "Latin America — Spanish VO", url: "/ads/doritos_sb.webm" },
+      { name: "Japan — Tokyo Edit", url: "/ads/doritos_sb.webm" },
+      { name: "Germany — Berlin Cut", url: "/ads/doritos_sb.webm" },
+    ],
     metadata: {
       speedFactor: 1.08,
       combos: ["hook_caption", "cinematic_grain"],
     },
   },
   {
-    id: "d3m0cafe02b2",
-    originalUrl: "",
-    analysisUrl: "",
+    id: "nike-sb-2026",
+    name: "Nike — \"Never Done\"",
+    originalUrl: "/ads/nike_sb.webm",
+    analysisUrl: "nike-sb-2026",
     createdAt: "2026-02-13T16:38:27Z",
-    variants: [],
+    variants: [
+      { name: "UK — London Localisation", url: "/ads/nike_sb.webm" },
+      { name: "France — Paris Edit", url: "/ads/nike_sb.webm" },
+    ],
     metadata: {
       speedFactor: 1.04,
       combos: ["vertical_focus", "cutdown_fast"],
     },
   },
   {
-    id: "d3m0cafe03c3",
-    originalUrl: "",
-    analysisUrl: "",
+    id: "pepsi-sb-2026",
+    name: "Pepsi — Halftime Hype",
+    originalUrl: "/ads/pepsi_sb.webm",
+    analysisUrl: "pepsi-sb-2026",
     createdAt: "2026-02-12T21:05:11Z",
-    variants: [],
+    variants: [
+      { name: "Brazil — São Paulo Cut", url: "/ads/pepsi_sb.webm" },
+      { name: "India — Mumbai Edit", url: "/ads/pepsi_sb.webm" },
+      { name: "Middle East — Dubai Edit", url: "/ads/pepsi_sb.webm" },
+      { name: "Japan — Tokyo Cut", url: "/ads/pepsi_sb.webm" },
+    ],
     metadata: {
       speedFactor: 1.06,
       combos: ["focus_backdrop", "hook_caption"],
     },
   },
   {
-    id: "d3m0cafe04d4",
-    originalUrl: "",
-    analysisUrl: "",
+    id: "openai-sb-2026",
+    name: "OpenAI — \"Intelligence for Everyone\"",
+    originalUrl: "/ads/openai_sb.webm",
+    analysisUrl: "openai-sb-2026",
     createdAt: "2026-02-11T14:19:52Z",
-    variants: [],
+    variants: [
+      { name: "Korea — Seoul Edit", url: "/ads/openai_sb.webm" },
+    ],
     metadata: {
       speedFactor: 1.03,
       combos: ["cutdown_fast", "vertical_focus"],
     },
   },
   {
-    id: "d3m0cafe05e5",
-    originalUrl: "",
-    analysisUrl: "",
+    id: "tacobell-sb-2026",
+    name: "Taco Bell — Live Más",
+    originalUrl: "/ads/taco_bell_sb.webm",
+    analysisUrl: "tacobell-sb-2026",
     createdAt: "2026-02-10T11:44:39Z",
-    variants: [],
+    variants: [
+      { name: "Mexico — CDMX Cut", url: "/ads/taco_bell_sb.webm" },
+      { name: "Spain — Madrid Edit", url: "/ads/taco_bell_sb.webm" },
+    ],
     metadata: {
       speedFactor: 1.07,
       combos: ["cinematic_grain", "focus_backdrop"],
@@ -59,72 +81,72 @@ const MOCK_CAMPAIGNS: Campaign[] = [
 ];
 
 const MOCK_ANALYSIS: Record<string, AnalysisData> = {
-  d3m0cafe01a1: {
+  "doritos-sb-2026": {
     captions: [
-      { id: "hook", caption: "Cold open: beans hit the grinder." },
-      { id: "benefit", caption: "Bright aroma, instant wake-up." },
-      { id: "social", caption: "Barista pour with foam art." },
-      { id: "cta", caption: "Limited roast drop this week." },
-    ],
-    events: [
-      { t_start: 0, t_end: 3, caption_id: "hook" },
-      { t_start: 3, t_end: 7, caption_id: "benefit" },
-      { t_start: 7, t_end: 11, caption_id: "social" },
-      { t_start: 11, t_end: 15, caption_id: "cta" },
-    ],
-  },
-  d3m0cafe02b2: {
-    captions: [
-      { id: "hook", caption: "Runner hits a sunrise trail." },
-      { id: "product", caption: "Close-up: TrailMix Pro pack." },
-      { id: "benefit", caption: "20g protein, zero crash." },
-      { id: "cta", caption: "Shop the endurance bundle." },
+      { id: "hook", caption: "Crowd roar. Triangle chip snaps in slow motion." },
+      { id: "action", caption: "Fan leaps off couch — Dorito mid-air." },
+      { id: "comedic", caption: "Dog steals the bag, chaos erupts." },
+      { id: "cta", caption: "\"For The Bold\" title card. Stadium cheers." },
     ],
     events: [
       { t_start: 0, t_end: 4, caption_id: "hook" },
-      { t_start: 4, t_end: 7, caption_id: "product" },
-      { t_start: 7, t_end: 12, caption_id: "benefit" },
-      { t_start: 12, t_end: 16, caption_id: "cta" },
+      { t_start: 4, t_end: 9, caption_id: "action" },
+      { t_start: 9, t_end: 14, caption_id: "comedic" },
+      { t_start: 14, t_end: 18, caption_id: "cta" },
     ],
   },
-  d3m0cafe03c3: {
+  "nike-sb-2026": {
     captions: [
-      { id: "hook", caption: "Before/after skincare glow." },
-      { id: "texture", caption: "Serum texture on glass." },
-      { id: "routine", caption: "Night routine in three steps." },
-      { id: "cta", caption: "Glow kit ships today." },
+      { id: "hook", caption: "Athlete trains alone, pre-dawn city streets." },
+      { id: "montage", caption: "Quick cuts of sprinting, lifting, pushing limits." },
+      { id: "climax", caption: "Finish line moment — arms raised." },
+      { id: "cta", caption: "Swoosh fade-in. \"Just Do It.\"" },
     ],
     events: [
-      { t_start: 0, t_end: 3, caption_id: "hook" },
-      { t_start: 3, t_end: 7, caption_id: "texture" },
-      { t_start: 7, t_end: 12, caption_id: "routine" },
-      { t_start: 12, t_end: 16, caption_id: "cta" },
+      { t_start: 0, t_end: 5, caption_id: "hook" },
+      { t_start: 5, t_end: 10, caption_id: "montage" },
+      { t_start: 10, t_end: 15, caption_id: "climax" },
+      { t_start: 15, t_end: 19, caption_id: "cta" },
     ],
   },
-  d3m0cafe04d4: {
+  "pepsi-sb-2026": {
     captions: [
-      { id: "hook", caption: "Desk setup reveal in two cuts." },
-      { id: "feature", caption: "Wireless hub snaps into place." },
-      { id: "benefit", caption: "Clutter-free charging all day." },
-      { id: "cta", caption: "Drop is live tonight." },
-    ],
-    events: [
-      { t_start: 0, t_end: 3, caption_id: "hook" },
-      { t_start: 3, t_end: 7, caption_id: "feature" },
-      { t_start: 7, t_end: 11, caption_id: "benefit" },
-      { t_start: 11, t_end: 15, caption_id: "cta" },
-    ],
-  },
-  d3m0cafe05e5: {
-    captions: [
-      { id: "hook", caption: "Unboxing the travel kit." },
-      { id: "benefit", caption: "Leakproof bottles, TSA-ready." },
-      { id: "social", caption: "Packed in under 30 seconds." },
-      { id: "cta", caption: "Preorders close Friday." },
+      { id: "hook", caption: "Stadium lights up. Can cracks open." },
+      { id: "energy", caption: "Dancers hit the floor, halftime vibes." },
+      { id: "celeb", caption: "Celebrity cameo — crowd goes wild." },
+      { id: "cta", caption: "\"That's What I Like\" tagline, Pepsi globe spins." },
     ],
     events: [
       { t_start: 0, t_end: 4, caption_id: "hook" },
-      { t_start: 4, t_end: 8, caption_id: "benefit" },
+      { t_start: 4, t_end: 8, caption_id: "energy" },
+      { t_start: 8, t_end: 13, caption_id: "celeb" },
+      { t_start: 13, t_end: 17, caption_id: "cta" },
+    ],
+  },
+  "openai-sb-2026": {
+    captions: [
+      { id: "hook", caption: "Child asks a question. AI answers warmly." },
+      { id: "demo", caption: "Split-screen: coding, writing, creating, learning." },
+      { id: "impact", caption: "Doctor uses AI to diagnose faster." },
+      { id: "cta", caption: "\"Intelligence for Everyone\" — openai.com." },
+    ],
+    events: [
+      { t_start: 0, t_end: 5, caption_id: "hook" },
+      { t_start: 5, t_end: 10, caption_id: "demo" },
+      { t_start: 10, t_end: 15, caption_id: "impact" },
+      { t_start: 15, t_end: 20, caption_id: "cta" },
+    ],
+  },
+  "tacobell-sb-2026": {
+    captions: [
+      { id: "hook", caption: "Late night drive-thru glow. Bass drops." },
+      { id: "food", caption: "Crunchwrap close-up, cheese pull." },
+      { id: "social", caption: "Friends piling into the car, laughing." },
+      { id: "cta", caption: "\"Live Más\" on screen. Bell rings." },
+    ],
+    events: [
+      { t_start: 0, t_end: 4, caption_id: "hook" },
+      { t_start: 4, t_end: 8, caption_id: "food" },
       { t_start: 8, t_end: 12, caption_id: "social" },
       { t_start: 12, t_end: 16, caption_id: "cta" },
     ],

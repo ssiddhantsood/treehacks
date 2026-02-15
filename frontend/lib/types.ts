@@ -10,6 +10,7 @@ export interface VideoVariant {
 
 export interface Video {
   id: string;
+  name?: string;
   originalUrl: string;
   analysisUrl?: string;
   createdAt: string;
@@ -18,6 +19,7 @@ export interface Video {
 
 export interface Campaign {
   id: string;
+  name?: string;
   originalUrl: string;
   analysisUrl?: string;
   createdAt: string;

@@ -1,0 +1,11 @@
+age,gender,demographic_info,previous_search_history
+23,female,"Urban, single, college student, low-income","budget smartphones; student discounts; thrift stores; free events near me"
+26,male,"Urban, single, early-career, mid-income","ride-share credits; studio apartments; coffee shops near me; streaming bundles"
+29,female,"Urban, cohabiting, early-career, mid-income","meal prep services; compact furniture; boutique fitness classes; weekend city trips"
+31,non-binary,"Urban, renting, tech worker, high-income","noise-canceling headphones; productivity apps; coworking spaces; standing desk"
+34,male,"Urban, single, professional, high-income","premium skincare; international flights; luxury watches; fine dining"
+45,female,"Suburban, married, parent of two, mid-income","back-to-school deals; kids soccer gear; family health insurance; minivan safety ratings"
+48,male,"Suburban, married, homeowner, mid-income","home improvement loans; lawn care services; SUV reviews; smart thermostats"
+52,female,"Suburban, married, parent of three, mid-income","bulk grocery deals; family vacation packages; after-school programs; minivan accessories"
+57,male,"Suburban, married, empty nester, mid-income","garden tools; DIY shed plans; local golf courses; grill accessories"
+61,female,"Suburban, retired, mid-income","cruise packages; arthritis relief; home blood pressure monitor; quiet community events"
