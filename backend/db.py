@@ -125,6 +125,47 @@ def add_variant(video_id: str, name: str, url: str) -> None:
     conn.close()
 
 
+def delete_variant(video_id: str, name: str) -> None:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM variants WHERE video_id = ? AND name = ?", (video_id, name))
+    conn.commit()
+    conn.close()
+
+
+def delete_variants_by_prefix(video_id: str, prefix: str) -> None:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM variants WHERE video_id = ? AND name LIKE ?",
+        (video_id, f"{prefix}%"),
+    )
+    conn.commit()
+    conn.close()
+
+
+def update_video_metadata(video_id: str, user_id: int, metadata: dict | None) -> None:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE videos SET metadata = ? WHERE id = ? AND user_id = ?",
+        (json.dumps(metadata) if metadata else None, video_id, user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def update_video_analysis_url(video_id: str, user_id: int, analysis_url: str | None) -> None:
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE videos SET analysis_url = ? WHERE id = ? AND user_id = ?",
+        (analysis_url, video_id, user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
 def list_videos_for_user(user_id: int) -> list[dict]:
     conn = get_conn()
     cur = conn.cursor()

@@ -79,6 +79,16 @@ export const api = {
         body: formData,
       });
     },
+    generateAds: (id: string, options?: { groupCount?: number; maxEdits?: number }) =>
+      request<{
+        ok: boolean;
+        variants: { name: string; url: string }[];
+        metadata: Campaign["metadata"];
+        analysisUrl?: string;
+      }>(`/api/videos/${id}/generate-ads`, {
+        method: "POST",
+        body: JSON.stringify(options ?? {}),
+      }),
   },
   analysis: {
     get: (url: string) => request<AnalysisData>(url),

@@ -37,6 +37,16 @@ python tests/run_tool_smoke.py
 
 Outputs to `tests/tool_smoke/`.
 
+## Group ads (test mode)
+
+Run the group-ad variant pipeline in offline test mode (no OpenAI calls):
+
+```bash
+python tests/run_group_ads.py
+```
+
+Outputs to `tests/group_ads/`.
+
 ## Market research (Perplexity)
 
 Run the Perplexity-backed market research agent against a few sample audiences:

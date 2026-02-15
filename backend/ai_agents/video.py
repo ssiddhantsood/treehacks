@@ -38,14 +38,15 @@ def _has_filter(name: str) -> bool:
     return f" {name} " in _ffmpeg_filters() or f"\n{name} " in _ffmpeg_filters()
 
 
-HWACCEL = _normalize_flag(os.getenv("VIDEO_HWACCEL"))
+_RAW_HWACCEL = os.getenv("VIDEO_HWACCEL")
+HWACCEL = _normalize_flag(_RAW_HWACCEL)
 ENCODER = _normalize_flag(os.getenv("VIDEO_ENCODER"))
 PRESET = _normalize_flag(os.getenv("VIDEO_PRESET", "veryfast"))
 CRF = _normalize_flag(os.getenv("VIDEO_CRF", "23"))
 THREADS = _normalize_flag(os.getenv("VIDEO_THREADS"))
 FASTSTART = os.getenv("VIDEO_FASTSTART", "1") != "0"
 
-if HWACCEL is None and platform.system().lower() == "darwin":
+if HWACCEL is None and _RAW_HWACCEL is None and platform.system().lower() == "darwin":
     HWACCEL = "videotoolbox"
 
 if ENCODER is None:

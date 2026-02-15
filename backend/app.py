@@ -1,7 +1,8 @@
 import asyncio
+import json
 import os
-import shutil
 import random
+import shutil
 import traceback
 from typing import Annotated
 from datetime import datetime, timezone
@@ -17,17 +18,21 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from ai_agents.agent import COMBOS, run_combo_agent, run_speedup_agent
 from ai_agents.action_timeline import analyze_video
+from ai_agents.group_ads import generate_group_variants
 from ai_agents.market_research import run_market_research_agent
 from auth import create_access_token, decode_token, hash_password, verify_password
 from db import (
     add_variant,
     create_user,
     create_video,
+    delete_variants_by_prefix,
     get_user_by_email,
     get_user_by_id,
     get_video_with_variants,
     init_db,
     list_videos_for_user,
+    update_video_analysis_url,
+    update_video_metadata,
 )
 
 load_dotenv()
@@ -60,6 +65,13 @@ app.mount("/media/processed", StaticFiles(directory=str(PROCESSED_DIR)), name="p
 app.mount("/media/analysis", StaticFiles(directory=str(ANALYSIS_DIR)), name="analysis")
 
 security = HTTPBearer()
+
+
+def _coerce_int(value) -> int | None:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]):
@@ -244,6 +256,81 @@ async def transform(video: UploadFile = File(...), user=Depends(get_current_user
         "processedUrl": f"/media/processed/{processed_filename}",
         "analysisUrl": analysis_url,
         "variants": variants,
+    }
+
+
+@app.post("/api/videos/{video_id}/generate-ads")
+async def generate_ads(video_id: str, payload: dict | None = None, user=Depends(get_current_user)):
+    payload = payload or {}
+    group_count = _coerce_int(payload.get("groupCount") or payload.get("group_count"))
+    max_edits = _coerce_int(payload.get("maxEdits") or payload.get("max_edits"))
+
+    video = get_video_with_variants(video_id, user["id"])
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    original_url = video.get("originalUrl")
+    if not original_url:
+        raise HTTPException(status_code=400, detail="Video has no original asset")
+
+    original_path = ORIGINAL_DIR / Path(original_url).name
+    if not original_path.exists():
+        raise HTTPException(status_code=404, detail="Original video file missing")
+
+    analysis_data = None
+    analysis_url = video.get("analysisUrl")
+    if analysis_url:
+        analysis_path = ANALYSIS_DIR / Path(analysis_url).name
+        if analysis_path.exists():
+            try:
+                analysis_data = json.loads(analysis_path.read_text())
+            except json.JSONDecodeError:
+                analysis_data = None
+
+    if analysis_data is None:
+        analysis_filename = f"{video_id}.json"
+        analysis_path = ANALYSIS_DIR / analysis_filename
+        analysis_data = await run_in_threadpool(
+            analyze_video,
+            str(original_path),
+            str(analysis_path),
+        )
+        analysis_url = f"/media/analysis/{analysis_filename}"
+        update_video_analysis_url(video_id, user["id"], analysis_url)
+
+    try:
+        variants, group_metadata = await run_in_threadpool(
+            generate_group_variants,
+            video_id,
+            original_path,
+            analysis_data,
+            PROCESSED_DIR,
+            str(BASE_DIR / "mock_profiles.csv"),
+            group_count,
+            max_edits,
+        )
+    except Exception as exc:
+        traceback.print_exc()
+        detail = "Ad generation failed"
+        if DEBUG:
+            detail = f"{type(exc).__name__}: {exc}"
+        raise HTTPException(status_code=500, detail=detail) from exc
+
+    delete_variants_by_prefix(video_id, "group-")
+    for variant in variants:
+        add_variant(video_id, variant["name"], variant["url"])
+
+    metadata = video.get("metadata") or {}
+    metadata["groupVariants"] = group_metadata
+    metadata["groupCount"] = len(group_metadata)
+    metadata["generatedAt"] = datetime.now(timezone.utc).isoformat()
+    update_video_metadata(video_id, user["id"], metadata)
+
+    return {
+        "ok": True,
+        "variants": variants,
+        "metadata": metadata,
+        "analysisUrl": analysis_url,
     }
 
 

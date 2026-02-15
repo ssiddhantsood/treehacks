@@ -27,6 +27,55 @@ export interface Campaign {
   metadata?: {
     speedFactor?: number;
     combos?: string[];
+    groupCount?: number;
+    generatedAt?: string;
+    groupVariants?: {
+      groupId: number;
+      label?: string;
+      summary?: string;
+      research?: {
+        ok?: boolean;
+        audience?: string;
+        insights?: string;
+        citations?: string[];
+        model?: string;
+        error?: string;
+        transformations?: string[];
+      };
+      context?: {
+        region?: string;
+        country?: string;
+        timezone?: string;
+        timeOfDay?: string;
+        localHour?: number;
+        englishSpeaking?: boolean;
+        isUrban?: boolean;
+        avgAge?: number;
+        ageBucket?: string;
+        topGenders?: string[];
+        interests?: string[];
+      };
+      planner?: {
+        ok?: boolean;
+        error?: string;
+        model?: string;
+        raw?: string;
+      };
+      variantName?: string;
+      variantUrl?: string;
+      changes?: {
+        tool?: string;
+        args?: Record<string, unknown>;
+        summary?: string;
+        reason?: string;
+        apply?: boolean;
+        applied?: boolean;
+        forced?: boolean;
+        source?: string;
+        error?: string;
+        outputPath?: string;
+      }[];
+    }[];
   };
 }
 
