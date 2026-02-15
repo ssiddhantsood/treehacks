@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <Logo />
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted">
-          © {new Date().getFullYear()} AdApt
+          © {new Date().getFullYear()} ADAPT
         </span>
       </div>
     </footer>

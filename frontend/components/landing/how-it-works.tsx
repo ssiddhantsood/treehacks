@@ -2,7 +2,7 @@ const steps = [
   {
     title: "Upload your base creative",
     description:
-      "Drop in a single video ad. AdApt analyzes the composition, subjects, and scene structure automatically.",
+      "Drop in a single video ad. ADAPT analyzes the composition, subjects, and scene structure automatically.",
   },
   {
     title: "Define your audiences",

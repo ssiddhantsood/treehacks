@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Pricing } from "@/components/landing/pricing";
+import { Input } from "@/components/ui/input";
+import { setToken } from "@/lib/auth";
 
 const ads = [
   { title: "Doritos", market: "SF", year: "2026", video: "/ads/doritos_sb.webm" },
@@ -51,12 +54,45 @@ function getCardStyle(index: number, scrollOffset: number, isHovered: boolean, i
 }
 
 export default function Home() {
+  const router = useRouter();
   const [hoveredAd, setHoveredAd] = useState<number | null>(null);
   const [scrollOffset, setScrollOffset] = useState(0); 
   const [isScrolling, setIsScrolling] = useState(false);
   const [hasLeftHero, setHasLeftHero] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [loginMode, setLoginMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
   const scrollAccum = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError("");
+    setLoginLoading(true);
+    try {
+      if (email === "demo@adapt.com" && password === "password") {
+        setToken("fake-jwt-token");
+        router.push("/console");
+      } else {
+        setLoginError("Invalid email or password");
+      }
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const openLogin = () => setShowLogin(true);
+  const closeLogin = () => {
+    setShowLogin(false);
+    setLoginError("");
+    setEmail("");
+    setPassword("");
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -111,6 +147,79 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden relative">
+      {/* --- login modal --- */}
+      {showLogin && (
+        <div className="fixed inset-0 z-99999 bg-background/95 backdrop-blur-sm flex items-center justify-center">
+          <div className="animate-modal-in w-full max-w-sm px-6">
+            <button
+              onClick={closeLogin}
+              className="absolute top-6 right-8 text-muted hover:text-foreground transition-colors cursor-pointer"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M4 4l12 12M16 4L4 16" />
+              </svg>
+            </button>
+
+            <div className="flex flex-col items-center text-center mb-10">
+              <span className="text-sm font-medium tracking-widest uppercase">ADAPT</span>
+              <h2 className="mt-6 text-2xl font-bold tracking-tight">
+                {loginMode === "login" ? "Welcome back" : "Create your account"}
+              </h2>
+              <p className="mt-3 text-sm text-muted max-w-xs">
+                {loginMode === "login"
+                  ? "Sign in to access your console and campaigns."
+                  : "Get started with ADAPT to localize your ads globally."}
+              </p>
+            </div>
+
+            <form onSubmit={handleLoginSubmit} className="flex flex-col gap-6">
+              <Input
+                label="Email"
+                type="email"
+                placeholder="you@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Input
+                label="Password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              {loginError && (
+                <p className="text-sm text-red-400">{loginError}</p>
+              )}
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="cursor-pointer mt-2 w-full px-8 py-3 bg-[#1c1c1c] text-white rounded-full text-sm font-medium hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loginLoading
+                  ? "Loading..."
+                  : loginMode === "login"
+                    ? "Sign in"
+                    : "Create account"}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={() => setLoginMode(loginMode === "login" ? "register" : "login")}
+                className="font-mono text-[11px] uppercase tracking-widest text-muted transition-colors hover:text-foreground cursor-pointer"
+              >
+                {loginMode === "login"
+                  ? "Create an account →"
+                  : "Sign in instead →"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* --- header --- */}
       <section className="relative h-screen w-full overflow-hidden">
         <nav className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 pointer-events-none">
@@ -118,7 +227,7 @@ export default function Home() {
             onClick={scrollToTop} 
             className="text-sm font-medium tracking-widest uppercase text-foreground pointer-events-auto hover:opacity-70 transition-opacity"
           >
-            AdApt
+            ADAPT
           </button>
         </nav>
         
@@ -133,18 +242,18 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-3" style={{ zIndex: 10000, position: "relative" }}>
-              <Link
-                href="/login"
-                className="px-4 py-2 sm:px-6 sm:py-2.5 bg-[#1c1c1c] text-white rounded-full text-[12px] sm:text-sm font-medium hover:bg-[#000000] transition-colors duration-200 pointer-events-auto"
+              <button
+                onClick={openLogin}
+                className="cursor-pointer px-4 py-2 sm:px-6 sm:py-2.5 bg-[#1c1c1c] text-white rounded-full text-[12px] sm:text-sm font-medium hover:bg-[#000000] transition-colors duration-200 pointer-events-auto"
               >
                 Get Started
-              </Link>
-              <Link
-                href="/login"
-                className="px-4 py-2 sm:px-6 sm:py-2.5 bg-transparent text-[#1c1c1c] border border-border rounded-full text-[12px] sm:text-sm font-medium hover:bg-[#f5f5f5] transition-colors duration-200 pointer-events-auto"
+              </button>
+              <button
+                onClick={openLogin}
+                className="cursor-pointer px-4 py-2 sm:px-6 sm:py-2.5 bg-transparent text-[#1c1c1c] border border-border rounded-full text-[12px] sm:text-sm font-medium hover:bg-[#f5f5f5] transition-colors duration-200 pointer-events-auto"
               >
                 Login
-              </Link>
+              </button>
               <button
                 onClick={() => scrollToSection('about')}
                 className="cursor-pointer px-4 py-2 sm:px-6 sm:py-2.5 bg-transparent text-[#1c1c1c] border border-border rounded-full text-[12px] sm:text-sm font-medium hover:bg-[#f5f5f5] transition-colors duration-200 pointer-events-auto"
@@ -236,7 +345,7 @@ export default function Home() {
             onClick={scrollToTop} 
             className="text-sm font-medium tracking-widest uppercase text-foreground hover:opacity-70 transition-opacity"
           >
-            AdApt
+            ADAPT
           </button>
           <div className="flex items-center gap-6">
             <button onClick={() => scrollToSection('about')} className="text-xs text-muted hover:text-foreground transition-colors uppercase tracking-wider">
@@ -245,9 +354,9 @@ export default function Home() {
             <button onClick={() => scrollToSection('pricing')} className="text-xs text-muted hover:text-foreground transition-colors uppercase tracking-wider">
               Pricing
             </button>
-            <Link href="/login" className="text-xs text-muted hover:text-foreground transition-colors uppercase tracking-wider">
+            <button onClick={openLogin} className="cursor-pointer text-xs text-muted hover:text-foreground transition-colors uppercase tracking-wider">
               Login
-            </Link>
+            </button>
           </div>
         </nav>
 
@@ -321,15 +430,15 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-8 py-24 flex flex-col items-center text-center">
           <h2 className="text-3xl font-bold tracking-tight">Ready to go global?</h2>
           <p className="mt-4 text-sm text-muted max-w-md leading-relaxed">
-            See how AdApt can scale your creative across every market. Book a personalized demo with our team.
+            See how ADAPT can scale your creative across every market. Book a personalized demo with our team.
           </p>
           <div className="mt-8 flex items-center gap-4">
-            <Link
-              href="/login"
-              className="px-8 py-3 bg-[#1c1c1c] text-white rounded-full text-sm font-medium hover:bg-black transition-colors"
+            <button
+              onClick={openLogin}
+              className="cursor-pointer px-8 py-3 bg-[#1c1c1c] text-white rounded-full text-sm font-medium hover:bg-black transition-colors"
             >
               Request a demo
-            </Link>
+            </button>
             <button
               onClick={() => scrollToSection('pricing')}
               className="cursor-pointer px-8 py-3 bg-transparent text-foreground border border-border rounded-full text-sm font-medium hover:bg-foreground/5 transition-colors"
@@ -343,7 +452,7 @@ export default function Home() {
       {/* --- footer --- */}
       <footer className="border-t border-border bg-background relative z-10">
         <div className="mx-auto max-w-7xl px-8 py-10 flex flex-col sm:flex-row justify-between items-center gap-6">
-          <span className="text-sm font-medium tracking-widest uppercase">AdApt</span>
+          <span className="text-sm font-medium tracking-widest uppercase">ADAPT</span>
           <div className="flex items-center gap-8">
             <Link href="#" className="text-xs text-muted hover:text-foreground transition-colors">Privacy</Link>
             <Link href="#" className="text-xs text-muted hover:text-foreground transition-colors">Terms</Link>

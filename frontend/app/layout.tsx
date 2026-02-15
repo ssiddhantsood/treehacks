@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AdApt — AI-Powered Hyperlocal Ads",
+  title: "ADAPT — AI-Powered Hyperlocal Ads",
   description:
     "Generate hyper-localized ad variants with AI. Adjust backgrounds, scenery, and elements to match any demographic.",
 };

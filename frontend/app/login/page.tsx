@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
 import { setToken } from "@/lib/auth";
 import Link from "next/link";
 
@@ -23,10 +22,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const authFn = mode === "register" ? api.auth.register : api.auth.login;
-      const res = await authFn(email, password);
-      setToken(res.token);
-      router.push("/console");
+      if (email === "demo@adapt.com" && password === "password") {
+        setToken("fake-jwt-token");
+        router.push("/console");
+      } else {
+        setError("Invalid email or password");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
