@@ -33,7 +33,7 @@ SYSTEM_PROMPT = (
     "For color grading, use color_grade_video with gradeStyle from: "
     f"{', '.join(COLOR_GRADE_STYLES)} and explain the choice in gradeNote. "
     "For generative requests (background replace, object erase, text replace), use the "
-    "submit_* tools to create a job spec. If using apply_combo, choose comboName from: "
+    "submit_* tools to run a Lucy video-to-video edit. If using apply_combo, choose comboName from: "
     f"{', '.join(COMBOS)}. For submit_* tools, map inputPath/outputPath to "
     "inputVideo/outputVideo. Always include input/output paths (or use the provided "
     "defaults). If the request is about market research, demographics, or ad preferences, "
