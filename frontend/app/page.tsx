@@ -147,7 +147,7 @@ export default function Home() {
               </Link>
               <button
                 onClick={() => scrollToSection('about')}
-                className="px-4 py-2 sm:px-6 sm:py-2.5 bg-transparent text-[#1c1c1c] border border-border rounded-full text-[12px] sm:text-sm font-medium hover:bg-[#f5f5f5] transition-colors duration-200 pointer-events-auto"
+                className="cursor-pointer px-4 py-2 sm:px-6 sm:py-2.5 bg-transparent text-[#1c1c1c] border border-border rounded-full text-[12px] sm:text-sm font-medium hover:bg-[#f5f5f5] transition-colors duration-200 pointer-events-auto"
               >
                 Learn more
               </button>
@@ -332,7 +332,7 @@ export default function Home() {
             </Link>
             <button
               onClick={() => scrollToSection('pricing')}
-              className="px-8 py-3 bg-transparent text-foreground border border-border rounded-full text-sm font-medium hover:bg-foreground/5 transition-colors"
+              className="cursor-pointer px-8 py-3 bg-transparent text-foreground border border-border rounded-full text-sm font-medium hover:bg-foreground/5 transition-colors"
             >
               View pricing
             </button>
