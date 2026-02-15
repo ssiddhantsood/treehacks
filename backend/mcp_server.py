@@ -4,11 +4,12 @@ the orchestrator agent (ai_agents/orchestrator.py).
 
 Poke user → Poke AI → MCP edit_video → run_orchestrator_agent → OpenAI → tools → FFmpeg
 
-Run:
+Local dev:
     python mcp_server.py
 
-Then in another terminal:
-    npx poke tunnel http://localhost:8765/mcp -n "Video Editor"
+Cloud (Render):
+    Deployed via Dockerfile — Render sets PORT automatically.
+    Users add https://<your-service>.onrender.com/mcp in Poke settings.
 """
 
 import json
@@ -25,11 +26,12 @@ from ai_agents.orchestrator import run_orchestrator_agent
 load_dotenv()
 
 # ---------------------------------------------------------------------------
-# Storage paths
+# Storage paths  (use /tmp on cloud where filesystem is ephemeral)
 # ---------------------------------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent
-STORAGE_DIR = BASE_DIR / "storage"
+_cloud = os.getenv("RENDER", "")  # Render sets this automatically
+STORAGE_DIR = Path("/tmp/adapt-storage") if _cloud else BASE_DIR / "storage"
 ORIGINAL_DIR = STORAGE_DIR / "original"
 PROCESSED_DIR = STORAGE_DIR / "processed"
 ANALYSIS_DIR = STORAGE_DIR / "analysis"
@@ -41,16 +43,25 @@ for _dir in (ORIGINAL_DIR, PROCESSED_DIR, ANALYSIS_DIR):
 # FastMCP app
 # ---------------------------------------------------------------------------
 
-MCP_PORT = int(os.getenv("MCP_PORT", "8765"))
+# On Render, the platform sets PORT and the service must listen on it.
+# Locally, use MCP_PORT (not in .env) so it doesn't clash with FastAPI's PORT=8000.
+if _cloud:
+    MCP_PORT = int(os.getenv("PORT", "10000"))
+else:
+    MCP_PORT = int(os.getenv("MCP_PORT", "8765"))
 
 mcp = FastMCP(
-    "Video Editor",
+    "ADAPT Video Editor",
     instructions=(
-        "You are a video editing assistant that processes videos on the user's "
-        "local machine. IMPORTANT: Always call list_videos first to see what "
-        "videos are available. Then call edit_video with the filename and a "
-        "natural language description of the edits you want. The AI orchestrator "
-        "will figure out which video tools to use."
+        "You are ADAPT, an AI video editing assistant. You edit videos using "
+        "natural language instructions.\n\n"
+        "WORKFLOW:\n"
+        "1. If the user has already provided a video URL, skip to step 2.\n"
+        "   Otherwise call list_videos to see what's available.\n"
+        "2. Call edit_video with the video source (URL or filename) and a "
+        "   natural language description of the edits.\n\n"
+        "The AI orchestrator will figure out which tools to use (speed change, "
+        "color grade, trim, text overlay, reframe, film grain, combos, etc.)."
     ),
     host="0.0.0.0",
     port=MCP_PORT,
@@ -138,18 +149,21 @@ def edit_video(video_source: str, instructions: str) -> str:
     trim, reverse, reframe, film grain, text overlay, presets, generative edits,
     or market research).
 
+    video_source can be:
+      - A public URL (https://...) — the video will be downloaded automatically
+      - A filename from list_videos
+
     Examples:
-      - "Speed this up 2x"
+      - "Speed this up slightly"
       - "Make it look cinematic with film grain"
-      - "Trim to the first 5 seconds and add a caption"
+      - "Trim to the first 5 seconds and add a caption saying WAIT FOR IT"
       - "Reframe for TikTok vertical format"
-      - "Color grade with high contrast and warm tones"
+      - "Color grade with warm tones"
       - "Reverse the video"
-      - "Replace the background with a beach scene"
       - "Who is the target audience for this ad?"
 
     Args:
-        video_source: Filename from list_videos, URL, or local path.
+        video_source: Public video URL (https://...) or filename from list_videos.
         instructions: Natural language description of what you want done.
     """
     inp = _resolve_input(video_source)
@@ -187,10 +201,17 @@ def edit_video(video_source: str, instructions: str) -> str:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    print(f"Starting Video Editor MCP server on port {MCP_PORT}...")
+    print(f"Starting ADAPT Video Editor MCP server on port {MCP_PORT}...")
+    print(f"Storage: {STORAGE_DIR}")
     print(f"\nTools available:")
     print(f"  - list_videos   -- See available videos")
     print(f"  - edit_video    -- Edit video via AI orchestrator (natural language)")
-    print(f"\nNext step -- in another terminal, run:")
-    print(f'  npx poke tunnel http://localhost:{MCP_PORT}/mcp -n "Video Editor"\n')
+    if _cloud:
+        print(f"\nRunning in cloud mode (Render).")
+        print(f"Add this in Poke settings → Connections → Create Integration:")
+        print(f"  Server URL: https://<your-service>.onrender.com/mcp")
+    else:
+        print(f"\nLocal dev — in another terminal, run:")
+        print(f'  npx poke tunnel http://localhost:{MCP_PORT}/mcp -n "Video Editor"')
+    print()
     mcp.run(transport="streamable-http")
