@@ -95,9 +95,20 @@ export interface AnalysisData {
 export interface EmbeddingsPoint {
   x: number;
   y: number;
+  z: number;
   groupId: number;
   index: number;
   summary?: string;
+}
+
+export interface EmbeddingGroupSummary {
+  groupId: number;
+  label?: string;
+  summary?: string;
+  traits?: string[];
+  examples?: string[];
+  memberCount?: number;
+  source?: string;
 }
 
 export interface AuthResponse {

@@ -244,7 +244,7 @@ export default function ConsolePage() {
   };
 
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const totalVariants = videos.reduce((acc, v) => acc + (v.variants?.length ?? v.variantsCount ?? 0), 0);
+  const totalAds = videos.reduce((acc, v) => acc + (v.variants?.length ?? v.variantsCount ?? 0), 0);
 
   return (
     <div className="h-full w-full overflow-hidden bg-background">
@@ -256,7 +256,7 @@ export default function ConsolePage() {
                 <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Confirm deletion</span>
                 <h3 className="mt-3 text-lg font-semibold">Delete campaign?</h3>
                 <p className="mt-2 text-sm text-muted">
-                  This removes the campaign, variants, and analysis. This cannot be undone.
+                  This removes the campaign, ads, and analysis. This cannot be undone.
                 </p>
               </div>
               <button
@@ -274,7 +274,7 @@ export default function ConsolePage() {
               <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-400/40 flex items-center justify-center">
                 <TriangleAlert size={14} className="text-amber-500" />
               </div>
-              <span className="text-xs text-muted">If you want to keep variants, export them before deleting.</span>
+              <span className="text-xs text-muted">If you want to keep ads, export them before deleting.</span>
             </div>
             {deleteError && <p className="mt-4 text-xs text-red-400">{deleteError}</p>}
             <div className="mt-6 flex items-center justify-end gap-3">
@@ -412,7 +412,7 @@ export default function ConsolePage() {
                       <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Step 1 of 3</span>
                       <h2 className="mt-2 text-xl font-bold">Base Creative</h2>
                       <p className="mt-3 text-sm text-muted leading-relaxed">
-                        Upload your master video. This will be analyzed and transformed into multiple localized variants.
+                        Upload your master video. We&apos;ll run the ingest pipeline (cuts, captions, audio) so it&apos;s ready for localization.
                       </p>
                     </div>
 
@@ -643,7 +643,7 @@ export default function ConsolePage() {
                       <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Step 3 of 3</span>
                       <h2 className="mt-2 text-xl font-bold">Target Audience</h2>
                       <p className="mt-3 text-sm text-muted leading-relaxed">
-                        Import your audience data. We&apos;ll cluster them into segments and generate variants for each.
+                        Import your audience data. We&apos;ll cluster them into segments and generate ads for each.
                       </p>
                     </div>
 
@@ -713,7 +713,7 @@ export default function ConsolePage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Campaigns</h1>
             <p className="mt-3 text-sm text-muted leading-relaxed max-w-xs">
-              Your localized ad campaigns. Each card represents a master creative with its variants.
+              Your localized ad campaigns. Each card represents a master creative with its ads.
             </p>
           </div>
 
@@ -721,7 +721,7 @@ export default function ConsolePage() {
           <div className="mt-10 grid grid-cols-2 gap-4">
             {[
               { value: videos.length, label: "Campaigns" },
-              { value: totalVariants, label: "Variants" },
+              { value: totalAds, label: "Ads" },
               { value: "12", label: "Markets" },
               { value: "+41%", label: "Avg. lift" },
             ].map((stat) => (
@@ -767,7 +767,7 @@ export default function ConsolePage() {
                     <span className="font-mono text-[10px] text-muted w-5">{String(i + 1).padStart(2, "0")}</span>
                     <div className="flex-1 min-w-0">
                       <span className="text-sm font-medium block truncate">{video.name || `Campaign ${video.id.slice(0, 8)}`}</span>
-                      <span className="text-[10px] text-muted">{video.variants?.length ?? video.variantsCount ?? 0} variants</span>
+                      <span className="text-[10px] text-muted">{video.variants?.length ?? video.variantsCount ?? 0} ads</span>
                     </div>
                   {isPending ? (
                     <span className="flex items-center gap-2 text-[10px] text-muted">
@@ -876,7 +876,7 @@ export default function ConsolePage() {
                                    {video.name || "Untitled"}
                                  </span>
                                  <span className="font-mono text-[10px] text-white/60 uppercase tracking-widest drop-shadow-md">
-                                   {video.variants?.length ?? video.variantsCount ?? 0} variants
+                                   {video.variants?.length ?? video.variantsCount ?? 0} ads
                                  </span>
                               </div>
                               <div className="flex justify-between items-end">
@@ -897,7 +897,7 @@ export default function ConsolePage() {
                                 {video.name || "Untitled"}
                               </span>
                               <span className="font-mono text-[10px] text-white/80 uppercase tracking-widest drop-shadow-sm">
-                                {video.variants?.length ?? video.variantsCount ?? 0} VARIANTS
+                                {video.variants?.length ?? video.variantsCount ?? 0} ADS
                               </span>
                             </div>
                         </div>

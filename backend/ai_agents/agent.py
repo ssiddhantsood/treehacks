@@ -176,6 +176,12 @@ EDIT_TOOLS = [
                     "inputPath": {"type": "string"},
                     "outputPath": {"type": "string"},
                     "comboName": {"type": "string"},
+                    "text": {"type": "string"},
+                    "start": {"type": "number"},
+                    "end": {"type": "number"},
+                    "x": {"type": "integer"},
+                    "y": {"type": "integer"},
+                    "fontSize": {"type": "integer"},
                 },
                 "required": ["inputPath", "outputPath", "comboName"],
             },
@@ -333,7 +339,17 @@ def _dispatch_tool(name: str, args: dict, input_path: str, output_path: str) -> 
         )
     elif name == "apply_combo":
         combo = args.get("comboName") or "warm_boost"
-        apply_combo(resolved_input, resolved_output, combo)
+        apply_combo(
+            resolved_input,
+            resolved_output,
+            combo,
+            overlay_text=args.get("text"),
+            overlay_start=args.get("start"),
+            overlay_end=args.get("end"),
+            overlay_x=args.get("x", 32),
+            overlay_y=args.get("y", 32),
+            overlay_font_size=args.get("fontSize", 40),
+        )
     elif name == "add_text_overlay_video":
         add_text_overlay_video(
             resolved_input,

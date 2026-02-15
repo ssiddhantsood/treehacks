@@ -5,6 +5,7 @@ import type {
   Video,
   AnalysisData,
   EmbeddingsPoint,
+  EmbeddingGroupSummary,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
@@ -83,7 +84,7 @@ export const api = {
         videoId: string;
         name?: string;
         originalUrl: string;
-        processedUrl: string;
+        processedUrl?: string;
         analysisUrl: string;
         variants: { name: string; url: string }[];
       }>("/api/transform", {
@@ -111,7 +112,7 @@ export const api = {
   },
   embeddings: {
     get: (id: string) =>
-      request<{ ok: boolean; points: EmbeddingsPoint[]; count: number; source?: string }>(
+      request<{ ok: boolean; points: EmbeddingsPoint[]; count: number; source?: string; groups?: EmbeddingGroupSummary[] }>(
         `/api/videos/${id}/embeddings`
       ),
   },

@@ -56,6 +56,7 @@ def _missing_tools(decisions: list[dict[str, Any]], tools: list[str]) -> list[st
 
 
 def _constraint_feedback(
+    payload: dict[str, Any],
     decisions: list[dict[str, Any]],
     tools: list[str],
     visible_tools: set[str],
@@ -68,6 +69,13 @@ def _constraint_feedback(
         feedback.append(f"Missing tool decisions: {', '.join(missing)}")
 
     tool_map = _decision_map(decisions)
+    applied_count = sum(1 for item in decisions if item.get("apply"))
+    max_transforms = payload.get("max_transformations")
+    target_transforms = payload.get("target_transformations")
+    if isinstance(max_transforms, int) and max_transforms > 0 and applied_count > max_transforms:
+        feedback.append(f"Too many transforms applied ({applied_count}); cap at {max_transforms}.")
+    if isinstance(target_transforms, int) and target_transforms > 0 and applied_count < target_transforms:
+        feedback.append(f"Need at least {target_transforms} transforms; apply more tools.")
     if context.get("timeOfDay") and not tool_map.get("change_speed_video", {}).get("apply"):
         feedback.append("Must apply change_speed_video because timeOfDay is present.")
 
@@ -84,6 +92,18 @@ def _constraint_feedback(
     if visible < min_visible:
         feedback.append(f"Need at least {min_visible} visible transforms; only {visible} are applied.")
 
+    transcript_excerpts = payload.get("transcript_excerpts") or []
+    if transcript_excerpts:
+        has_text_tool = any(
+            item.get("apply")
+            and item.get("tool") in {"add_text_overlay_video", "replace_text_region_video"}
+            for item in decisions
+        )
+        if not has_text_tool:
+            feedback.append(
+                "Transcript excerpts provided; apply add_text_overlay_video or replace_text_region_video and use transcript wording."
+            )
+
     return feedback
 
 
@@ -91,18 +111,34 @@ def _planner_prompt(payload: dict) -> tuple[str, str]:
     system_prompt = (
         "You are an ad transformation planning agent. You must decide for each available tool "
         "whether to apply it for this audience cluster. Provide concrete args when applying. "
-        "Bias towards making changes, even if subtle. Tie decisions to time-of-day, region, "
-        "language, urbanicity, and demographic context. Use groupId as a tie-breaker to keep "
-        "variants distinct. Return JSON only."
+        "Bias towards making changes, even if subtle, and aim to use as many tools as possible "
+        "up to max_transformations. Ground choices in transcript_excerpts and caption_highlights "
+        "when available, and generate unique, specific creative ideas (avoid generic copy). Tie "
+        "decisions to time-of-day, region, language, urbanicity, and demographic context. Use "
+        "groupId as a tie-breaker to keep variants distinct. Favor impactful, well-timed text overlays "
+        "when applying add_text_overlay_video. Return JSON only."
     )
     user_prompt = (
         "Return JSON with `decisions` containing one entry per tool in available_tools. "
         "Each decision must include: tool, apply (true/false), reason, summary, args. "
         "Constraints:\n"
+        "- Apply as many tools as possible up to max_transformations (target_transformations is the goal).\n"
         "- If timeOfDay is present, change_speed_video must apply.\n"
         "- If englishSpeaking is false, change_speed_video must use slow_* tag.\n"
         "- color_grade_video must apply.\n"
         "- At least min_visible visible transforms must apply.\n"
+        "- If transcript_excerpts are provided, at least one text tool should apply using transcript wording.\n"
+        "- If overlay_guidance is provided and overlay_guidance.should_apply is true, prefer add_text_overlay_video unless it violates constraints.\n"
+        "- If overlay_guidance.should_apply is false, skip add_text_overlay_video unless there is a clear creative benefit.\n"
+        "- When applying add_text_overlay_video, choose an impact_moment (start/end/text) if provided, or align to transcript_excerpts/caption_highlights; avoid defaulting to start=0.\n"
+        "- Text overlays should be short and punchy (1-5 words) and derived from provided content; avoid generic filler.\n"
+        "Audience heuristics (soft guidance; use context if present):\n"
+        "- Older audiences (ageBucket 45+): favor slower pacing, longer on-screen text, and more captions. "
+        "Use change_speed_video with slow_* tags and add_text_overlay_video / replace_text_region_video; "
+        "use larger fontSize and longer start/end windows.\n"
+        "- Younger audiences (18-24/25-34): tighter pacing and punchier copy; shorter trims can help.\n"
+        "- Non-English or mixed language: prefer slower pacing plus captions/overlays drawn from transcript_excerpts.\n"
+        "- Morning/afternoon: brisk pacing; evening/night: slower pacing and moodier grade.\n"
         "When apply=true, include required args for the tool.\n\n"
         + json.dumps(payload)
     )
@@ -156,7 +192,7 @@ def plan_with_review(
         return {"ok": False, "error": "Planner returned invalid JSON", "raw": raw, "decisions": []}
 
     for _ in range(max_rounds):
-        feedback = _constraint_feedback(decisions, tools, visible_tools, min_visible, context)
+        feedback = _constraint_feedback(payload, decisions, tools, visible_tools, min_visible, context)
         if not feedback:
             return {"ok": True, "model": MODEL, "raw": raw, "decisions": decisions}
 

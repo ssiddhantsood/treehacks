@@ -1,8 +1,6 @@
-import asyncio
 import csv
 import json
 import os
-import random
 import shutil
 import traceback
 from typing import Annotated
@@ -17,8 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import numpy as np
+from openai import OpenAI
 
-from ai_agents.agent import COMBOS, run_combo_agent, run_speedup_agent
 from ai_agents.action_timeline import analyze_video
 from ai_agents.group_ads import generate_group_variants
 from ai_agents.market_research import run_market_research_agent
@@ -42,8 +40,11 @@ from cluster_profiles import _embed_texts, _kmeans
 load_dotenv()
 
 DEBUG = os.getenv("DEBUG", "0") == "1"
-VARIANT_CONCURRENCY = int(os.getenv("VIDEO_VARIANT_CONCURRENCY", "1") or "1")
 EMBEDDINGS_INPUT_TYPE = os.getenv("EMBEDDINGS_INPUT_TYPE", "CLUSTERING")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5")
+OLDER_AUDIENCE_AGE = int(os.getenv("OLDER_AUDIENCE_AGE", "55") or "55")
+
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY") or "")
 
 BASE_DIR = Path(__file__).resolve().parent
 STORAGE_DIR = BASE_DIR / "storage"
@@ -88,6 +89,201 @@ def _has_embedding_env() -> bool:
     )
 
 
+def _has_openai_env() -> bool:
+    return bool(os.getenv("OPENAI_API_KEY"))
+
+
+def _strip_code_fences(text: str) -> str:
+    if not text:
+        return ""
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.replace("```json", "", 1).replace("```", "", 1)
+    return cleaned.strip()
+
+
+def _extract_json(text: str) -> dict:
+    cleaned = _strip_code_fences(text)
+    if not cleaned:
+        return {}
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError:
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(cleaned[start : end + 1])
+            except json.JSONDecodeError:
+                return {}
+    return {}
+
+
+def _truncate(text: str, limit: int = 180) -> str:
+    if not text:
+        return ""
+    cleaned = text.strip()
+    if len(cleaned) <= limit:
+        return cleaned
+    trimmed = cleaned[:limit].rsplit(" ", 1)[0]
+    return (trimmed or cleaned[:limit]).rstrip() + "..."
+
+
+def _parse_age(value: str | None) -> int | None:
+    if not value:
+        return None
+    try:
+        return int(value)
+    except ValueError:
+        return None
+
+
+def _top_terms(entries: list[str], limit: int = 4) -> list[str]:
+    terms: list[str] = []
+    for entry in entries:
+        for chunk in entry.split(";"):
+            cleaned = chunk.strip().lower()
+            if cleaned:
+                terms.append(cleaned)
+    if not terms:
+        return []
+    counts = {}
+    for term in terms:
+        counts[term] = counts.get(term, 0) + 1
+    ranked = sorted(counts.items(), key=lambda item: item[1], reverse=True)
+    return [item for item, _ in ranked[:limit]]
+
+
+def _format_example(row: dict[str, str]) -> str:
+    age = row.get("age") or ""
+    gender = row.get("gender") or ""
+    demo = row.get("demographic_info") or ""
+    history = row.get("previous_search_history") or ""
+    parts = []
+    if age or gender:
+        parts.append(", ".join([p for p in [age, gender] if p]))
+    if demo:
+        parts.append(demo)
+    if history:
+        shortened = history.strip()
+        if len(shortened) > 80:
+            shortened = shortened[:77].rsplit(" ", 1)[0] + "..."
+        parts.append(shortened)
+    return " | ".join([p for p in parts if p])
+
+
+def _summarize_group_heuristic(members: list[dict[str, str]]) -> dict[str, object]:
+    ages = [age for age in (_parse_age(m.get("age")) for m in members) if age is not None]
+    avg_age = round(sum(ages) / len(ages)) if ages else None
+    is_older = avg_age is not None and avg_age >= OLDER_AUDIENCE_AGE
+
+    gender_counts: dict[str, int] = {}
+    for member in members:
+        gender = (member.get("gender") or "").strip().lower()
+        if not gender:
+            continue
+        gender_counts[gender] = gender_counts.get(gender, 0) + 1
+    top_genders = [g for g, _ in sorted(gender_counts.items(), key=lambda item: item[1], reverse=True)[:2]]
+
+    demo_samples = []
+    for member in members:
+        demo = (member.get("demographic_info") or "").strip()
+        if demo and demo not in demo_samples:
+            demo_samples.append(demo)
+        if len(demo_samples) >= 2:
+            break
+
+    interests = _top_terms([m.get("previous_search_history") or "" for m in members], limit=3)
+
+    summary_parts = []
+    if avg_age is not None:
+        summary_parts.append(f"avg age {avg_age}")
+    if top_genders:
+        summary_parts.append(f"top genders: {', '.join(top_genders)}")
+    if interests:
+        summary_parts.append(f"interests: {', '.join(interests)}")
+    if not summary_parts and demo_samples:
+        summary_parts.append(f"demo: {demo_samples[0]}")
+    summary = " · ".join(summary_parts) if summary_parts else "Mixed audience segment with diverse interests."
+    summary = _truncate(summary, limit=260 if is_older else 200)
+
+    example_limit = 3 if is_older else 2
+    examples = [_truncate(ex, limit=120) for ex in (_format_example(m) for m in members[:example_limit]) if ex]
+    return {
+        "summary": summary,
+        "traits": interests[:2],
+        "examples": examples,
+    }
+
+
+def _summarize_group_llm(group_id: int, members: list[dict[str, str]]) -> dict[str, object] | None:
+    if not _has_openai_env() or not members:
+        return None
+
+    sample_size = min(len(members), 20)
+    samples = [_row_to_text(row) for row in members[:sample_size]]
+    ages = [age for age in (_parse_age(m.get("age")) for m in members) if age is not None]
+    avg_age = round(sum(ages) / len(ages)) if ages else None
+    older_hint = avg_age is not None and avg_age >= OLDER_AUDIENCE_AGE
+    summary_rule = "1-3 sentences"
+    example_rule = "1-4 short examples"
+    prompt = (
+        "Summarize this audience cluster for an embeddings map. Focus on general trends and avoid listing every item. "
+        f"Return JSON only with keys: summary ({summary_rule}), traits (2-4 short phrases), examples ({example_rule}). "
+        "Examples should be short fragments derived from the input, not long lists.\n"
+        f"Cluster {group_id} has {len(members)} profiles."
+        + (f" Average age is ~{avg_age}." if avg_age is not None else "")
+        + (
+            f" Guidance: average age >= {OLDER_AUDIENCE_AGE} often benefits from slightly more detail and extra examples."
+            if older_hint
+            else " Guidance: if the audience skews younger or attention is short, keep the summary tight."
+        )
+        + " Sample profiles:\n- "
+        + "\n- ".join(samples)
+    )
+
+    try:
+        response = openai_client.chat.completions.create(
+            model=OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": "You summarize audience clusters for UI tooltips. Be concise and trend-focused."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.3,
+        )
+    except Exception:
+        return None
+
+    content = response.choices[0].message.content or ""
+    data = _extract_json(content)
+    if not data:
+        return None
+
+    summary = _truncate(str(data.get("summary") or "").strip(), limit=260)
+    traits = data.get("traits") or []
+    if isinstance(traits, str):
+        traits = [t.strip() for t in traits.split(",") if t.strip()]
+    if not isinstance(traits, list):
+        traits = []
+    traits = [_truncate(str(item).strip(), limit=40) for item in traits if str(item).strip()]
+
+    examples = data.get("examples") or []
+    if isinstance(examples, str):
+        examples = [ex.strip() for ex in examples.split(";") if ex.strip()]
+    if not isinstance(examples, list):
+        examples = []
+    examples = [_truncate(str(item).strip(), limit=120) for item in examples if str(item).strip()]
+
+    if not summary:
+        return None
+
+    return {
+        "summary": summary,
+        "traits": traits[:4],
+        "examples": examples[:4],
+    }
+
+
 def _load_profile_rows(csv_path: Path) -> list[dict[str, str]]:
     with csv_path.open(newline="", encoding="utf-8") as f:
         return [row for row in csv.DictReader(f)]
@@ -126,24 +322,33 @@ def _simple_profile_vectors(rows: list[dict[str, str]]) -> np.ndarray:
     return np.array(vectors, dtype=np.float32)
 
 
-def _project_2d(vectors: np.ndarray) -> np.ndarray:
+def _project_nd(vectors: np.ndarray, dims: int) -> np.ndarray:
     if vectors.size == 0:
-        return np.zeros((0, 2), dtype=np.float32)
+        return np.zeros((0, dims), dtype=np.float32)
     if vectors.shape[0] == 1:
-        return np.array([[0.5, 0.5]], dtype=np.float32)
+        return np.full((1, dims), 0.5, dtype=np.float32)
     centered = vectors - vectors.mean(axis=0, keepdims=True)
     if centered.shape[1] == 1:
-        coords = np.concatenate([centered, np.zeros((centered.shape[0], 1), dtype=np.float32)], axis=1)
+        coords = np.concatenate(
+            [centered] + [np.zeros((centered.shape[0], 1), dtype=np.float32) for _ in range(dims - 1)],
+            axis=1,
+        )
     else:
         _, _, vt = np.linalg.svd(centered, full_matrices=False)
-        components = vt[:2].T
+        components = vt[:dims].T
         coords = centered @ components
+        if coords.shape[1] < dims:
+            coords = np.concatenate(
+                [coords, np.zeros((coords.shape[0], dims - coords.shape[1]), dtype=np.float32)], axis=1
+            )
     return coords.astype(np.float32)
 
 
 def _normalize_points(coords: np.ndarray) -> np.ndarray:
     if coords.size == 0:
         return coords
+    if coords.shape[0] == 1:
+        return np.full_like(coords, 0.5)
     mins = coords.min(axis=0)
     maxs = coords.max(axis=0)
     span = np.where(maxs - mins == 0, 1.0, maxs - mins)
@@ -286,11 +491,12 @@ async def get_embeddings(video_id: str, user=Depends(get_current_user)):
         vectors = _simple_profile_vectors(rows)
         source = "heuristic"
 
-    coords = _project_2d(vectors)
+    coords = _project_nd(vectors, 3)
     normalized = _normalize_points(coords)
     labels, _ = _kmeans(vectors, group_count)
 
     points = []
+    grouped_rows: dict[int, list[dict[str, str]]] = {}
     for idx, row in enumerate(rows):
         summary = ", ".join(
             [
@@ -299,17 +505,37 @@ async def get_embeddings(video_id: str, user=Depends(get_current_user)):
                 row.get("demographic_info", "") or "",
             ]
         ).strip(" ,")
+        group_id = int(labels[idx])
+        grouped_rows.setdefault(group_id, []).append(row)
         points.append(
             {
                 "x": round(float(normalized[idx][0]), 5),
                 "y": round(float(normalized[idx][1]), 5),
-                "groupId": int(labels[idx]),
+                "z": round(float(normalized[idx][2]), 5),
+                "groupId": group_id,
                 "index": idx,
                 "summary": summary,
             }
         )
 
-    return {"ok": True, "points": points, "count": len(points), "source": source}
+    groups = []
+    for group_id in sorted(grouped_rows.keys()):
+        members = grouped_rows[group_id]
+        llm_summary = await run_in_threadpool(_summarize_group_llm, group_id, members)
+        summary_data = llm_summary or _summarize_group_heuristic(members)
+        groups.append(
+            {
+                "groupId": group_id,
+                "label": f"Group {group_id}",
+                "summary": summary_data.get("summary"),
+                "traits": summary_data.get("traits"),
+                "examples": summary_data.get("examples"),
+                "memberCount": len(members),
+                "source": "llm" if llm_summary else "heuristic",
+            }
+        )
+
+    return {"ok": True, "points": points, "count": len(points), "source": source, "groups": groups}
 
 
 @app.post("/api/transform")
@@ -343,63 +569,19 @@ async def transform(
             shutil.copyfileobj(profiles.file, buffer)
         await profiles.close()
 
-    processed_filename = f"{upload_id}-speed.mp4"
-    processed_path = PROCESSED_DIR / processed_filename
-
     analysis_filename = f"{upload_id}.json"
     analysis_path = ANALYSIS_DIR / analysis_filename
     variants = []
-    chosen_combos = []
 
     analysis_result = None
 
     try:
-        speed_task = run_in_threadpool(
-            run_speedup_agent,
-            str(original_path),
-            str(processed_path),
-        )
         analysis_task = run_in_threadpool(
             analyze_video,
             str(original_path),
             str(analysis_path),
         )
-        _, analysis_result = await asyncio.gather(speed_task, analysis_task)
-
-        variants.append(
-            {
-                "name": "speed_up",
-                "url": f"/media/processed/{processed_filename}",
-            }
-        )
-
-        chosen_combos = random.sample(COMBOS, k=min(2, len(COMBOS)))
-        if chosen_combos:
-            concurrency = max(1, VARIANT_CONCURRENCY)
-            semaphore = asyncio.Semaphore(concurrency)
-
-            async def _run_variant(combo_name: str):
-                async with semaphore:
-                    variant_filename = f"{upload_id}-{combo_name}.mp4"
-                    variant_path = PROCESSED_DIR / variant_filename
-                    try:
-                        await run_in_threadpool(
-                            run_combo_agent,
-                            str(original_path),
-                            str(variant_path),
-                            combo_name,
-                        )
-                        return {
-                            "name": combo_name,
-                            "url": f"/media/processed/{variant_filename}",
-                        }
-                    except Exception as exc:
-                        if DEBUG:
-                            print(f"Variant {combo_name} failed: {exc}")
-                        return None
-
-            results = await asyncio.gather(*[_run_variant(name) for name in chosen_combos])
-            variants.extend([item for item in results if item])
+        analysis_result = await analysis_task
     except Exception as exc:
         traceback.print_exc()
         detail = "Video processing failed"
@@ -410,10 +592,7 @@ async def transform(
     original_url = f"/media/original/{original_filename}"
     analysis_url = f"/media/analysis/{analysis_filename}"
 
-    metadata_payload = {
-        "speedFactor": 1.05,
-        "combos": chosen_combos,
-    }
+    metadata_payload = {}
     if product_desc:
         metadata_payload["productDesc"] = product_desc
     if goal:
@@ -434,15 +613,11 @@ async def transform(
         name=name,
     )
 
-    for variant in variants:
-        add_variant(upload_id, variant["name"], variant["url"])
-
     return {
         "ok": True,
         "videoId": upload_id,
         "name": name,
         "originalUrl": original_url,
-        "processedUrl": f"/media/processed/{processed_filename}",
         "analysisUrl": analysis_url,
         "variants": variants,
     }

@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import json
 import os
 import re
@@ -6,6 +7,8 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+import numpy as np
 
 try:
     from zoneinfo import ZoneInfo
@@ -26,8 +29,10 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-5")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 DEFAULT_GROUP_COUNT = int(os.getenv("AD_GROUP_COUNT", "4") or "4")
-DEFAULT_MAX_EDITS = int(os.getenv("AD_MAX_EDITS", "3") or "3")
+# 0 means "auto" (use most available tools).
+DEFAULT_MAX_EDITS = int(os.getenv("AD_MAX_EDITS", "0") or "0")
 DEFAULT_MIN_VISIBLE = int(os.getenv("AD_MIN_VISIBLE_TRANSFORMS", "2") or "2")
+EMBEDDINGS_INPUT_TYPE = os.getenv("EMBEDDINGS_INPUT_TYPE", "CLUSTERING")
 
 STATE_TIMEZONES = {
     "CA": "America/Los_Angeles",
@@ -65,6 +70,90 @@ CITY_TIMEZONES = {
 
 ENGLISH_COUNTRIES = {"US", "UK", "IE", "CA", "AU", "NZ", "SG"}
 
+IMPACT_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "been",
+    "being",
+    "but",
+    "by",
+    "for",
+    "from",
+    "has",
+    "have",
+    "if",
+    "in",
+    "into",
+    "is",
+    "it",
+    "its",
+    "just",
+    "like",
+    "more",
+    "most",
+    "not",
+    "of",
+    "on",
+    "or",
+    "our",
+    "out",
+    "so",
+    "that",
+    "the",
+    "their",
+    "then",
+    "these",
+    "they",
+    "this",
+    "to",
+    "too",
+    "up",
+    "was",
+    "we",
+    "were",
+    "with",
+    "you",
+    "your",
+}
+
+IMPACT_KEYWORDS = {
+    "new",
+    "now",
+    "free",
+    "limited",
+    "only",
+    "fast",
+    "fresh",
+    "power",
+    "powerful",
+    "save",
+    "win",
+    "best",
+    "easy",
+    "instant",
+    "today",
+    "tonight",
+    "exclusive",
+    "must",
+    "unlock",
+    "upgrade",
+    "ready",
+    "go",
+    "glow",
+    "boost",
+    "strong",
+    "bold",
+    "pro",
+    "ultra",
+    "zero",
+    "plus",
+}
+
 
 def _in_test_mode() -> bool:
     return os.getenv("AD_TEST_MODE", "0") == "1"
@@ -84,26 +173,76 @@ def _has_embedding_env() -> bool:
     )
 
 
+def _row_to_text(row: dict[str, str]) -> str:
+    return (
+        f"age: {row.get('age', '')}; "
+        f"gender: {row.get('gender', '')}; "
+        f"demographic: {row.get('demographic_info', '')}; "
+        f"previous_search_history: {row.get('previous_search_history', '')}"
+    )
+
+
+def _simple_profile_vectors(rows: list[dict[str, str]]) -> np.ndarray:
+    vectors = []
+    for row in rows:
+        age_raw = row.get("age") or ""
+        try:
+            age = float(age_raw)
+        except ValueError:
+            age = 0.0
+        gender = (row.get("gender") or "").strip().lower()
+        if gender.startswith("m"):
+            gender_val = 1.0
+        elif gender.startswith("f"):
+            gender_val = -1.0
+        else:
+            gender_val = 0.0
+        demo = (row.get("demographic_info") or "")
+        history = (row.get("previous_search_history") or "")
+        demo_len = len(demo) / 100.0
+        history_len = len(history) / 100.0
+        interest_count = max(1, len([c for c in history.split(";") if c.strip()])) / 10.0
+        vectors.append([age / 100.0, gender_val, demo_len, history_len, interest_count])
+    return np.array(vectors, dtype=np.float32)
+
+
 def _cluster_profiles(csv_path: str, group_count: int) -> dict[int, list[dict[str, str]]]:
-    try:
-        if _has_embedding_env():
+    rows = _load_profiles(csv_path)
+    if not rows:
+        return {}
+
+    group_count = max(1, min(group_count, len(rows)))
+    vectors: np.ndarray | None = None
+
+    if _has_embedding_env():
+        try:
             import cluster_profiles
 
-            clustered = cluster_profiles.cluster(n_clusters=group_count, csv_path=csv_path)
-            groups: dict[int, list[dict[str, str]]] = {}
-            for row in clustered:
-                group_id = int(row.get("cluster", 0))
-                groups.setdefault(group_id, []).append(row)
-            if groups:
-                return groups
-    except Exception:
-        pass
+            texts = [_row_to_text(row) for row in rows]
+            embeddings = cluster_profiles._embed_texts(
+                texts,
+                endpoint=os.getenv("ELASTICSEARCH_ENDPOINT") or "",
+                api_key=os.getenv("ELASTIC_API_KEY") or "",
+                inference_id=os.getenv("ELASTIC_INFERENCE_ID") or "",
+                input_type=EMBEDDINGS_INPUT_TYPE,
+            )
+            vectors = np.array(embeddings, dtype=np.float32)
+        except Exception:
+            vectors = None
 
-    rows = _load_profiles(csv_path)
-    groups = {idx: [] for idx in range(group_count)}
-    for idx, row in enumerate(rows):
-        group_id = idx % group_count
-        groups[group_id].append(row)
+    if vectors is None:
+        vectors = _simple_profile_vectors(rows)
+
+    try:
+        import cluster_profiles
+
+        labels, _ = cluster_profiles._kmeans(vectors, group_count)
+    except Exception:
+        labels = np.array([idx % group_count for idx in range(len(rows))], dtype=np.int64)
+
+    groups: dict[int, list[dict[str, str]]] = {idx: [] for idx in range(group_count)}
+    for row, label in zip(rows, labels):
+        groups[int(label)].append(row)
     return groups
 
 
@@ -321,6 +460,30 @@ def _truncate(text: str, limit: int = 1400) -> str:
     return (trimmed or cleaned[:limit]).rstrip() + "..."
 
 
+def _clip_text(text: str, limit: int = 32) -> str:
+    cleaned = (text or "").strip()
+    if len(cleaned) <= limit:
+        return cleaned
+    trimmed = cleaned[:limit].rsplit(" ", 1)[0]
+    return (trimmed or cleaned[:limit]).rstrip()
+
+
+def _extract_hook(text: str, limit: int = 32) -> str:
+    if not text:
+        return ""
+    cleaned = re.sub(r"\s+", " ", text).strip()
+    if not cleaned:
+        return ""
+    candidates = [c.strip(" \"'") for c in re.split(r"[.!?]+", cleaned) if c.strip()]
+    for candidate in candidates:
+        words = candidate.split()
+        if 3 <= len(words) <= 10:
+            return _clip_text(candidate, limit=limit)
+    if candidates:
+        return _clip_text(candidates[0], limit=limit)
+    return _clip_text(cleaned, limit=limit)
+
+
 def _extract_json(text: str) -> dict:
     cleaned = _strip_code_fences(text)
     if not cleaned:
@@ -471,19 +634,374 @@ def _recommended_combo(context: dict[str, Any]) -> str:
 
 
 def _pick_overlay_text(research: dict | None, analysis: dict | None) -> str:
+    if analysis:
+        audio_segments = analysis.get("audio_segments") or []
+        for segment in audio_segments:
+            hook = _extract_hook(str(segment.get("text") or ""), limit=32)
+            if hook:
+                return hook
     if research:
         insights = str(research.get("insights") or "").strip()
         if insights:
             snippet = insights.split(".")[0].strip()
             if snippet:
-                return snippet[:32]
+                return _clip_text(snippet, limit=32)
     if analysis:
         captions = analysis.get("captions") or []
         if captions:
             text = str(captions[0].get("caption") or "").strip()
             if text:
-                return text[:32]
+                return _clip_text(text, limit=32)
     return "Made for you"
+
+
+def _stable_roll(*parts: Any) -> float:
+    seed = "::".join([str(p) for p in parts if p not in (None, "")])
+    if not seed:
+        seed = "0"
+    digest = hashlib.md5(seed.encode("utf-8")).hexdigest()
+    return int(digest[:8], 16) / float(0xFFFFFFFF)
+
+
+def _overlay_target_share(context: dict[str, Any], analysis: dict | None) -> float:
+    target = 0.33
+    if context.get("englishSpeaking") is False:
+        target += 0.08
+    if context.get("ageBucket") == "45+":
+        target += 0.08
+    if analysis:
+        if analysis.get("audio_segments"):
+            target += 0.05
+        if not analysis.get("audio_segments") and not analysis.get("captions"):
+            target -= 0.15
+    else:
+        target -= 0.1
+    return min(max(target, 0.2), 0.55)
+
+
+def _overlay_guidance(
+    video_id: str | None,
+    group_id: int,
+    context: dict[str, Any],
+    analysis: dict | None,
+    override: bool | None = None,
+) -> dict[str, Any]:
+    target = _overlay_target_share(context, analysis)
+    roll = _stable_roll(video_id or "", group_id, context.get("region"), context.get("timeOfDay"))
+    should_apply = roll < target
+    reason = "Apply overlays for roughly a third of variants while adapting to audience and content."
+    if override is not None:
+        should_apply = bool(override)
+        reason = "Batch selection targets ~33% of variants in this group set."
+    return {
+        "target_share": round(target, 3),
+        "roll": round(roll, 3),
+        "should_apply": should_apply,
+        "reason": reason,
+    }
+
+
+def _overlay_font_size(context: dict[str, Any]) -> int:
+    if context.get("ageBucket") == "45+":
+        return 42
+    if context.get("ageBucket") in {"18-24", "25-34"}:
+        return 36
+    return 38
+
+
+def _impact_phrase(text: str, context: dict[str, Any]) -> str:
+    if not text:
+        return ""
+    hook = _extract_hook(text, limit=64)
+    words = re.findall(r"[A-Za-z0-9']+", hook)
+    if not words:
+        return _clip_text(hook, limit=32)
+
+    filtered = [w for w in words if w.lower() not in IMPACT_STOPWORDS]
+    phrase_words = filtered[:4] if len(filtered) >= 2 else words[:4]
+    phrase = " ".join(phrase_words)
+    phrase = _clip_text(phrase, limit=32)
+
+    if context.get("englishSpeaking") is False:
+        return phrase
+    if len(phrase.split()) <= 4:
+        return phrase.upper()
+    return phrase
+
+
+def _impact_score(text: str, start: float, end: float, duration: float | None, source: str) -> float:
+    if not text:
+        return 0.0
+    lower = text.lower()
+    score = 0.2
+    if "!" in text:
+        score += 0.3
+    for keyword in IMPACT_KEYWORDS:
+        if keyword in lower:
+            score += 0.6
+    words = re.findall(r"[A-Za-z0-9']+", text)
+    if 2 <= len(words) <= 6:
+        score += 0.5
+    if len(words) > 12:
+        score -= 0.3
+    if source == "audio":
+        score += 0.2
+    if duration and duration > 0:
+        mid = (start + end) / 2.0
+        ratio = mid / duration
+        if ratio < 0.08 or ratio > 0.92:
+            score -= 0.25
+        elif 0.2 <= ratio <= 0.75:
+            score += 0.2
+    return score
+
+
+def _normalize_overlay_window(start: float, end: float, duration: float | None) -> tuple[float, float]:
+    safe_start = max(0.0, float(start))
+    safe_end = max(safe_start, float(end))
+    length = safe_end - safe_start
+    target = 1.6 if length < 1.0 else min(length, 2.6)
+    if length > target:
+        safe_start = safe_start + (length - target) / 2.0
+    safe_end = safe_start + target
+    if duration and duration > 0:
+        safe_end = min(safe_end, duration)
+    return round(safe_start, 3), round(safe_end, 3)
+
+
+def _overlay_candidates(analysis: dict | None, context: dict[str, Any]) -> list[dict[str, Any]]:
+    if not analysis:
+        return []
+    duration = analysis.get("duration")
+    duration_value = float(duration) if isinstance(duration, (int, float)) else None
+    candidates: list[dict[str, Any]] = []
+
+    audio_segments = analysis.get("audio_segments") or []
+    for segment in audio_segments[:12]:
+        text = str(segment.get("text") or "").strip()
+        if not text:
+            continue
+        phrase = _impact_phrase(text, context)
+        if not phrase:
+            continue
+        start = float(segment.get("start", 0.0))
+        end = float(segment.get("end", start + 1.5))
+        start, end = _normalize_overlay_window(start, end, duration_value)
+        score = _impact_score(text, start, end, duration_value, "audio")
+        candidates.append(
+            {"text": phrase, "start": start, "end": end, "source": "audio", "score": score}
+        )
+
+    captions = analysis.get("captions") or []
+    caption_map = {c.get("id"): c for c in captions if isinstance(c, dict)}
+    events = analysis.get("events") or []
+    for event in events[:20]:
+        caption = caption_map.get(event.get("caption_id"))
+        if not caption:
+            continue
+        text = str(caption.get("caption") or "").strip()
+        if not text:
+            continue
+        phrase = _impact_phrase(text, context)
+        if not phrase:
+            continue
+        start = float(event.get("t_start", 0.0))
+        end = float(event.get("t_end", start + 1.8))
+        start, end = _normalize_overlay_window(start, end, duration_value)
+        score = _impact_score(text, start, end, duration_value, "visual")
+        candidates.append(
+            {"text": phrase, "start": start, "end": end, "source": "visual", "score": score}
+        )
+
+    scene_captions = analysis.get("scene_captions") or []
+    for item in scene_captions[:10]:
+        if not isinstance(item, dict):
+            continue
+        text = str(item.get("caption") or "").strip()
+        if not text:
+            continue
+        phrase = _impact_phrase(text, context)
+        if not phrase:
+            continue
+        start = float(item.get("t", 0.0))
+        end = start + 2.0
+        start, end = _normalize_overlay_window(start, end, duration_value)
+        score = _impact_score(text, start, end, duration_value, "scene")
+        candidates.append(
+            {"text": phrase, "start": start, "end": end, "source": "scene", "score": score}
+        )
+
+    return candidates
+
+
+def _select_overlay_moment(analysis: dict | None, context: dict[str, Any]) -> dict[str, Any]:
+    candidates = _overlay_candidates(analysis, context)
+    if not candidates:
+        return {}
+    candidates.sort(key=lambda item: item.get("score", 0.0), reverse=True)
+    return candidates[0]
+
+
+def _impact_moments_for_prompt(analysis: dict | None, context: dict[str, Any], limit: int = 4) -> list[dict[str, Any]]:
+    candidates = _overlay_candidates(analysis, context)
+    if not candidates:
+        return []
+    candidates.sort(key=lambda item: item.get("score", 0.0), reverse=True)
+    moments: list[dict[str, Any]] = []
+    for item in candidates[:limit]:
+        moments.append(
+            {
+                "start": item.get("start"),
+                "end": item.get("end"),
+                "text": item.get("text"),
+                "source": item.get("source"),
+            }
+        )
+    return moments
+
+
+def _apply_overlay_guidance(
+    decisions: list[dict[str, Any]],
+    overlay_guidance: dict[str, Any],
+    max_transforms: int | None,
+) -> None:
+    if not overlay_guidance or not overlay_guidance.get("should_apply"):
+        return
+    overlay = next((d for d in decisions if d.get("tool") == "add_text_overlay_video"), None)
+    if not overlay or overlay.get("apply"):
+        return
+    applied = sum(1 for d in decisions if d.get("apply"))
+    if isinstance(max_transforms, int) and max_transforms > 0 and applied >= max_transforms:
+        return
+    overlay["apply"] = True
+    overlay["forced"] = True
+    overlay["reason"] = (overlay.get("reason") or "").strip()
+    suffix = " Overlay guidance requested an impact text moment."
+    overlay["reason"] = (overlay["reason"] + suffix).strip()
+
+
+def _rank_overlay_groups(video_id: str | None, groups: list[dict[str, Any]]) -> list[int]:
+    scored: list[tuple[float, int]] = []
+    for group in groups:
+        group_id = int(group.get("id", 0))
+        roll = _stable_roll(video_id or "", group_id, group.get("label"), group.get("description"))
+        scored.append((roll, group_id))
+    scored.sort(key=lambda item: item[0])
+    return [group_id for _, group_id in scored]
+
+
+def _select_overlay_group_ids(
+    video_id: str | None,
+    groups: list[dict[str, Any]],
+    target_ratio: float = 0.33,
+) -> set[int]:
+    if not groups:
+        return set()
+    ranked = _rank_overlay_groups(video_id, groups)
+    target = max(1, int(round(len(ranked) * target_ratio)))
+    return set(ranked[:target])
+
+
+def _plan_overlay_group_ids(
+    video_id: str | None,
+    groups: list[dict[str, Any]],
+    analysis: dict,
+    target_ratio: float = 0.33,
+) -> set[int]:
+    if not groups:
+        return set()
+    target_count = max(1, int(round(len(groups) * target_ratio)))
+
+    if _in_test_mode() or not os.getenv("OPENAI_API_KEY"):
+        ranked = _rank_overlay_groups(video_id, groups)
+        return set(ranked[:target_count])
+
+    captions = analysis.get("captions", []) if isinstance(analysis, dict) else []
+    caption_lines = _compact_lines(captions, "caption", limit=12)
+    audio_segments = analysis.get("audio_segments", []) if isinstance(analysis, dict) else []
+    audio_lines: list[str] = []
+    for segment in audio_segments[:12]:
+        hook = _extract_hook(str(segment.get("text") or ""), limit=120)
+        if hook:
+            audio_lines.append(hook)
+
+    group_payload = []
+    for group in groups:
+        group_payload.append(
+            {
+                "id": group.get("id"),
+                "label": group.get("label"),
+                "description": group.get("description"),
+                "context": group.get("context"),
+            }
+        )
+
+    system_prompt = (
+        "You are a creative planning agent. Choose which audience groups should receive on-screen text overlays. "
+        "Pick the groups where short impact captions would add clarity or punch (e.g., non-English, older, "
+        "dense messaging, strong hook moments). Return JSON only."
+    )
+    user_payload = {
+        "target_count": target_count,
+        "target_ratio": target_ratio,
+        "groups": group_payload,
+        "transcript_excerpts": audio_lines,
+        "caption_highlights": caption_lines,
+        "instructions": (
+            "Return JSON with keys: ranked_group_ids (ordered list of group ids from most to least suited). "
+            "Use each group id at most once."
+        ),
+    }
+
+    try:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": json.dumps(user_payload)},
+            ],
+            temperature=0.2,
+        )
+    except Exception:
+        ranked = _rank_overlay_groups(video_id, groups)
+        return set(ranked[:target_count])
+
+    raw = response.choices[0].message.content or ""
+    payload = _extract_json(raw)
+    ranked_ids = payload.get("ranked_group_ids") if isinstance(payload, dict) else None
+    if not isinstance(ranked_ids, list):
+        ranked = _rank_overlay_groups(video_id, groups)
+        return set(ranked[:target_count])
+
+    group_ids = {int(group.get("id", 0)) for group in groups}
+    ordered: list[int] = []
+    seen: set[int] = set()
+    for item in ranked_ids:
+        try:
+            gid = int(item)
+        except (TypeError, ValueError):
+            continue
+        if gid not in group_ids or gid in seen:
+            continue
+        ordered.append(gid)
+        seen.add(gid)
+
+    if not ordered:
+        ranked = _rank_overlay_groups(video_id, groups)
+        return set(ranked[:target_count])
+
+    if len(ordered) < target_count:
+        ranked = _rank_overlay_groups(video_id, groups)
+        for gid in ranked:
+            if gid in seen:
+                continue
+            ordered.append(gid)
+            if len(ordered) >= target_count:
+                break
+    else:
+        ordered = ordered[:target_count]
+
+    return set(ordered)
 
 
 def _ensure_visible_decisions(decisions: list[dict[str, Any]], context: dict[str, Any]) -> None:
@@ -513,11 +1031,22 @@ def _ensure_visible_decisions(decisions: list[dict[str, Any]], context: dict[str
     )
 
 
-def _heuristic_decisions(context: dict[str, Any], analysis: dict, group_id: int) -> list[dict[str, Any]]:
+def _heuristic_decisions(
+    context: dict[str, Any],
+    analysis: dict,
+    group_id: int,
+    video_id: str | None = None,
+    overlay_override: bool | None = None,
+) -> list[dict[str, Any]]:
     speed_tag = _recommended_speed_tag(context)
     grade_style = _recommended_grade_style(context)
     combo_name = _recommended_combo(context)
-    overlay_text = _pick_overlay_text(None, analysis)
+    overlay_guidance = _overlay_guidance(video_id, group_id, context, analysis, override=overlay_override)
+    overlay_moment = _select_overlay_moment(analysis, context)
+    overlay_text = overlay_moment.get("text") or _pick_overlay_text(None, analysis)
+    overlay_start = overlay_moment.get("start", 0.6)
+    overlay_end = overlay_moment.get("end", 2.4)
+    overlay_font = _overlay_font_size(context)
 
     decisions = [
         {
@@ -546,10 +1075,17 @@ def _heuristic_decisions(context: dict[str, Any], analysis: dict, group_id: int)
         },
         {
             "tool": "add_text_overlay_video",
-            "apply": group_id % 2 == 1,
-            "reason": "Add light contextual copy for distinctiveness.",
+            "apply": bool(overlay_guidance.get("should_apply")),
+            "reason": "Overlay guidance favors impact text for about half of variants.",
             "summary": "overlay text",
-            "args": {"text": overlay_text, "x": 32, "y": 32, "fontSize": 36, "start": 0, "end": 2.5},
+            "args": {
+                "text": overlay_text,
+                "x": 32,
+                "y": 32,
+                "fontSize": overlay_font,
+                "start": overlay_start,
+                "end": overlay_end,
+            },
             "source": "heuristic",
         },
         {
@@ -604,6 +1140,8 @@ def plan_group_transformations(
     analysis: dict,
     research: dict | None,
     context: dict[str, Any],
+    video_id: str | None = None,
+    overlay_override: bool | None = None,
     max_edits: int | None = None,
 ) -> dict[str, Any]:
     if _in_test_mode():
@@ -612,14 +1150,33 @@ def plan_group_transformations(
     if not os.getenv("OPENAI_API_KEY"):
         raise RuntimeError("OPENAI_API_KEY is required for OpenAI-only planning.")
 
-    edits = max(1, min(max_edits or DEFAULT_MAX_EDITS, 6))
+    tool_count = len(PLANNER_TOOLS)
+    if max_edits is not None:
+        edits = max_edits
+    elif DEFAULT_MAX_EDITS > 0:
+        edits = DEFAULT_MAX_EDITS
+    else:
+        edits = max(1, tool_count - 1)
+    edits = max(1, min(int(edits), tool_count))
     audio_segments = analysis.get("audio_segments", []) if isinstance(analysis, dict) else []
     captions = analysis.get("captions", []) if isinstance(analysis, dict) else []
     caption_lines = _compact_lines(captions, "caption", limit=10)
-    audio_lines = _compact_lines(audio_segments, "text", limit=10)
+    audio_lines: list[str] = []
+    for segment in audio_segments[:10]:
+        hook = _extract_hook(str(segment.get("text") or ""), limit=120)
+        if hook:
+            audio_lines.append(hook)
 
     research_summary = _truncate(research.get("insights", "")) if research else ""
     research_citations = research.get("citations", []) if research else []
+    overlay_guidance = _overlay_guidance(
+        video_id,
+        context.get("groupId", 0),
+        context,
+        analysis,
+        override=overlay_override,
+    )
+    impact_moments = _impact_moments_for_prompt(analysis, context, limit=4)
 
     user_payload = {
         "audience": audience_description,
@@ -628,11 +1185,14 @@ def plan_group_transformations(
         "research_citations": research_citations,
         "transcript_excerpts": audio_lines,
         "caption_highlights": caption_lines,
+        "impact_moments": impact_moments,
+        "overlay_guidance": overlay_guidance,
         "available_tools": PLANNER_TOOLS,
         "combo_names": COMBOS,
         "speed_tags": SPEED_CHANGE_TAGS,
         "grade_styles": COLOR_GRADE_STYLES,
         "max_transformations": edits,
+        "target_transformations": edits,
         "min_visible_transforms": DEFAULT_MIN_VISIBLE,
         "required_output": {
             "decisions": [
@@ -656,11 +1216,31 @@ def plan_group_transformations(
             context=context,
         )
     except Exception as exc:
-        return {"ok": False, "error": str(exc), "decisions": _heuristic_decisions(context, analysis, context.get("groupId", 0))}
+        return {
+            "ok": False,
+            "error": str(exc),
+            "decisions": _heuristic_decisions(
+                context,
+                analysis,
+                context.get("groupId", 0),
+                video_id=video_id,
+                overlay_override=overlay_override,
+            ),
+        }
 
     decisions = plan.get("decisions")
     if not isinstance(decisions, list) or not decisions:
-        return {"ok": False, "error": plan.get("error", "Planner returned no decisions"), "decisions": _heuristic_decisions(context, analysis, context.get("groupId", 0))}
+        return {
+            "ok": False,
+            "error": plan.get("error", "Planner returned no decisions"),
+            "decisions": _heuristic_decisions(
+                context,
+                analysis,
+                context.get("groupId", 0),
+                video_id=video_id,
+                overlay_override=overlay_override,
+            ),
+        }
 
     cleaned: list[dict[str, Any]] = []
     for item in decisions:
@@ -680,6 +1260,8 @@ def plan_group_transformations(
                 "source": "ai",
             }
         )
+
+    _apply_overlay_guidance(cleaned, overlay_guidance, edits)
 
     return {
         "ok": plan.get("ok", True),
@@ -711,14 +1293,23 @@ def _fill_tool_args(
             f"Tone matched to {context.get('timeOfDay', 'day')} / urban={context.get('isUrban')}.",
         )
     elif tool == "apply_combo":
-        payload.setdefault("comboName", _recommended_combo(context))
+        combo = payload.setdefault("comboName", _recommended_combo(context))
+        if combo == "hook_caption":
+            overlay_moment = _select_overlay_moment(analysis, context)
+            payload.setdefault("text", overlay_moment.get("text") or _pick_overlay_text(research, analysis))
+            payload.setdefault("x", 32)
+            payload.setdefault("y", 32)
+            payload.setdefault("fontSize", _overlay_font_size(context))
+            payload.setdefault("start", overlay_moment.get("start", 0.6))
+            payload.setdefault("end", overlay_moment.get("end", 2.4))
     elif tool == "add_text_overlay_video":
-        payload.setdefault("text", _pick_overlay_text(research, analysis))
+        overlay_moment = _select_overlay_moment(analysis, context)
+        payload.setdefault("text", overlay_moment.get("text") or _pick_overlay_text(research, analysis))
         payload.setdefault("x", 32)
         payload.setdefault("y", 32)
-        payload.setdefault("fontSize", 36)
-        payload.setdefault("start", 0)
-        payload.setdefault("end", 2.5)
+        payload.setdefault("fontSize", _overlay_font_size(context))
+        payload.setdefault("start", overlay_moment.get("start", 0.6))
+        payload.setdefault("end", overlay_moment.get("end", 2.4))
     elif tool == "blur_backdrop_video":
         payload.setdefault("scale", 0.84)
         payload.setdefault("blur", 22.0)
@@ -731,38 +1322,65 @@ def _fill_tool_args(
     elif tool == "trim_video":
         payload.setdefault("start", 0.0)
         payload.setdefault("duration", 8.0)
+    elif tool == "replace_text_region_video":
+        payload.setdefault("x", 32)
+        payload.setdefault("y", 32)
+        payload.setdefault("w", 480)
+        payload.setdefault("h", 120)
+        overlay_moment = _select_overlay_moment(analysis, context)
+        payload.setdefault("text", overlay_moment.get("text") or _pick_overlay_text(research, analysis))
+        payload.setdefault("fontSize", 32)
+        payload.setdefault("color", "white")
+        payload.setdefault("boxColor", "black@0.6")
     return payload
 
 
 def _resolve_combo_conflicts(decisions: list[dict[str, Any]]) -> None:
+    # We keep all tools applied; annotate conflicts without disabling anything.
     combo = None
-    combo_decision = None
     for decision in decisions:
         if decision.get("tool") == "apply_combo" and decision.get("apply"):
             combo = decision.get("args", {}).get("comboName")
-            combo_decision = decision
             break
     if not combo:
         return
     conflicts = COMBO_FEATURES.get(combo, set())
-    if combo_decision:
-        forced_conflict = any(
-            d.get("apply") and d.get("forced") and d.get("tool") in conflicts
-            for d in decisions
-        )
-        if forced_conflict:
-            combo_decision["apply"] = False
-            combo_decision["applied"] = False
-            combo_decision["reason"] = (combo_decision.get("reason") or "") + " Skipped due to forced tool conflict."
-            return
+    if not conflicts:
+        return
     for decision in decisions:
         tool = decision.get("tool")
-        if tool == "apply_combo":
-            continue
         if tool in conflicts and decision.get("apply"):
-            decision["apply"] = False
-            decision["applied"] = False
-            decision["reason"] = (decision.get("reason") or "") + " Skipped due to combo overlap."
+            decision["reason"] = (decision.get("reason") or "") + " Overlaps combo; keeping both applied."
+
+
+def _ensure_min_visible(decisions: list[dict[str, Any]], min_visible: int) -> None:
+    visible_tools = [
+        "color_grade_video",
+        "add_text_overlay_video",
+        "add_film_grain_video",
+        "blur_backdrop_video",
+        "reframe_vertical_video",
+        "trim_video",
+    ]
+    applied_visible = sum(
+        1 for d in decisions if d.get("apply") and d.get("tool") in visible_tools
+    )
+    if applied_visible >= min_visible:
+        return
+
+    for tool in visible_tools:
+        if applied_visible >= min_visible:
+            break
+        for decision in decisions:
+            if decision.get("tool") != tool:
+                continue
+            if decision.get("apply"):
+                break
+            decision["apply"] = True
+            decision["forced"] = True
+            decision["reason"] = (decision.get("reason") or "") + " Forced to meet minimum visible transforms."
+            applied_visible += 1
+            break
 
 
 def _apply_decisions(
@@ -774,6 +1392,7 @@ def _apply_decisions(
     context: dict[str, Any],
     analysis: dict | None,
     research: dict | None,
+    enforce_min_visible: bool = True,
 ) -> tuple[str | None, list[dict[str, Any]]]:
     ordered = {tool: idx for idx, tool in enumerate(PLANNER_ORDER)}
     decisions.sort(key=lambda item: ordered.get(item.get("tool"), 999))
@@ -784,12 +1403,13 @@ def _apply_decisions(
 
     for decision in decisions:
         if decision.get("tool") == "apply_combo" and decision.get("apply"):
-            if decision.get("source") != "ai":
-                decision["args"] = _fill_tool_args(
-                    "apply_combo", decision.get("args") or {}, context, analysis, research
-                )
+            decision["args"] = _fill_tool_args(
+                "apply_combo", decision.get("args") or {}, context, analysis, research
+            )
 
     _resolve_combo_conflicts(decisions)
+    if enforce_min_visible:
+        _ensure_min_visible(decisions, DEFAULT_MIN_VISIBLE)
 
     current_input = str(original_path)
     applied_steps = 0
@@ -801,8 +1421,7 @@ def _apply_decisions(
             continue
 
         args = decision.get("args") or {}
-        if decision.get("source") != "ai":
-            args = _fill_tool_args(tool, args, context, analysis, research)
+        args = _fill_tool_args(tool, args, context, analysis, research)
 
         if tool == "replace_text_region_video":
             required = {"x", "y", "w", "h", "text"}
@@ -946,15 +1565,20 @@ def generate_group_variants(
     if not groups:
         return variants, metadata_updates
 
+    overlay_group_ids = _plan_overlay_group_ids(video_id, groups, analysis, target_ratio=0.33)
+
     for group in groups:
         group_id = group["id"]
         context = group.get("context") or {}
+        overlay_override = group_id in overlay_group_ids
         research = _run_group_research(group["description"], context=context)
         plan = plan_group_transformations(
             group["description"],
             analysis,
             research=research,
             context=context,
+            video_id=video_id,
+            overlay_override=overlay_override,
             max_edits=max_edits,
         )
         decisions = plan.get("decisions") or []
@@ -972,6 +1596,7 @@ def generate_group_variants(
             context=context,
             analysis=analysis,
             research=research,
+            enforce_min_visible=not plan.get("ok", True),
         )
 
         if not final_path:
