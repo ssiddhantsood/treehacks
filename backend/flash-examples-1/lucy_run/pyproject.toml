@@ -1,0 +1,12 @@
+[project]
+name = "lucy_run"
+version = "0.1.0"
+description = "Runpod Flash app for decart-ai/Lucy-Edit-Dev"
+requires-python = ">=3.10"
+
+dependencies = [
+  "runpod-flash",
+  "fastapi",
+  "uvicorn",
+  "python-dotenv",
+]

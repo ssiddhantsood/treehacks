@@ -1,0 +1,7 @@
+fastapi>=0.104.0
+numpy>=2.0.2
+pillow>=10.0.0
+python-multipart>=0.0.6
+runpod-flash
+structlog>=23.0.0
+uvicorn>=0.24.0
