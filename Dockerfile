@@ -1,9 +1,12 @@
 FROM python:3.12-slim
 
-# Install FFmpeg
+# Install FFmpeg with full codec support (libx264, aac, etc.)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends \
+        ffmpeg \
+        libx264-dev \
+        libavcodec-extra \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 

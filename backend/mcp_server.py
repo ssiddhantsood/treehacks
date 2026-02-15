@@ -272,8 +272,15 @@ def edit_video(video_source: str, instructions: str) -> str:
             output_path=out,
         )
     except Exception as e:
-        print(f"[edit] Orchestrator error: {traceback.format_exc()}")
-        return f"Error during processing: {e}"
+        tb = traceback.format_exc()
+        print(f"[edit] Orchestrator error: {tb}")
+        # Include FFmpeg stderr if available (CalledProcessError)
+        stderr_info = ""
+        if hasattr(e, "stderr") and e.stderr:
+            stderr_info = f"\nFFmpeg output: {str(e.stderr)[-500:]}"
+        elif hasattr(e, "__cause__") and hasattr(e.__cause__, "stderr") and e.__cause__.stderr:
+            stderr_info = f"\nFFmpeg output: {str(e.__cause__.stderr)[-500:]}"
+        return f"Error during processing: {e}{stderr_info}"
 
     # --- Step 3: Parse orchestrator result ---
     parsed = {}
