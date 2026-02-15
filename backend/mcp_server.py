@@ -117,6 +117,40 @@ async def health_check(request: Request) -> PlainTextResponse:
     return PlainTextResponse("ok")
 
 
+@mcp.custom_route("/debug/ffmpeg", methods=["GET"])
+async def debug_ffmpeg(request: Request) -> JSONResponse:
+    """Diagnostic endpoint — show FFmpeg version, encoders, and storage info."""
+    import subprocess as _sp
+
+    info = {}
+    try:
+        r = _sp.run(["ffmpeg", "-version"], capture_output=True, text=True, timeout=10)
+        info["version"] = (r.stdout or "").split("\n")[0]
+    except Exception as e:
+        info["version_error"] = str(e)
+
+    try:
+        r = _sp.run(["ffmpeg", "-encoders"], capture_output=True, text=True, timeout=10)
+        lines = [l for l in (r.stdout or "").split("\n") if "264" in l or "aac" in l.lower()]
+        info["relevant_encoders"] = lines
+    except Exception as e:
+        info["encoders_error"] = str(e)
+
+    try:
+        from ai_agents.video import ENCODER, HWACCEL
+        info["selected_encoder"] = ENCODER
+        info["hwaccel"] = HWACCEL
+    except Exception as e:
+        info["encoder_import_error"] = str(e)
+
+    info["storage_dir"] = str(STORAGE_DIR)
+    info["processed_dir_exists"] = PROCESSED_DIR.exists()
+    info["original_files"] = [f.name for f in ORIGINAL_DIR.iterdir()] if ORIGINAL_DIR.exists() else []
+    info["processed_files"] = [f.name for f in PROCESSED_DIR.iterdir()] if PROCESSED_DIR.exists() else []
+
+    return JSONResponse(info)
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
