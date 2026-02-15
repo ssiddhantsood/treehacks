@@ -392,7 +392,6 @@ async def register(payload: dict):
     token = create_access_token(user["id"])
     return {"ok": True, "token": token, "user": {"id": user["id"], "email": user["email"]}}
 
-
 @app.post("/api/auth/login")
 async def login(payload: dict):
     email = (payload.get("email") or "").strip().lower()
