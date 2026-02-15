@@ -607,12 +607,10 @@ def plan_group_transformations(
     max_edits: int | None = None,
 ) -> dict[str, Any]:
     if _in_test_mode():
-        decisions = _heuristic_decisions(context, analysis, context.get("groupId", 0))
-        return {"ok": True, "model": "test", "raw": "", "decisions": decisions}
+        raise RuntimeError("AD_TEST_MODE=1 disables OpenAI planning. Unset AD_TEST_MODE to use OpenAI-only decisions.")
 
     if not os.getenv("OPENAI_API_KEY"):
-        decisions = _heuristic_decisions(context, analysis, context.get("groupId", 0))
-        return {"ok": False, "error": "Missing OPENAI_API_KEY", "decisions": decisions}
+        raise RuntimeError("OPENAI_API_KEY is required for OpenAI-only planning.")
 
     edits = max(1, min(max_edits or DEFAULT_MAX_EDITS, 6))
     audio_segments = analysis.get("audio_segments", []) if isinstance(analysis, dict) else []

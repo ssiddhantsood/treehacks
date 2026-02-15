@@ -5,7 +5,6 @@ import shutil
 import sys
 from pathlib import Path
 
-os.environ["AD_TEST_MODE"] = "1"
 os.environ.setdefault("VIDEO_HWACCEL", "none")
 os.environ.setdefault("VIDEO_ENCODER", "libx264")
 
@@ -19,7 +18,7 @@ from ai_agents.group_ads import generate_group_variants  # noqa: E402
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run group ad generation in test mode.")
+    parser = argparse.ArgumentParser(description="Run group ad generation with OpenAI planning.")
     parser.add_argument(
         "--video",
         default=str(Path(__file__).resolve().parent / "video.mp4"),
@@ -45,6 +44,9 @@ def main() -> int:
 
     if shutil.which("ffmpeg") is None:
         print("ffmpeg not found on PATH; cannot run group ads test.")
+        return 1
+    if not os.getenv("OPENAI_API_KEY"):
+        print("OPENAI_API_KEY not set; OpenAI-only planning is required.")
         return 1
 
     video_path = Path(args.video).resolve()
@@ -84,10 +86,14 @@ def main() -> int:
         if not path.exists():
             missing.append(str(path))
 
+    metadata_path = out_dir / "metadata.json"
+    metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
     print(f"Generated {len(variants)} variants.")
     for item in metadata:
         summary = item.get("summary") or "(no summary)"
         print(f"- group {item.get('groupId')}: {summary}")
+    print(f"Metadata saved to: {metadata_path}")
 
     if missing:
         print("Missing output files:")

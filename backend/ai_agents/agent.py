@@ -53,13 +53,13 @@ COLOR_GRADE_STYLES = [
     "soft_pastel",
 ]
 COLOR_GRADE_PRESETS = {
-    "neutral_clean": {"contrast": 1.05, "brightness": 0.02, "saturation": 1.0},
-    "bright_airy": {"contrast": 1.02, "brightness": 0.06, "saturation": 1.05},
-    "moody_dark": {"contrast": 1.12, "brightness": -0.03, "saturation": 0.92},
-    "warm_glow": {"contrast": 1.06, "brightness": 0.03, "saturation": 1.08},
-    "cool_urban": {"contrast": 1.08, "brightness": 0.0, "saturation": 0.98},
-    "vibrant_pop": {"contrast": 1.1, "brightness": 0.02, "saturation": 1.18},
-    "soft_pastel": {"contrast": 0.98, "brightness": 0.04, "saturation": 0.9},
+    "neutral_clean": {"contrast": 1.08, "brightness": 0.015, "saturation": 1.04},
+    "bright_airy": {"contrast": 1.06, "brightness": 0.1, "saturation": 1.12},
+    "moody_dark": {"contrast": 1.2, "brightness": -0.07, "saturation": 0.85},
+    "warm_glow": {"contrast": 1.12, "brightness": 0.06, "saturation": 1.18},
+    "cool_urban": {"contrast": 1.15, "brightness": -0.02, "saturation": 0.92},
+    "vibrant_pop": {"contrast": 1.2, "brightness": 0.04, "saturation": 1.3},
+    "soft_pastel": {"contrast": 0.94, "brightness": 0.07, "saturation": 0.8},
 }
 
 SPEED_TOOLS = [

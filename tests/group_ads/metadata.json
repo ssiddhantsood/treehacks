@@ -1,0 +1,435 @@
+[
+  {
+    "groupId": 0,
+    "label": "Group 0",
+    "summary": "speed slow_2; combo cinematic_grain",
+    "changes": [
+      {
+        "tool": "trim_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip trim",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "change_speed_video",
+        "apply": true,
+        "reason": "Time-of-day or language pacing heuristic.",
+        "summary": "speed slow_2",
+        "args": {
+          "changeTag": "slow_2",
+          "changeNote": "Heuristic pace adjustment."
+        },
+        "source": "heuristic",
+        "applied": true,
+        "outputPath": "/Users/siddhantsood/Desktop/treehacks/tests/group_ads/test-group0-step1.mp4"
+      },
+      {
+        "tool": "color_grade_video",
+        "apply": false,
+        "reason": "Heuristic tone shift for audience/context. Skipped due to combo overlap.",
+        "summary": "grade moody_dark",
+        "args": {
+          "gradeStyle": "moody_dark",
+          "gradeNote": "Heuristic grade."
+        },
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "blur_backdrop_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip blur",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "reframe_vertical_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip reframe",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "add_film_grain_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip grain",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "add_text_overlay_video",
+        "apply": false,
+        "reason": "Add light contextual copy for distinctiveness.",
+        "summary": "overlay text",
+        "args": {
+          "text": "A person enters a large dining r",
+          "x": 32,
+          "y": 32,
+          "fontSize": 36,
+          "start": 0,
+          "end": 2.5
+        },
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "replace_text_region_video",
+        "apply": false,
+        "reason": "Requires explicit region coordinates.",
+        "summary": "skip replace text",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "apply_combo",
+        "apply": true,
+        "reason": "Alternate combos to keep group variants distinct.",
+        "summary": "combo cinematic_grain",
+        "args": {
+          "comboName": "cinematic_grain"
+        },
+        "source": "heuristic",
+        "applied": true,
+        "outputPath": "/Users/siddhantsood/Desktop/treehacks/tests/group_ads/test-group0-step2.mp4"
+      }
+    ],
+    "research": {
+      "ok": true,
+      "audience": "Group 0. avg age 42. top genders: female, male. demo: Urban, Austin TX, college student, part-time barista, renter, low-income; Urban, New York NY, freelancer, renter, mid-income. interests: budget smartphones, student discounts, thrift stores, free events near me, used textbooks",
+      "insights": "Test mode: no research run.",
+      "citations": [],
+      "model": "test",
+      "transformations": []
+    },
+    "context": {
+      "groupId": 0,
+      "region": "Austin",
+      "country": "US",
+      "timezone": "America/Chicago",
+      "timeOfDay": "night",
+      "localHour": 0,
+      "englishSpeaking": true,
+      "isUrban": true,
+      "avgAge": 42,
+      "ageBucket": "35-44",
+      "topGenders": [
+        "female",
+        "male"
+      ],
+      "interests": [
+        "budget smartphones",
+        "student discounts",
+        "thrift stores",
+        "free events near me",
+        "used textbooks"
+      ]
+    },
+    "planner": {
+      "ok": true,
+      "error": null,
+      "model": "test",
+      "raw": ""
+    },
+    "variantName": "group-0",
+    "variantUrl": "/media/processed/test-group0.mp4"
+  },
+  {
+    "groupId": 1,
+    "label": "Group 1",
+    "summary": "speed slow_2; grade moody_dark; overlay text",
+    "changes": [
+      {
+        "tool": "trim_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip trim",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "change_speed_video",
+        "apply": true,
+        "reason": "Time-of-day or language pacing heuristic.",
+        "summary": "speed slow_2",
+        "args": {
+          "changeTag": "slow_2",
+          "changeNote": "Heuristic pace adjustment."
+        },
+        "source": "heuristic",
+        "applied": true,
+        "outputPath": "/Users/siddhantsood/Desktop/treehacks/tests/group_ads/test-group1-step1.mp4"
+      },
+      {
+        "tool": "color_grade_video",
+        "apply": true,
+        "reason": "Heuristic tone shift for audience/context.",
+        "summary": "grade moody_dark",
+        "args": {
+          "gradeStyle": "moody_dark",
+          "gradeNote": "Heuristic grade."
+        },
+        "source": "heuristic",
+        "applied": true,
+        "outputPath": "/Users/siddhantsood/Desktop/treehacks/tests/group_ads/test-group1-step2.mp4"
+      },
+      {
+        "tool": "blur_backdrop_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip blur",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "reframe_vertical_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip reframe",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "add_film_grain_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip grain",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "add_text_overlay_video",
+        "apply": true,
+        "reason": "Add light contextual copy for distinctiveness.",
+        "summary": "overlay text",
+        "args": {
+          "text": "A person enters a large dining r",
+          "x": 32,
+          "y": 32,
+          "fontSize": 36,
+          "start": 0,
+          "end": 2.5
+        },
+        "source": "heuristic",
+        "applied": false,
+        "error": "ffmpeg build missing drawtext filter. Install ffmpeg with libfreetype."
+      },
+      {
+        "tool": "replace_text_region_video",
+        "apply": false,
+        "reason": "Requires explicit region coordinates.",
+        "summary": "skip replace text",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "apply_combo",
+        "apply": false,
+        "reason": "Alternate combos to keep group variants distinct.",
+        "summary": "combo cinematic_grain",
+        "args": {
+          "comboName": "cinematic_grain"
+        },
+        "source": "heuristic",
+        "applied": false
+      }
+    ],
+    "research": {
+      "ok": true,
+      "audience": "Group 1. avg age 36. top genders: male, female. demo: Urban, Seattle WA, early-career, software engineer, renter, high-income; Urban, Boston MA, single, professional, high-income. interests: noise-canceling headphones, productivity apps, standing desk, cloud certification courses, indie coffee shops",
+      "insights": "Test mode: no research run.",
+      "citations": [],
+      "model": "test",
+      "transformations": []
+    },
+    "context": {
+      "groupId": 1,
+      "region": "Seattle",
+      "country": "US",
+      "timezone": "America/Los_Angeles",
+      "timeOfDay": "night",
+      "localHour": 22,
+      "englishSpeaking": true,
+      "isUrban": true,
+      "avgAge": 36,
+      "ageBucket": "35-44",
+      "topGenders": [
+        "male",
+        "female"
+      ],
+      "interests": [
+        "noise-canceling headphones",
+        "productivity apps",
+        "standing desk",
+        "cloud certification courses",
+        "indie coffee shops"
+      ]
+    },
+    "planner": {
+      "ok": true,
+      "error": null,
+      "model": "test",
+      "raw": ""
+    },
+    "variantName": "group-1",
+    "variantUrl": "/media/processed/test-group1.mp4"
+  },
+  {
+    "groupId": 2,
+    "label": "Group 2",
+    "summary": "speed slow_2; combo cinematic_grain",
+    "changes": [
+      {
+        "tool": "trim_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip trim",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "change_speed_video",
+        "apply": true,
+        "reason": "Time-of-day or language pacing heuristic.",
+        "summary": "speed slow_2",
+        "args": {
+          "changeTag": "slow_2",
+          "changeNote": "Heuristic pace adjustment."
+        },
+        "source": "heuristic",
+        "applied": true,
+        "outputPath": "/Users/siddhantsood/Desktop/treehacks/tests/group_ads/test-group2-step1.mp4"
+      },
+      {
+        "tool": "color_grade_video",
+        "apply": false,
+        "reason": "Heuristic tone shift for audience/context. Skipped due to combo overlap.",
+        "summary": "grade moody_dark",
+        "args": {
+          "gradeStyle": "moody_dark",
+          "gradeNote": "Heuristic grade."
+        },
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "blur_backdrop_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip blur",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "reframe_vertical_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip reframe",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "add_film_grain_video",
+        "apply": false,
+        "reason": "Not required by heuristics.",
+        "summary": "skip grain",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "add_text_overlay_video",
+        "apply": false,
+        "reason": "Add light contextual copy for distinctiveness.",
+        "summary": "overlay text",
+        "args": {
+          "text": "A person enters a large dining r",
+          "x": 32,
+          "y": 32,
+          "fontSize": 36,
+          "start": 0,
+          "end": 2.5
+        },
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "replace_text_region_video",
+        "apply": false,
+        "reason": "Requires explicit region coordinates.",
+        "summary": "skip replace text",
+        "args": {},
+        "source": "heuristic",
+        "applied": false
+      },
+      {
+        "tool": "apply_combo",
+        "apply": true,
+        "reason": "Alternate combos to keep group variants distinct.",
+        "summary": "combo cinematic_grain",
+        "args": {
+          "comboName": "cinematic_grain"
+        },
+        "source": "heuristic",
+        "applied": true,
+        "outputPath": "/Users/siddhantsood/Desktop/treehacks/tests/group_ads/test-group2-step2.mp4"
+      }
+    ],
+    "research": {
+      "ok": true,
+      "audience": "Group 2. avg age 38. top genders: male, female. demo: Urban, Chicago IL, cohabiting, marketing associate, renter, mid-income; Suburban, Plano TX, married, parent of two, homeowner, mid-income. interests: meal prep services, compact furniture, boutique fitness classes, weekend city trips, pet-friendly apartments",
+      "insights": "Test mode: no research run.",
+      "citations": [],
+      "model": "test",
+      "transformations": []
+    },
+    "context": {
+      "groupId": 2,
+      "region": "Chicago",
+      "country": "US",
+      "timezone": "America/Chicago",
+      "timeOfDay": "night",
+      "localHour": 0,
+      "englishSpeaking": true,
+      "isUrban": true,
+      "avgAge": 38,
+      "ageBucket": "35-44",
+      "topGenders": [
+        "male",
+        "female"
+      ],
+      "interests": [
+        "meal prep services",
+        "compact furniture",
+        "boutique fitness classes",
+        "weekend city trips",
+        "pet-friendly apartments"
+      ]
+    },
+    "planner": {
+      "ok": true,
+      "error": null,
+      "model": "test",
+      "raw": ""
+    },
+    "variantName": "group-2",
+    "variantUrl": "/media/processed/test-group2.mp4"
+  }
+]
