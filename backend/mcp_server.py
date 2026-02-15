@@ -2,7 +2,7 @@
 MCP Server for Video Editor — exposes tools that route all requests through
 the orchestrator agent (ai_agents/orchestrator.py).
 
-Poke user → Poke AI → MCP edit_video → run_orchestrator_agent → OpenAI → tools → FFmpeg
+Poke user -> Poke AI -> MCP edit_video -> run_orchestrator_agent -> OpenAI -> tools -> FFmpeg
 
 Local dev:
     python mcp_server.py
@@ -14,12 +14,15 @@ Cloud (Render):
 
 import json
 import os
+import traceback
 import urllib.request
 import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import FileResponse, JSONResponse
 
 from ai_agents.orchestrator import run_orchestrator_agent
 
@@ -40,6 +43,17 @@ for _dir in (ORIGINAL_DIR, PROCESSED_DIR, ANALYSIS_DIR):
     _dir.mkdir(parents=True, exist_ok=True)
 
 # ---------------------------------------------------------------------------
+# Base URL for download links
+# ---------------------------------------------------------------------------
+
+RENDER_URL = os.getenv("RENDER_EXTERNAL_URL", "")  # e.g. https://adapt-q15d.onrender.com
+if _cloud and not RENDER_URL:
+    # Fallback — user can set RENDER_EXTERNAL_URL in Render dashboard
+    RENDER_URL = "https://adapt-q15d.onrender.com"
+
+LOCAL_BASE = "http://localhost:{port}"
+
+# ---------------------------------------------------------------------------
 # FastMCP app
 # ---------------------------------------------------------------------------
 
@@ -49,6 +63,13 @@ if _cloud:
     MCP_PORT = int(os.getenv("PORT", "10000"))
 else:
     MCP_PORT = int(os.getenv("MCP_PORT", "8765"))
+
+
+def _base_url() -> str:
+    if _cloud and RENDER_URL:
+        return RENDER_URL
+    return LOCAL_BASE.format(port=MCP_PORT)
+
 
 mcp = FastMCP(
     "ADAPT Video Editor",
@@ -61,11 +82,32 @@ mcp = FastMCP(
         "2. Call edit_video with the video source (URL or filename) and a "
         "   natural language description of the edits.\n\n"
         "The AI orchestrator will figure out which tools to use (speed change, "
-        "color grade, trim, text overlay, reframe, film grain, combos, etc.)."
+        "color grade, trim, text overlay, reframe, film grain, combos, etc.).\n\n"
+        "After editing, you'll receive a download URL for the processed video."
     ),
     host="0.0.0.0",
     port=MCP_PORT,
 )
+
+# ---------------------------------------------------------------------------
+# File download endpoint  (serves processed videos over HTTP)
+# ---------------------------------------------------------------------------
+
+
+@mcp.custom_route("/files/{filename}", methods=["GET"], name="download_file")
+async def download_file(request: Request) -> FileResponse | JSONResponse:
+    filename = request.path_params["filename"]
+    # Sanitize — only allow files from processed dir
+    safe_name = Path(filename).name
+    file_path = PROCESSED_DIR / safe_name
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(
+            str(file_path),
+            media_type="video/mp4",
+            filename=safe_name,
+        )
+    return JSONResponse({"error": f"File not found: {safe_name}"}, status_code=404)
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -80,7 +122,10 @@ def _resolve_input(video_source: str) -> str:
             ext = ".mp4"
         filename = f"{uuid.uuid4().hex}{ext}"
         local_path = ORIGINAL_DIR / filename
+        print(f"[download] Fetching {video_source} -> {local_path}")
         urllib.request.urlretrieve(video_source, str(local_path))
+        size_mb = local_path.stat().st_size / (1024 * 1024)
+        print(f"[download] Saved {size_mb:.1f} MB")
         return str(local_path)
 
     p = Path(video_source)
@@ -103,6 +148,23 @@ def _output_path(label: str) -> str:
     return str(PROCESSED_DIR / filename)
 
 
+def _download_url(file_path: str) -> str:
+    """Build a public download URL for a processed file."""
+    name = Path(file_path).name
+    return f"{_base_url()}/files/{name}"
+
+
+def _verify_output(file_path: str) -> dict:
+    """Check that the output file exists and has content."""
+    p = Path(file_path)
+    if not p.exists():
+        return {"verified": False, "error": "Output file was not created"}
+    size = p.stat().st_size
+    if size < 1000:  # less than 1KB is suspicious
+        return {"verified": False, "error": f"Output file is suspiciously small ({size} bytes)"}
+    return {"verified": True, "size_mb": round(size / (1024 * 1024), 2)}
+
+
 # ---------------------------------------------------------------------------
 # MCP Tools
 # ---------------------------------------------------------------------------
@@ -111,7 +173,7 @@ def _output_path(label: str) -> str:
 @mcp.tool()
 def list_videos() -> str:
     """List all available videos (originals and processed results).
-    Call this FIRST to see what videos are on the user's machine before editing.
+    Call this FIRST to see what videos are available before editing.
     Use the filename from the output as video_source in other tools.
     """
     VIDEO_EXTS = {".mp4", ".mov", ".avi", ".mkv", ".webm", ".m4v"}
@@ -127,7 +189,7 @@ def list_videos() -> str:
             size_mb = f.stat().st_size / (1024 * 1024)
             lines.append(f"  - {f.name}  ({size_mb:.1f} MB)")
     else:
-        lines.append("No original videos found.")
+        lines.append("No original videos found. Provide a video URL to edit_video.")
 
     processed = sorted(
         f for f in PROCESSED_DIR.iterdir()
@@ -137,7 +199,8 @@ def list_videos() -> str:
         lines.append("\nProcessed videos:")
         for f in processed:
             size_mb = f.stat().st_size / (1024 * 1024)
-            lines.append(f"  - {f.name}  ({size_mb:.1f} MB)")
+            dl = _download_url(str(f))
+            lines.append(f"  - {f.name}  ({size_mb:.1f} MB)  Download: {dl}")
 
     return "\n".join(lines)
 
@@ -166,34 +229,74 @@ def edit_video(video_source: str, instructions: str) -> str:
         video_source: Public video URL (https://...) or filename from list_videos.
         instructions: Natural language description of what you want done.
     """
-    inp = _resolve_input(video_source)
+    # --- Step 1: Resolve input ---
+    try:
+        inp = _resolve_input(video_source)
+    except FileNotFoundError as e:
+        return f"Error: {e}"
+    except Exception as e:
+        return f"Error downloading/finding video: {e}"
+
+    # Verify input exists
+    inp_size = Path(inp).stat().st_size / (1024 * 1024)
+    print(f"[edit] Input: {inp} ({inp_size:.1f} MB)")
+    print(f"[edit] Instructions: {instructions}")
+
     out = _output_path("edited")
 
-    result = run_orchestrator_agent(
-        request=instructions,
-        input_path=inp,
-        output_path=out,
-    )
+    # --- Step 2: Run orchestrator ---
+    try:
+        result = run_orchestrator_agent(
+            request=instructions,
+            input_path=inp,
+            output_path=out,
+        )
+    except Exception as e:
+        print(f"[edit] Orchestrator error: {traceback.format_exc()}")
+        return f"Error during processing: {e}"
 
-    # result is the last tool output dict from the orchestrator
+    # --- Step 3: Parse orchestrator result ---
+    tool_used = "unknown"
+    parsed = {}
+
     if isinstance(result, dict) and result.get("role") == "tool":
         content = result.get("content", "{}")
         try:
             parsed = json.loads(content)
         except (json.JSONDecodeError, TypeError):
             parsed = {"raw": content}
+        output_file = parsed.get("outputPath", out)
+    elif isinstance(result, dict) and result.get("error"):
+        return f"Error: {result['error']}"
+    else:
+        return f"Unexpected orchestrator result: {json.dumps(result)}"
 
-        output_path = parsed.get("outputPath", out)
-        lines = ["Edit complete."]
-        if parsed.get("ok"):
-            lines.append(f"Output: {output_path}")
-        if parsed.get("error"):
-            lines.append(f"Error: {parsed['error']}")
-        if parsed.get("jobId"):
-            lines.append(f"Generative job submitted: {parsed['jobId']}")
-        return "\n".join(lines)
+    # --- Step 4: Verify the output file actually exists ---
+    check = _verify_output(output_file)
+    if not check["verified"]:
+        print(f"[edit] VERIFICATION FAILED: {check['error']}")
+        return (
+            f"Processing reported success but verification failed: {check['error']}. "
+            f"The edit may not have been applied correctly."
+        )
 
-    return f"Orchestrator result: {json.dumps(result)}"
+    # --- Step 5: Build response with download URL ---
+    dl_url = _download_url(output_file)
+    size_mb = check["size_mb"]
+
+    lines = [
+        "Edit complete!",
+        f"Output size: {size_mb} MB",
+        f"Download your edited video: {dl_url}",
+    ]
+
+    if parsed.get("error"):
+        lines.append(f"Warning: {parsed['error']}")
+    if parsed.get("jobId"):
+        lines.append(f"Generative job submitted: {parsed['jobId']}")
+
+    print(f"[edit] Success: {dl_url} ({size_mb} MB)")
+    return "\n".join(lines)
 
 
 # ---------------------------------------------------------------------------
@@ -203,13 +306,17 @@ def edit_video(video_source: str, instructions: str) -> str:
 if __name__ == "__main__":
     print(f"Starting ADAPT Video Editor MCP server on port {MCP_PORT}...")
     print(f"Storage: {STORAGE_DIR}")
+    print(f"Base URL: {_base_url()}")
     print(f"\nTools available:")
     print(f"  - list_videos   -- See available videos")
     print(f"  - edit_video    -- Edit video via AI orchestrator (natural language)")
+    print(f"\nEndpoints:")
+    print(f"  - /mcp           -- MCP protocol (for Poke)")
+    print(f"  - /files/{{name}} -- Download processed videos")
     if _cloud:
         print(f"\nRunning in cloud mode (Render).")
-        print(f"Add this in Poke settings → Connections → Create Integration:")
-        print(f"  Server URL: https://<your-service>.onrender.com/mcp")
+        print(f"Add in Poke → Settings → Connections → Create Integration:")
+        print(f"  Server URL: {_base_url()}/mcp")
     else:
         print(f"\nLocal dev — in another terminal, run:")
         print(f'  npx poke tunnel http://localhost:{MCP_PORT}/mcp -n "Video Editor"')
