@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Pricing } from "@/components/landing/pricing";
 import { Input } from "@/components/ui/input";
 import { setToken } from "@/lib/auth";
+import { api } from "@/lib/api";
 
 const ads = [
   { title: "Doritos", market: "SF", year: "2026", video: "/ads/doritos_sb.webm" },
@@ -73,12 +74,12 @@ export default function Home() {
     setLoginError("");
     setLoginLoading(true);
     try {
-      if (email === "demo@adapt.com" && password === "password") {
-        setToken("fake-jwt-token");
-        router.push("/console");
-      } else {
-        setLoginError("Invalid email or password");
-      }
+      const response =
+        loginMode === "login"
+          ? await api.auth.login(email, password)
+          : await api.auth.register(email, password);
+      setToken(response.token);
+      router.push("/console");
     } catch (err) {
       setLoginError(err instanceof Error ? err.message : "Something went wrong");
     } finally {

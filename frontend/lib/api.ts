@@ -4,6 +4,7 @@ import type {
   Campaign,
   Video,
   AnalysisData,
+  EmbeddingsPoint,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
@@ -64,12 +65,23 @@ export const api = {
       request<{ ok: boolean; videos: Video[] }>("/api/videos"),
     get: (id: string) =>
       request<{ ok: boolean; video: Campaign }>(`/api/videos/${id}`),
-    upload: (file: File) => {
+    upload: (
+      file: File,
+      profilesFile?: File | null,
+      options?: { name?: string; productDesc?: string; goal?: string }
+    ) => {
       const formData = new FormData();
       formData.append("video", file);
+      if (profilesFile) {
+        formData.append("profiles", profilesFile);
+      }
+      if (options?.name) formData.append("name", options.name);
+      if (options?.productDesc) formData.append("product_desc", options.productDesc);
+      if (options?.goal) formData.append("goal", options.goal);
       return request<{
         ok: boolean;
         videoId: string;
+        name?: string;
         originalUrl: string;
         processedUrl: string;
         analysisUrl: string;
@@ -89,8 +101,18 @@ export const api = {
         method: "POST",
         body: JSON.stringify(options ?? {}),
       }),
+    delete: (id: string) =>
+      request<{ ok: boolean }>(`/api/videos/${id}`, {
+        method: "DELETE",
+      }),
   },
   analysis: {
     get: (url: string) => request<AnalysisData>(url),
+  },
+  embeddings: {
+    get: (id: string) =>
+      request<{ ok: boolean; points: EmbeddingsPoint[]; count: number; source?: string }>(
+        `/api/videos/${id}/embeddings`
+      ),
   },
 };

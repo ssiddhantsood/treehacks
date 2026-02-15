@@ -9,6 +9,7 @@ from db import (
     create_user,
     create_video,
     get_user_by_email,
+    init_db,
     list_videos_for_user,
 )
 
@@ -37,8 +38,8 @@ def _write_json(path: Path, payload: dict) -> None:
 
 
 def seed_demo_data() -> dict:
-    email = os.getenv("DEMO_EMAIL", "demo@treehacks.local")
-    password = os.getenv("DEMO_PASSWORD", "demo1234")
+    email = os.getenv("DEMO_EMAIL", "demo@adapt.com")
+    password = os.getenv("DEMO_PASSWORD", "password")
 
     user = get_user_by_email(email)
     if not user:
@@ -99,7 +100,7 @@ def seed_demo_data() -> dict:
         },
     ]
 
-    for campaign in campaigns:
+    for index, campaign in enumerate(campaigns, start=1):
         video_id = uuid4().hex
         original_filename = f"{video_id}.mp4"
         analysis_filename = f"{video_id}.json"
@@ -121,6 +122,7 @@ def seed_demo_data() -> dict:
             original_url=original_url,
             analysis_url=analysis_url,
             metadata={"speedFactor": campaign["speed"], "combos": campaign["combos"]},
+            name=f"Demo Campaign {index}",
         )
 
         for variant in variants:
@@ -136,3 +138,9 @@ def seed_demo_data() -> dict:
         )
 
     return {"seeded": True, "user_id": user_id, "count": len(campaigns)}
+
+
+if __name__ == "__main__":
+    init_db()
+    result = seed_demo_data()
+    print(json.dumps(result, indent=2))

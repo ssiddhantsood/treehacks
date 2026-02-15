@@ -1,4 +1,5 @@
 import asyncio
+import csv
 import json
 import os
 import random
@@ -10,11 +11,12 @@ from pathlib import Path
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+import numpy as np
 
 from ai_agents.agent import COMBOS, run_combo_agent, run_speedup_agent
 from ai_agents.action_timeline import analyze_video
@@ -26,6 +28,7 @@ from db import (
     create_user,
     create_video,
     delete_variants_by_prefix,
+    delete_video,
     get_user_by_email,
     get_user_by_id,
     get_video_with_variants,
@@ -34,11 +37,13 @@ from db import (
     update_video_analysis_url,
     update_video_metadata,
 )
+from cluster_profiles import _embed_texts, _kmeans
 
 load_dotenv()
 
 DEBUG = os.getenv("DEBUG", "0") == "1"
 VARIANT_CONCURRENCY = int(os.getenv("VIDEO_VARIANT_CONCURRENCY", "1") or "1")
+EMBEDDINGS_INPUT_TYPE = os.getenv("EMBEDDINGS_INPUT_TYPE", "CLUSTERING")
 
 BASE_DIR = Path(__file__).resolve().parent
 STORAGE_DIR = BASE_DIR / "storage"
@@ -46,8 +51,9 @@ TMP_DIR = STORAGE_DIR / "tmp"
 ORIGINAL_DIR = STORAGE_DIR / "original"
 PROCESSED_DIR = STORAGE_DIR / "processed"
 ANALYSIS_DIR = STORAGE_DIR / "analysis"
+PROFILES_DIR = STORAGE_DIR / "profiles"
 
-for folder in (TMP_DIR, ORIGINAL_DIR, PROCESSED_DIR, ANALYSIS_DIR):
+for folder in (TMP_DIR, ORIGINAL_DIR, PROCESSED_DIR, ANALYSIS_DIR, PROFILES_DIR):
     folder.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI()
@@ -72,6 +78,76 @@ def _coerce_int(value) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
+
+
+def _has_embedding_env() -> bool:
+    return bool(
+        os.getenv("ELASTICSEARCH_ENDPOINT")
+        and os.getenv("ELASTIC_API_KEY")
+        and os.getenv("ELASTIC_INFERENCE_ID")
+    )
+
+
+def _load_profile_rows(csv_path: Path) -> list[dict[str, str]]:
+    with csv_path.open(newline="", encoding="utf-8") as f:
+        return [row for row in csv.DictReader(f)]
+
+
+def _row_to_text(row: dict[str, str]) -> str:
+    return (
+        f"age: {row.get('age', '')}; "
+        f"gender: {row.get('gender', '')}; "
+        f"demographic: {row.get('demographic_info', '')}; "
+        f"previous_search_history: {row.get('previous_search_history', '')}"
+    )
+
+
+def _simple_profile_vectors(rows: list[dict[str, str]]) -> np.ndarray:
+    vectors = []
+    for row in rows:
+        age_raw = row.get("age") or ""
+        try:
+            age = float(age_raw)
+        except ValueError:
+            age = 0.0
+        gender = (row.get("gender") or "").strip().lower()
+        if gender.startswith("m"):
+            gender_val = 1.0
+        elif gender.startswith("f"):
+            gender_val = -1.0
+        else:
+            gender_val = 0.0
+        demo = (row.get("demographic_info") or "")
+        history = (row.get("previous_search_history") or "")
+        demo_len = len(demo) / 100.0
+        history_len = len(history) / 100.0
+        interest_count = max(1, len([c for c in history.split(";") if c.strip()])) / 10.0
+        vectors.append([age / 100.0, gender_val, demo_len, history_len, interest_count])
+    return np.array(vectors, dtype=np.float32)
+
+
+def _project_2d(vectors: np.ndarray) -> np.ndarray:
+    if vectors.size == 0:
+        return np.zeros((0, 2), dtype=np.float32)
+    if vectors.shape[0] == 1:
+        return np.array([[0.5, 0.5]], dtype=np.float32)
+    centered = vectors - vectors.mean(axis=0, keepdims=True)
+    if centered.shape[1] == 1:
+        coords = np.concatenate([centered, np.zeros((centered.shape[0], 1), dtype=np.float32)], axis=1)
+    else:
+        _, _, vt = np.linalg.svd(centered, full_matrices=False)
+        components = vt[:2].T
+        coords = centered @ components
+    return coords.astype(np.float32)
+
+
+def _normalize_points(coords: np.ndarray) -> np.ndarray:
+    if coords.size == 0:
+        return coords
+    mins = coords.min(axis=0)
+    maxs = coords.max(axis=0)
+    span = np.where(maxs - mins == 0, 1.0, maxs - mins)
+    return (coords - mins) / span
 
 
 def get_current_user(credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]):
@@ -145,8 +221,106 @@ async def get_video(video_id: str, user=Depends(get_current_user)):
     return {"ok": True, "video": video}
 
 
+@app.delete("/api/videos/{video_id}")
+async def delete_video_route(video_id: str, user=Depends(get_current_user)):
+    video = get_video_with_variants(video_id, user["id"])
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    original_url = video.get("originalUrl") or ""
+    analysis_url = video.get("analysisUrl") or ""
+    variant_urls = [variant.get("url") for variant in (video.get("variants") or []) if variant.get("url")]
+
+    def _safe_unlink(path: Path) -> None:
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            return
+        except Exception:
+            return
+
+    if original_url:
+        _safe_unlink(ORIGINAL_DIR / Path(original_url).name)
+    if analysis_url:
+        _safe_unlink(ANALYSIS_DIR / Path(analysis_url).name)
+    for url in variant_urls:
+        _safe_unlink(PROCESSED_DIR / Path(url).name)
+
+    profiles_path = PROFILES_DIR / f"{video_id}.csv"
+    _safe_unlink(profiles_path)
+
+    delete_video(video_id, user["id"])
+    return {"ok": True}
+
+
+@app.get("/api/videos/{video_id}/embeddings")
+async def get_embeddings(video_id: str, user=Depends(get_current_user)):
+    video = get_video_with_variants(video_id, user["id"])
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+
+    profiles_path = PROFILES_DIR / f"{video_id}.csv"
+    if not profiles_path.exists():
+        raise HTTPException(status_code=404, detail="Profiles not found")
+
+    rows = _load_profile_rows(profiles_path)
+    if not rows:
+        return {"ok": True, "points": [], "count": 0}
+
+    metadata = video.get("metadata") or {}
+    group_count = _coerce_int(metadata.get("groupCount")) or 3
+    group_count = max(1, min(group_count, len(rows)))
+
+    if _has_embedding_env():
+        texts = [_row_to_text(row) for row in rows]
+        embeddings = _embed_texts(
+            texts,
+            endpoint=os.getenv("ELASTICSEARCH_ENDPOINT") or "",
+            api_key=os.getenv("ELASTIC_API_KEY") or "",
+            inference_id=os.getenv("ELASTIC_INFERENCE_ID") or "",
+            input_type=EMBEDDINGS_INPUT_TYPE,
+        )
+        vectors = np.array(embeddings, dtype=np.float32)
+        source = "embeddings"
+    else:
+        vectors = _simple_profile_vectors(rows)
+        source = "heuristic"
+
+    coords = _project_2d(vectors)
+    normalized = _normalize_points(coords)
+    labels, _ = _kmeans(vectors, group_count)
+
+    points = []
+    for idx, row in enumerate(rows):
+        summary = ", ".join(
+            [
+                row.get("age", "") or "",
+                row.get("gender", "") or "",
+                row.get("demographic_info", "") or "",
+            ]
+        ).strip(" ,")
+        points.append(
+            {
+                "x": round(float(normalized[idx][0]), 5),
+                "y": round(float(normalized[idx][1]), 5),
+                "groupId": int(labels[idx]),
+                "index": idx,
+                "summary": summary,
+            }
+        )
+
+    return {"ok": True, "points": points, "count": len(points), "source": source}
+
+
 @app.post("/api/transform")
-async def transform(video: UploadFile = File(...), user=Depends(get_current_user)):
+async def transform(
+    video: UploadFile = File(...),
+    profiles: UploadFile | None = File(None),
+    name: str | None = Form(None),
+    product_desc: str | None = Form(None),
+    goal: str | None = Form(None),
+    user=Depends(get_current_user),
+):
     if not video:
         raise HTTPException(status_code=400, detail="No file uploaded")
 
@@ -159,6 +333,15 @@ async def transform(video: UploadFile = File(...), user=Depends(get_current_user
         shutil.copyfileobj(video.file, buffer)
 
     await video.close()
+
+    if profiles:
+        profiles_suffix = Path(profiles.filename or "").suffix.lower()
+        if profiles_suffix and profiles_suffix != ".csv":
+            raise HTTPException(status_code=400, detail="Profiles file must be a CSV")
+        profiles_path = PROFILES_DIR / f"{upload_id}.csv"
+        with profiles_path.open("wb") as buffer:
+            shutil.copyfileobj(profiles.file, buffer)
+        await profiles.close()
 
     processed_filename = f"{upload_id}-speed.mp4"
     processed_path = PROCESSED_DIR / processed_filename
@@ -231,6 +414,10 @@ async def transform(video: UploadFile = File(...), user=Depends(get_current_user
         "speedFactor": 1.05,
         "combos": chosen_combos,
     }
+    if product_desc:
+        metadata_payload["productDesc"] = product_desc
+    if goal:
+        metadata_payload["goal"] = goal
     if isinstance(analysis_result, dict):
         metadata_payload["analysis"] = {
             "perSecondDescriptions": analysis_result.get("per_second_descriptions", []),
@@ -244,6 +431,7 @@ async def transform(video: UploadFile = File(...), user=Depends(get_current_user
         original_url=original_url,
         analysis_url=analysis_url,
         metadata=metadata_payload,
+        name=name,
     )
 
     for variant in variants:
@@ -252,6 +440,7 @@ async def transform(video: UploadFile = File(...), user=Depends(get_current_user
     return {
         "ok": True,
         "videoId": upload_id,
+        "name": name,
         "originalUrl": original_url,
         "processedUrl": f"/media/processed/{processed_filename}",
         "analysisUrl": analysis_url,
@@ -298,6 +487,9 @@ async def generate_ads(video_id: str, payload: dict | None = None, user=Depends(
         analysis_url = f"/media/analysis/{analysis_filename}"
         update_video_analysis_url(video_id, user["id"], analysis_url)
 
+    profiles_path = PROFILES_DIR / f"{video_id}.csv"
+    csv_path = str(profiles_path) if profiles_path.exists() else str(BASE_DIR / "mock_profiles.csv")
+
     try:
         variants, group_metadata = await run_in_threadpool(
             generate_group_variants,
@@ -305,7 +497,7 @@ async def generate_ads(video_id: str, payload: dict | None = None, user=Depends(
             original_path,
             analysis_data,
             PROCESSED_DIR,
-            str(BASE_DIR / "mock_profiles.csv"),
+            csv_path,
             group_count,
             max_edits,
         )

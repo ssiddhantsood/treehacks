@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { Video } from "@/lib/types";
 import { getMockCampaigns } from "@/lib/mock";
+import { TriangleAlert, X } from "lucide-react";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
+
+function mediaUrl(path: string) {
+  if (path.startsWith("/ads/")) return path;
+  return `${API_BASE}${path}`;
+}
 
 interface Profile {
   age: string;
@@ -48,6 +56,7 @@ export default function ConsolePage() {
   const [productDesc, setProductDesc] = useState("");
   const [goal, setGoal] = useState("");
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [selectedProfilesFile, setSelectedProfilesFile] = useState<File | null>(null);
   const [clusterCount, setClusterCount] = useState(3);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -60,6 +69,11 @@ export default function ConsolePage() {
   // Grid layout state
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const pendingPreviews = useRef<Record<string, string>>({});
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const handleMouseEnter = (id: string, index: number) => {
     setHoveredCard(index);
@@ -119,6 +133,7 @@ export default function ConsolePage() {
     setProductDesc("");
     setGoal("");
     setProfiles([]);
+    setSelectedProfilesFile(null);
     setClusterCount(3);
     setSubmitError("");
   };
@@ -136,6 +151,7 @@ export default function ConsolePage() {
     if (e instanceof File) file = e;
     else file = e?.target.files?.[0] || csvInputRef.current?.files?.[0];
     if (!file) return;
+    setSelectedProfilesFile(file);
     setProfiles(parseCSV(await file.text()));
   };
 
@@ -158,21 +174,131 @@ export default function ConsolePage() {
     setSubmitting(true);
     setSubmitError("");
     try {
-      const res = await api.videos.upload(selectedFile);
-      setSubmitting(false);
+      const pendingId = `pending-${Date.now()}`;
+      const previewUrl = URL.createObjectURL(selectedFile);
+      pendingPreviews.current[pendingId] = previewUrl;
+      setPendingIds((prev) => new Set(prev).add(pendingId));
+      setVideos((prev) => [
+        {
+          id: pendingId,
+          name: campaignName || "Processing campaign",
+          originalUrl: previewUrl,
+          createdAt: new Date().toISOString(),
+          variants: [],
+          variantsCount: 0,
+        },
+        ...prev,
+      ]);
       closeModal();
-      router.push(`/console/campaigns/${res.videoId}`);
+
+      const res = await api.videos.upload(selectedFile, selectedProfilesFile, {
+        name: campaignName || undefined,
+        productDesc: productDesc || undefined,
+        goal: goal || undefined,
+      });
+      setVideos((prev) => [
+        {
+          id: res.videoId,
+          name: res.name || campaignName || undefined,
+          originalUrl: res.originalUrl,
+          analysisUrl: res.analysisUrl,
+          createdAt: new Date().toISOString(),
+          variants: res.variants || [],
+        },
+        ...prev.filter((video) => video.id !== pendingId),
+      ]);
+      const pendingUrl = pendingPreviews.current[pendingId];
+      if (pendingUrl) {
+        URL.revokeObjectURL(pendingUrl);
+        delete pendingPreviews.current[pendingId];
+      }
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(pendingId);
+        return next;
+      });
+      setSubmitting(false);
     } catch (err) {
       setSubmitting(false);
       setSubmitError(err instanceof Error ? err.message : "Upload failed");
     }
   };
 
+  const handleDeleteCampaign = (id: string) => {
+    setDeleteError("");
+    setPendingDeleteId(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteCampaign = async () => {
+    if (!pendingDeleteId) return;
+    setDeleteError("");
+    try {
+      await api.videos.delete(pendingDeleteId);
+      setVideos((prev) => prev.filter((video) => video.id !== pendingDeleteId));
+      setShowDeleteConfirm(false);
+      setPendingDeleteId(null);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Delete failed");
+    }
+  };
+
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  const totalVariants = videos.reduce((acc, v) => acc + (v.variants?.length || 0), 0);
+  const totalVariants = videos.reduce((acc, v) => acc + (v.variants?.length ?? v.variantsCount ?? 0), 0);
 
   return (
     <div className="h-full w-full overflow-hidden bg-background">
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[9999] bg-black/30 flex items-center justify-center">
+          <div className="w-full max-w-sm rounded-2xl bg-background p-7 shadow-2xl ring-1 ring-border/60">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Confirm deletion</span>
+                <h3 className="mt-3 text-lg font-semibold">Delete campaign?</h3>
+                <p className="mt-2 text-sm text-muted">
+                  This removes the campaign, variants, and analysis. This cannot be undone.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setPendingDeleteId(null);
+                }}
+                className="text-muted hover:text-foreground transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="mt-5 flex items-center gap-3 rounded-xl border border-amber-200/40 bg-amber-500/5 px-3 py-2">
+              <div className="w-7 h-7 rounded-full bg-amber-500/10 border border-amber-400/40 flex items-center justify-center">
+                <TriangleAlert size={14} className="text-amber-500" />
+              </div>
+              <span className="text-xs text-muted">If you want to keep variants, export them before deleting.</span>
+            </div>
+            {deleteError && <p className="mt-4 text-xs text-red-400">{deleteError}</p>}
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setPendingDeleteId(null);
+                }}
+                className="px-4 py-2 text-xs text-muted hover:text-foreground transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteCampaign}
+                className="px-4 py-2 text-xs font-medium bg-foreground text-background rounded-full hover:bg-foreground/90 cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ═══════════════════════════════════════════════════════════════════════
           MODAL - Full Redesign with Steps
       ═══════════════════════════════════════════════════════════════════════ */}
@@ -454,7 +580,10 @@ export default function ConsolePage() {
                             </div>
                           </div>
                           <button
-                            onClick={() => setProfiles([])}
+                            onClick={() => {
+                              setProfiles([]);
+                              setSelectedProfilesFile(null);
+                            }}
                             className="text-xs text-muted hover:text-foreground cursor-pointer"
                           >
                             Remove
@@ -468,18 +597,18 @@ export default function ConsolePage() {
                             </span>
                             <span className="text-2xl font-bold">{clusterCount}</span>
                           </div>
-                          <input
-                            type="range"
-                            min={1}
-                            max={Math.min(profiles.length, 10)}
-                            value={clusterCount}
-                            onChange={(e) => setClusterCount(Number(e.target.value))}
-                            className="w-full h-2 appearance-none bg-foreground/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground"
-                          />
-                          <div className="flex justify-between mt-2 text-xs text-muted font-mono">
-                            <span>1</span>
-                            <span>{Math.min(profiles.length, 10)}</span>
-                          </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={Math.max(1, profiles.length)}
+                    value={clusterCount}
+                    onChange={(e) => setClusterCount(Number(e.target.value))}
+                    className="w-full h-2 appearance-none bg-foreground/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground"
+                  />
+                  <div className="flex justify-between mt-2 text-xs text-muted font-mono">
+                    <span>1</span>
+                    <span>{Math.max(1, profiles.length)}</span>
+                  </div>
                         </div>
 
                         <div className="border border-border rounded-2xl overflow-hidden">
@@ -617,24 +746,51 @@ export default function ConsolePage() {
             <div ref={recentSectionRef} className="mt-10 flex-1 min-h-0 flex flex-col relative">
             <span className="font-mono text-[10px] uppercase tracking-widest text-muted">Recent</span>
             <div className="mt-4 space-y-0 overflow-y-auto flex-1 -mr-4 pr-4">
-              {videos.slice(0, 6).map((video, i) => (
-                <Link
-                  key={video.id}
-                  href={`/console/campaigns/${video.id}`}
-                  onMouseEnter={() => setHoveredCard(i)}
-                  onMouseLeave={() => setHoveredCard(null)}
-                  className={`flex items-center gap-3 py-3 border-b border-border transition-colors ${
-                    hoveredCard === i ? "bg-foreground/2" : ""
-                  }`}
-                >
-                  <span className="font-mono text-[10px] text-muted w-5">{String(i + 1).padStart(2, "0")}</span>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium block truncate">{video.name || `Campaign ${video.id.slice(0, 8)}`}</span>
-                    <span className="text-[10px] text-muted">{video.variants?.length || 0} variants</span>
-                  </div>
-                  <span className="text-[10px] text-muted">{formatDate(video.createdAt)}</span>
-                </Link>
-              ))}
+              {videos.slice(0, 6).map((video, i) => {
+                const isPending = pendingIds.has(video.id);
+                return (
+                  <Link
+                    key={video.id}
+                    href={`/console/campaigns/${video.id}`}
+                    onClick={(e) => {
+                      if (isPending) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredCard(i)}
+                    onMouseLeave={() => setHoveredCard(null)}
+                    className={`flex items-center gap-3 py-3 border-b border-border transition-colors ${
+                      hoveredCard === i ? "bg-foreground/2" : ""
+                    } ${isPending ? "opacity-70" : ""}`}
+                  >
+                    <span className="font-mono text-[10px] text-muted w-5">{String(i + 1).padStart(2, "0")}</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium block truncate">{video.name || `Campaign ${video.id.slice(0, 8)}`}</span>
+                      <span className="text-[10px] text-muted">{video.variants?.length ?? video.variantsCount ?? 0} variants</span>
+                    </div>
+                  {isPending ? (
+                    <span className="flex items-center gap-2 text-[10px] text-muted">
+                      <span className="w-2.5 h-2.5 border-2 border-muted/40 border-t-foreground rounded-full animate-spin" />
+                      Processing
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-muted">{formatDate(video.createdAt)}</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteCampaign(video.id);
+                    }}
+                    className="ml-2 font-mono text-[9px] uppercase tracking-widest text-muted/70 hover:text-foreground transition-colors cursor-pointer"
+                  >
+                    Delete
+                  </button>
+                  </Link>
+                );
+              })}
             </div>
             <div className="absolute bottom-0 left-0 right-0 h-12 bg-linear-to-t from-background to-transparent pointer-events-none" />
           </div>
@@ -693,17 +849,17 @@ export default function ConsolePage() {
                         }}
                       >
                         <div
-                          className="relative w-full flex-1 overflow-hidden rounded-lg bg-neutral-900"
+                          className="relative w-full flex-1 overflow-hidden rounded-lg bg-neutral-900 isolate"
                         >
                             {video.originalUrl ? (
-                              <video
-                                ref={(el) => { if (el) videoRefs.current[video.id] = el; }}
-                                src={video.originalUrl}
-                                className="absolute inset-0 w-full h-full object-cover"
-                                loop
-                                muted
-                                playsInline
-                              />
+                                <video
+                                  ref={(el) => { if (el) videoRefs.current[video.id] = el; }}
+                                 src={mediaUrl(video.originalUrl)}
+                                 className="absolute inset-0 w-full h-full object-cover"
+                                 loop
+                                 muted
+                                 playsInline
+                               />
                             ) : (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-foreground/20">
@@ -716,12 +872,12 @@ export default function ConsolePage() {
                             <div className="absolute inset-0 bg-black/50 flex flex-col justify-between p-4 transition-opacity duration-300 group-hover:opacity-0">
                               <div />
                               <div className="flex flex-col items-center text-center gap-1">
-                                <span className="font-mono text-xs text-white font-medium tracking-wide drop-shadow-md">
-                                  {video.name || "Untitled"}
-                                </span>
-                                <span className="font-mono text-[10px] text-white/60 uppercase tracking-widest drop-shadow-md">
-                                  {video.variants?.length || 0} variants
-                                </span>
+                                 <span className="font-mono text-xs text-white font-medium tracking-wide drop-shadow-md">
+                                   {video.name || "Untitled"}
+                                 </span>
+                                 <span className="font-mono text-[10px] text-white/60 uppercase tracking-widest drop-shadow-md">
+                                   {video.variants?.length ?? video.variantsCount ?? 0} variants
+                                 </span>
                               </div>
                               <div className="flex justify-between items-end">
                                 <span className="font-mono text-[9px] text-white/50 uppercase tracking-widest drop-shadow-md">
@@ -733,6 +889,7 @@ export default function ConsolePage() {
                               </div>
                             </div>
 
+
                             {/* Hover overlay — fades in on hover */}
                             <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                             <div className="absolute inset-x-0 bottom-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between items-end pointer-events-none">
@@ -740,7 +897,7 @@ export default function ConsolePage() {
                                 {video.name || "Untitled"}
                               </span>
                               <span className="font-mono text-[10px] text-white/80 uppercase tracking-widest drop-shadow-sm">
-                                {video.variants?.length || 0} VARIANTS
+                                {video.variants?.length ?? video.variantsCount ?? 0} VARIANTS
                               </span>
                             </div>
                         </div>

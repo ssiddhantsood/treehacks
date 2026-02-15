@@ -15,6 +15,7 @@ export interface Video {
   analysisUrl?: string;
   createdAt: string;
   variants?: VideoVariant[];
+  variantsCount?: number;
 }
 
 export interface Campaign {
@@ -89,6 +90,14 @@ export interface TimelineEvent {
 export interface AnalysisData {
   events: TimelineEvent[];
   captions: { id: string; caption: string }[];
+}
+
+export interface EmbeddingsPoint {
+  x: number;
+  y: number;
+  groupId: number;
+  index: number;
+  summary?: string;
 }
 
 export interface AuthResponse {
