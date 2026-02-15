@@ -195,6 +195,7 @@ export default function ConsolePage() {
         name: campaignName || undefined,
         productDesc: productDesc || undefined,
         goal: goal || undefined,
+        groupCount: clusterCount || undefined,
       });
       setVideos((prev) => [
         {

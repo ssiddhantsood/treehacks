@@ -20,6 +20,7 @@ LUCY_GUIDANCE_SCALE = float(os.getenv("LUCY_GUIDANCE_SCALE", "7.0"))
 LUCY_STRENGTH = float(os.getenv("LUCY_STRENGTH", "0.85"))
 LUCY_NUM_INFERENCE_STEPS = int(os.getenv("LUCY_NUM_INFERENCE_STEPS", "40"))
 LUCY_FPS = int(os.getenv("LUCY_FPS", "24"))
+LUCY_SKIP = os.getenv("LUCY_SKIP", "1").strip().lower() in {"1", "true", "yes", "y"}
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -90,8 +91,29 @@ TOOLS = [
 
 SYSTEM_PROMPT = (
     "You are a generative video agent. "
-    "Always call the appropriate tool to run a Lucy video-to-video edit."
+    "Always call exactly one tool to run a Lucy video-to-video edit. "
+    "Never call more than one tool per request."
 )
+
+
+def _skip_lucy(input_video: str, output_video: str) -> dict:
+    input_path = Path(input_video)
+    output_path = Path(output_video)
+    if not input_path.exists():
+        return {
+            "ok": False,
+            "error": "Lucy skipped but inputVideo was not found locally",
+            "detail": str(input_path),
+        }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(input_path, output_path)
+    return {
+        "ok": True,
+        "outputPath": str(output_path),
+        "skipped": True,
+        "reason": "Lucy disabled (LUCY_SKIP=1).",
+    }
+
 
 def _ensure_curl() -> str | None:
     return shutil.which("curl")
@@ -236,6 +258,8 @@ def submit_background_replace(args: dict) -> dict:
     output_video = args.get("outputVideo") or ""
     if not output_video:
         return {"ok": False, "error": "outputVideo is required"}
+    if LUCY_SKIP:
+        return _skip_lucy(video_url, output_video)
     payload = _lucy_payload(prompt, video_url, args.get("seed"))
     return _call_lucy(payload, output_video)
 
@@ -248,6 +272,8 @@ def submit_object_erase(args: dict) -> dict:
     output_video = args.get("outputVideo") or ""
     if not output_video:
         return {"ok": False, "error": "outputVideo is required"}
+    if LUCY_SKIP:
+        return _skip_lucy(video_url, output_video)
     payload = _lucy_payload(prompt, video_url, args.get("seed"))
     return _call_lucy(payload, output_video)
 
@@ -260,6 +286,8 @@ def submit_text_replace(args: dict) -> dict:
     output_video = args.get("outputVideo") or ""
     if not output_video:
         return {"ok": False, "error": "outputVideo is required"}
+    if LUCY_SKIP:
+        return _skip_lucy(video_url, output_video)
     payload = _lucy_payload(prompt, video_url, args.get("seed"))
     return _call_lucy(payload, output_video)
 
@@ -287,6 +315,8 @@ def run_generative_agent(request: str, input_video: str, output_video: str) -> d
 
     message = response.choices[0].message
     tool_calls = message.tool_calls or []
+    if tool_calls:
+        tool_calls = tool_calls[:1]
     outputs = []
 
     for call in tool_calls:

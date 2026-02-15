@@ -581,6 +581,7 @@ export default function CampaignDetailPage() {
   const [embeddingsSource, setEmbeddingsSource] = useState<string | null>(null);
   const [embeddingsError, setEmbeddingsError] = useState("");
   const [embeddingsCount, setEmbeddingsCount] = useState(0);
+  const [profileCount, setProfileCount] = useState(0);
   const [embeddingGroups, setEmbeddingGroups] = useState<EmbeddingGroupSummary[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -618,12 +619,14 @@ export default function CampaignDetailPage() {
   useEffect(() => {
     if (!params.id) return;
     setEmbeddingsError("");
+    const requestedGroupCount = Math.max(1, groupCount || 1);
     api.embeddings
-      .get(params.id)
+      .get(params.id, requestedGroupCount)
       .then((res) => {
         setEmbeddings(res.points || []);
         setEmbeddingsSource(res.source || null);
         setEmbeddingGroups(res.groups || []);
+        setProfileCount(res.count || 0);
         const groupTotal = new Set((res.points || []).map((point) => point.groupId)).size;
         setEmbeddingsCount(groupTotal);
       })
@@ -632,14 +635,25 @@ export default function CampaignDetailPage() {
         setEmbeddingsSource(null);
         setEmbeddingsError(err instanceof Error ? err.message : "Embeddings unavailable");
         setEmbeddingsCount(0);
+        setProfileCount(0);
         setEmbeddingGroups([]);
       });
-  }, [params.id]);
+  }, [params.id, groupCount]);
 
   useEffect(() => {
     if (groupCountTouched.current) return;
-    setGroupCount(Math.max(1, embeddingsCount || 0));
+    if (embeddingsCount > 0) {
+      setGroupCount(Math.max(1, embeddingsCount));
+    }
   }, [embeddingsCount]);
+
+  useEffect(() => {
+    if (groupCountTouched.current) return;
+    const stored = campaign?.metadata?.groupCount;
+    if (stored && stored > 0) {
+      setGroupCount(stored);
+    }
+  }, [campaign?.metadata?.groupCount]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -667,8 +681,9 @@ export default function CampaignDetailPage() {
 
   const hasGeneratedAds = groupVariants.length > 0;
   const targetedAdsCount = groupVariants.length;
-  const effectiveGroupCount = Math.max(1, embeddingsCount || groupCount);
-  const groupCountLocked = embeddingsCount > 0;
+  const maxGroups = Math.max(1, profileCount || groupCount || 1);
+  const effectiveGroupCount = Math.max(1, Math.min(groupCount, maxGroups));
+  const groupCountLocked = false;
   const activeGroup = useMemo(
     () => groupVariants.find((group) => group.groupId === expandedGroup) || null,
     [expandedGroup, groupVariants]
@@ -876,6 +891,28 @@ export default function CampaignDetailPage() {
               Cluster profiles and generate tailored edits. Each segment gets research, a plan, and a targeted ad cut.
             </p>
             <div className="mt-5">
+              <div className="flex items-center justify-between mb-3">
+                <label className="font-mono text-[9px] uppercase tracking-widest text-muted">
+                  Segments
+                </label>
+                <span className="text-xl font-bold tabular-nums">{effectiveGroupCount}</span>
+              </div>
+                <input
+                  type="range"
+                  min={1}
+                  max={Math.max(1, profileCount || groupCount || 1)}
+                  value={effectiveGroupCount}
+                  onChange={(e) => {
+                    groupCountTouched.current = true;
+                    setGroupCount(Number(e.target.value));
+                  }}
+                  disabled={groupCountLocked}
+                  className="w-full h-2 appearance-none bg-foreground/10 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground"
+                />
+                <div className="flex justify-between mt-2 text-xs text-muted font-mono">
+                  <span>1</span>
+                  <span>{Math.max(1, profileCount || groupCount || 1)}</span>
+                </div>
               <button
                 onClick={handleGenerateAds}
                 disabled={generating}

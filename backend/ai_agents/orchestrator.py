@@ -33,7 +33,9 @@ SYSTEM_PROMPT = (
     "For color grading, use color_grade_video with gradeStyle from: "
     f"{', '.join(COLOR_GRADE_STYLES)} and explain the choice in gradeNote. "
     "For generative requests (background replace, object erase, text replace), use the "
-    "submit_* tools to run a Lucy video-to-video edit. If using apply_combo, choose comboName from: "
+    "submit_* tools to run a Lucy video-to-video edit. "
+    "Never call more than one tool per request; if multiple generative edits are requested, pick the single most important one. "
+    "If using apply_combo, choose comboName from: "
     f"{', '.join(COMBOS)}. For submit_* tools, map inputPath/outputPath to "
     "inputVideo/outputVideo. Always include input/output paths (or use the provided "
     "defaults). If the request is about market research, demographics, or ad preferences, "
@@ -101,6 +103,8 @@ def run_orchestrator_agent(
 
     message = response.choices[0].message
     tool_calls = message.tool_calls or []
+    if tool_calls:
+        tool_calls = tool_calls[:1]
     outputs = []
 
     for call in tool_calls:

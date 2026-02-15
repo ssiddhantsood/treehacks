@@ -69,7 +69,7 @@ export const api = {
     upload: (
       file: File,
       profilesFile?: File | null,
-      options?: { name?: string; productDesc?: string; goal?: string }
+      options?: { name?: string; productDesc?: string; goal?: string; groupCount?: number }
     ) => {
       const formData = new FormData();
       formData.append("video", file);
@@ -79,6 +79,7 @@ export const api = {
       if (options?.name) formData.append("name", options.name);
       if (options?.productDesc) formData.append("product_desc", options.productDesc);
       if (options?.goal) formData.append("goal", options.goal);
+      if (options?.groupCount != null) formData.append("groupCount", String(options.groupCount));
       return request<{
         ok: boolean;
         videoId: string;
@@ -111,9 +112,9 @@ export const api = {
     get: (url: string) => request<AnalysisData>(url),
   },
   embeddings: {
-    get: (id: string) =>
+    get: (id: string, groupCount?: number) =>
       request<{ ok: boolean; points: EmbeddingsPoint[]; count: number; source?: string; groups?: EmbeddingGroupSummary[] }>(
-        `/api/videos/${id}/embeddings`
+        `/api/videos/${id}/embeddings${groupCount != null ? `?groupCount=${groupCount}` : ""}`
       ),
   },
 };

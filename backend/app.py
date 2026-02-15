@@ -9,7 +9,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile, Query
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -458,7 +458,11 @@ async def delete_video_route(video_id: str, user=Depends(get_current_user)):
 
 
 @app.get("/api/videos/{video_id}/embeddings")
-async def get_embeddings(video_id: str, user=Depends(get_current_user)):
+async def get_embeddings(
+    video_id: str,
+    group_count: int | None = Query(None, alias="groupCount"),
+    user=Depends(get_current_user),
+):
     video = get_video_with_variants(video_id, user["id"])
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
@@ -472,7 +476,7 @@ async def get_embeddings(video_id: str, user=Depends(get_current_user)):
         return {"ok": True, "points": [], "count": 0}
 
     metadata = video.get("metadata") or {}
-    group_count = _coerce_int(metadata.get("groupCount")) or 3
+    group_count = _coerce_int(group_count) or _coerce_int(metadata.get("groupCount")) or 3
     group_count = max(1, min(group_count, len(rows)))
 
     if _has_embedding_env():
@@ -544,6 +548,7 @@ async def transform(
     name: str | None = Form(None),
     product_desc: str | None = Form(None),
     goal: str | None = Form(None),
+    group_count: int | None = Form(None, alias="groupCount"),
     user=Depends(get_current_user),
 ):
     if not video:
@@ -596,6 +601,8 @@ async def transform(
         metadata_payload["productDesc"] = product_desc
     if goal:
         metadata_payload["goal"] = goal
+    if _coerce_int(group_count):
+        metadata_payload["groupCount"] = int(group_count)
     if isinstance(analysis_result, dict):
         metadata_payload["analysis"] = {
             "perSecondDescriptions": analysis_result.get("per_second_descriptions", []),

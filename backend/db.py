@@ -12,9 +12,7 @@ def _utc_now() -> str:
 
 
 def get_conn() -> sqlite3.Connection:
-    db_path = Path(DATABASE_PATH).expanduser()
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
+    conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
