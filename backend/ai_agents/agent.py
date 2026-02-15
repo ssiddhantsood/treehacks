@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from video import (
+from .video import (
     apply_combo,
     change_speed_video,
     color_grade_video,

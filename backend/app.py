@@ -15,8 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from agent import COMBOS, run_combo_agent, run_speedup_agent
-from action_timeline import analyze_video
+from ai_agents.agent import COMBOS, run_combo_agent, run_speedup_agent
+from ai_agents.action_timeline import analyze_video
 from auth import create_access_token, decode_token, hash_password, verify_password
 from db import (
     add_variant,

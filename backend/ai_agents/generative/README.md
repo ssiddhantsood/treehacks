@@ -31,7 +31,7 @@ Implementation (GPU script):
 - Render new text with PIL and re-encode video.
 
 ## How it works
-- The **agent** writes a job spec to `backend/generative/jobs/`.
+- The **agent** writes a job spec to `backend/ai_agents/generative/jobs/`.
 - Run a script on a GPU box to execute the job.
 
 ## Setup (RunPod)
