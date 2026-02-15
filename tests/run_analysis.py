@@ -59,6 +59,28 @@ def _fmt_scene_segment(item: dict) -> str:
     return f"{t_start} -> {t_end} | " + " | ".join([p for p in parts if p])
 
 
+def _fmt_action_caption(item: dict) -> str:
+    t = f"{item.get('t', 0.0):>7.3f}s"
+    caption = item.get("caption", "") or ""
+    people = ", ".join(item.get("people") or [])
+    objects = ", ".join(item.get("objects") or [])
+    actions = ", ".join(item.get("actions") or [])
+    setting = item.get("setting", "") or ""
+    confidence = item.get("confidence", 0.0)
+    parts = [caption]
+    if people:
+        parts.append(f"people=[{people}]")
+    if objects:
+        parts.append(f"objects=[{objects}]")
+    if actions:
+        parts.append(f"actions=[{actions}]")
+    if setting:
+        parts.append(f"setting={setting}")
+    if confidence:
+        parts.append(f"conf={confidence:.2f}")
+    return f"{t} | " + " | ".join([p for p in parts if p])
+
+
 def _fmt_justification(item: dict) -> str:
     t = f"{item.get('t', 0.0):>7.3f}s"
     text = item.get("justification", "") or ""
@@ -86,7 +108,62 @@ def main() -> int:
         print(f"Video not found: {video_path}")
         return 1
 
-    result = analyze_video(str(video_path), str(output_path))
+    def _progress(event: str, payload: dict) -> None:
+        if event == "start":
+            print(f"Starting analysis: {payload.get('video_path')}", flush=True)
+            return
+        if event == "duration":
+            print(f"Duration: {payload.get('duration', 0.0)}s", flush=True)
+            return
+        if event == "scene_cuts":
+            print(f"Scene cuts detected: {payload.get('count', 0)}", flush=True)
+            return
+        if event == "frames_extracted":
+            print(f"Frames extracted at {payload.get('fps')} FPS", flush=True)
+            return
+        if event == "audio_segments":
+            print(f"Audio segments: {payload.get('count', 0)}", flush=True)
+            return
+        if event == "captions_start":
+            print(
+                f"Action captions starting ({payload.get('frame_count', 0)} frames @ {payload.get('fps')} fps)",
+                flush=True,
+            )
+            return
+        if event == "caption":
+            print(_fmt_action_caption(payload), flush=True)
+            return
+        if event == "per_second_start":
+            print(
+                f"Per-second descriptions starting ({payload.get('count', 0)} frames @ {payload.get('fps')} fps)",
+                flush=True,
+            )
+            return
+        if event == "per_second":
+            print(_fmt_per_second(payload), flush=True)
+            return
+        if event == "scene_segments_start":
+            print(f"Scene segments starting ({payload.get('count', 0)})", flush=True)
+            return
+        if event == "scene_segment":
+            print(_fmt_scene_segment(payload), flush=True)
+            return
+        if event == "justification_start":
+            print(f"Justification timeline starting (chunk {payload.get('chunk_sec')}s)", flush=True)
+            return
+        if event == "justification":
+            print(_fmt_justification(payload), flush=True)
+            return
+        if event == "background_update":
+            t = payload.get("t", 0.0)
+            narration = payload.get("narration", "")
+            print(f"{t:>7.3f}s | background | {narration}", flush=True)
+            return
+        if event == "done":
+            print(f"Analysis complete. Output JSON: {payload.get('output_path')}", flush=True)
+            return
+
+    result = analyze_video(str(video_path), str(output_path), progress_cb=_progress)
 
     print("=== Summary ===")
     print(f"Video: {video_path}")

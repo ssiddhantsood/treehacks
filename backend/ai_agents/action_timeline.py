@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Callable, Optional
 
 import numpy as np
 from dotenv import load_dotenv
@@ -31,6 +32,7 @@ DENSE_INTERVAL = float(os.getenv("ACTION_DENSE_INTERVAL", "0.5"))
 PER_SECOND_FPS = float(os.getenv("ACTION_PER_SECOND_FPS", "1"))
 SCENE_SAMPLE_COUNT = int(os.getenv("ACTION_SCENE_SAMPLE_COUNT", "3"))
 JUSTIFY_CHUNK_SEC = float(os.getenv("ACTION_JUSTIFY_CHUNK_SEC", "60"))
+PARALLEL_CAPTIONS = os.getenv("ACTION_PARALLEL_CAPTIONS", "0") == "1"
 def _coerce_int(value, default: int, min_value: int = 1) -> int:
     try:
         parsed = int(value)
@@ -105,15 +107,21 @@ def _diff_score(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.mean(np.abs(a - b)))
 
 
-def _parallel_map(items: list, func, max_workers: int) -> list:
+def _parallel_map(items: list, func, max_workers: int, on_result: Optional[Callable[[dict], None]] = None) -> list:
     if max_workers <= 1 or len(items) <= 1:
-        return [func(item) for item in items]
+        results = [func(item) for item in items]
+        if on_result:
+            for result in results:
+                on_result(result)
+        return results
     results = [None] * len(items)
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_index = {executor.submit(func, item): idx for idx, item in enumerate(items)}
         for future in as_completed(future_to_index):
             idx = future_to_index[future]
             results[idx] = future.result()
+            if on_result and results[idx] is not None:
+                on_result(results[idx])
     return results
 
 
@@ -182,6 +190,7 @@ def _caption_frames_at_times(
     frame_files: list[Path],
     timestamps: list[float],
     known_entities: list[str],
+    on_result: Optional[Callable[[dict], None]] = None,
 ) -> list[dict]:
     if not frame_files or not timestamps:
         return []
@@ -202,7 +211,7 @@ def _caption_frames_at_times(
         payload = _caption_frame(frame_path, known_entities)
         return {"t": round(t_value, 3), **payload}
 
-    return _parallel_map(requests, _run, VLM_CONCURRENCY)
+    return _parallel_map(requests, _run, VLM_CONCURRENCY, on_result=on_result)
 
 
 def _strip_code_fences(text: str) -> str:
@@ -432,6 +441,7 @@ def _describe_frames_at_times(
     frame_files: list[Path],
     timestamps: list[float],
     known_entities: list[str],
+    on_result: Optional[Callable[[dict], None]] = None,
 ) -> list[dict]:
     if not frame_files or not timestamps:
         return []
@@ -452,7 +462,7 @@ def _describe_frames_at_times(
         payload = _describe_frame(frame_path, known_entities)
         return {"t": round(t_value, 3), **payload}
 
-    return _parallel_map(requests, _run, VLM_CONCURRENCY)
+    return _parallel_map(requests, _run, VLM_CONCURRENCY, on_result=on_result)
 
 
 def _sample_segment_times(start: float, end: float, count: int) -> list[float]:
@@ -625,6 +635,7 @@ def _build_justification_timeline(
     scene_segments: list[dict],
     audio_segments: list[dict],
     duration: float,
+    progress_cb: Optional[Callable[[str, dict], None]] = None,
 ) -> list[dict]:
     if not per_second_descriptions:
         return []
@@ -647,7 +658,11 @@ def _build_justification_timeline(
             if s.get("end", 0.0) >= chunk_start and s.get("start", 0.0) <= chunk_end
         ]
 
-        timeline.extend(_justify_chunk(seconds, scenes, audio, chunk_start, chunk_end))
+        chunk_timeline = _justify_chunk(seconds, scenes, audio, chunk_start, chunk_end)
+        if progress_cb:
+            for item in chunk_timeline:
+                progress_cb("justification", item)
+        timeline.extend(chunk_timeline)
         t += chunk
 
     return timeline
@@ -727,24 +742,38 @@ def _summarize_background(
     return summary, {"summary": summary, "entities": new_entities}
 
 
-def analyze_video(video_path: str, output_json_path: str) -> dict:
+def analyze_video(
+    video_path: str,
+    output_json_path: str,
+    progress_cb: Optional[Callable[[str, dict], None]] = None,
+) -> dict:
     video_path = str(video_path)
     output_path = Path(output_json_path)
+
+    def _emit(event: str, payload: dict | None = None) -> None:
+        if progress_cb:
+            progress_cb(event, payload or {})
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir)
         frames_dir = tmp_path / "frames"
         audio_path = tmp_path / "audio.wav"
 
+        _emit("start", {"video_path": video_path, "output_path": str(output_path)})
         duration = _get_duration(video_path)
+        _emit("duration", {"duration": round(duration, 3)})
         scene_cuts = _detect_scene_cuts(video_path)
+        _emit("scene_cuts", {"count": len(scene_cuts), "cuts": scene_cuts})
         _extract_frames(video_path, frames_dir)
+        _emit("frames_extracted", {"fps": FPS})
 
         if INCLUDE_AUDIO:
             _extract_audio(video_path, audio_path)
             audio_segments = _transcribe_audio(audio_path)
+            _emit("audio_segments", {"count": len(audio_segments)})
         else:
             audio_segments = []
+            _emit("audio_segments", {"count": 0})
 
         frame_files = sorted(frames_dir.glob("*.jpg"))
         captions = []
@@ -754,10 +783,12 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
         scene_segments = []
         justification_timeline = []
 
+        _emit("captions_start", {"frame_count": len(frame_files), "fps": FPS})
         prev_signature = None
         last_caption_time = -999.0
         last_caption_id = None
         segment_start = 0.0
+        caption_requests: list[tuple[float, Path]] = []
 
         for index, frame_path in enumerate(frame_files):
             timestamp = index / FPS
@@ -775,12 +806,64 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
                     needs_update = True
 
             if needs_update:
+                if PARALLEL_CAPTIONS:
+                    caption_requests.append((timestamp, frame_path))
+                    last_caption_time = timestamp
+                else:
+                    payload = _caption_frame(frame_path, known_entities)
+                    caption_id = len(captions)
+                    caption = {
+                        "id": caption_id,
+                        "t": round(timestamp, 3),
+                        "caption": payload.get("caption", "").strip(),
+                        "actions": payload.get("actions", []),
+                        "objects": payload.get("objects", []),
+                        "people": payload.get("people", []),
+                        "setting": payload.get("setting", ""),
+                        "confidence": payload.get("confidence", 0.0),
+                    }
+                    captions.append(caption)
+                    _emit("caption", caption)
+
+                    for item in caption["people"] + caption["objects"]:
+                        if item and item not in known_entities:
+                            known_entities.append(item)
+
+                    if last_caption_id is not None:
+                        events.append(
+                            {
+                                "t_start": round(segment_start, 3),
+                                "t_end": round(timestamp, 3),
+                                "caption_id": last_caption_id,
+                            }
+                        )
+                    segment_start = timestamp
+                    last_caption_id = caption_id
+                    last_caption_time = timestamp
+            prev_signature = signature
+
+        if PARALLEL_CAPTIONS and caption_requests:
+            def _run_caption(request: tuple[float, Path]) -> dict:
+                t_value, frame_path = request
                 payload = _caption_frame(frame_path, known_entities)
+                return {"t": round(t_value, 3), **payload}
+
+            raw_captions = _parallel_map(
+                caption_requests,
+                _run_caption,
+                VLM_CONCURRENCY,
+                on_result=lambda item: _emit("caption", item),
+            )
+
+            raw_captions = [item for item in raw_captions if item]
+            raw_captions.sort(key=lambda item: item.get("t", 0.0))
+
+            for payload in raw_captions:
                 caption_id = len(captions)
                 caption = {
                     "id": caption_id,
-                    "t": round(timestamp, 3),
-                    "caption": payload.get("caption", "").strip(),
+                    "t": round(float(payload.get("t", 0.0)), 3),
+                    "caption": str(payload.get("caption", "") or "").strip(),
                     "actions": payload.get("actions", []),
                     "objects": payload.get("objects", []),
                     "people": payload.get("people", []),
@@ -793,22 +876,26 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
                     if item and item not in known_entities:
                         known_entities.append(item)
 
-                if last_caption_id is not None:
+            if captions:
+                segment_start = captions[0]["t"]
+                for idx in range(1, len(captions)):
                     events.append(
                         {
                             "t_start": round(segment_start, 3),
-                            "t_end": round(timestamp, 3),
-                            "caption_id": last_caption_id,
+                            "t_end": round(captions[idx]["t"], 3),
+                            "caption_id": captions[idx - 1]["id"],
                         }
                     )
-                segment_start = timestamp
-                last_caption_id = caption_id
-                last_caption_time = timestamp
-                prev_signature = signature
-            else:
-                prev_signature = signature
+                    segment_start = captions[idx]["t"]
 
-        if last_caption_id is not None:
+                events.append(
+                    {
+                        "t_start": round(segment_start, 3),
+                        "t_end": round(duration, 3),
+                        "caption_id": captions[-1]["id"],
+                    }
+                )
+        elif last_caption_id is not None:
             events.append(
                 {
                     "t_start": round(segment_start, 3),
@@ -819,17 +906,29 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
 
         dense_captions = []
         if DENSE_INTERVAL > 0:
+            _emit("dense_captions_start", {"interval": DENSE_INTERVAL})
             dense_times = []
             t = 0.0
             while t <= duration:
                 dense_times.append(t)
                 t += DENSE_INTERVAL
-            dense_captions = _caption_frames_at_times(frame_files, dense_times, known_entities)
+            dense_captions = _caption_frames_at_times(
+                frame_files,
+                dense_times,
+                known_entities,
+                on_result=lambda item: _emit("dense_caption", item),
+            )
 
         scene_captions = []
         if scene_cuts:
+            _emit("scene_captions_start", {"count": len(scene_cuts)})
             scene_marks = sorted(set([0.0] + scene_cuts))
-            scene_captions = _caption_frames_at_times(frame_files, scene_marks, known_entities)
+            scene_captions = _caption_frames_at_times(
+                frame_files,
+                scene_marks,
+                known_entities,
+                on_result=lambda item: _emit("scene_caption", item),
+            )
 
         if PER_SECOND_FPS > 0 and frame_files:
             step = 1.0 / PER_SECOND_FPS
@@ -838,7 +937,13 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
             while t <= duration:
                 per_second_times.append(round(t, 3))
                 t += step
-            per_second_descriptions = _describe_frames_at_times(frame_files, per_second_times, known_entities)
+            _emit("per_second_start", {"fps": PER_SECOND_FPS, "count": len(per_second_times)})
+            per_second_descriptions = _describe_frames_at_times(
+                frame_files,
+                per_second_times,
+                known_entities,
+                on_result=lambda item: _emit("per_second", item),
+            )
 
         if frame_files:
             scene_marks = sorted(set([0.0] + scene_cuts + [duration]))
@@ -866,7 +971,13 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
                     **payload,
                 }
 
-            scene_segments = _parallel_map(segment_requests, _run_segment, VLM_CONCURRENCY)
+            _emit("scene_segments_start", {"count": len(segment_requests)})
+            scene_segments = _parallel_map(
+                segment_requests,
+                _run_segment,
+                VLM_CONCURRENCY,
+                on_result=lambda item: _emit("scene_segment", item),
+            )
             for idx, segment in enumerate(scene_segments):
                 segment["id"] = idx
 
@@ -876,6 +987,7 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
         last_audio_marker = -1
 
         if captions or audio_segments:
+            _emit("background_updates_start", {"interval": BG_UPDATE_SEC})
             t = 0.0
             while t <= duration:
                 window_start = max(0.0, t - BG_WINDOW_SEC)
@@ -889,16 +1001,19 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
                     summary, state = _summarize_background(window_captions, window_audio, state)
                     if summary:
                         background_updates.append({"t": round(t, 3), "narration": summary})
+                        _emit("background_update", {"t": round(t, 3), "narration": summary})
                     last_caption_marker = newest_caption_id
                     last_audio_marker = newest_audio_idx
 
                 t += BG_UPDATE_SEC
 
+        _emit("justification_start", {"chunk_sec": JUSTIFY_CHUNK_SEC})
         justification_timeline = _build_justification_timeline(
             per_second_descriptions,
             scene_segments,
             audio_segments,
             duration,
+            progress_cb=progress_cb,
         )
 
         result = {
@@ -917,4 +1032,5 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
         }
 
         output_path.write_text(json.dumps(result, indent=2))
+        _emit("done", {"output_path": str(output_path)})
         return result

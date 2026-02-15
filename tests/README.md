@@ -36,3 +36,13 @@ python tests/run_tool_smoke.py
 ```
 
 Outputs to `tests/tool_smoke/`.
+
+## Market research (Perplexity)
+
+Run the Perplexity-backed market research agent against a few sample audiences:
+
+```bash
+python tests/run_market_research.py
+```
+
+Requires `PERPLEXITY` to be set in `backend/.env`.

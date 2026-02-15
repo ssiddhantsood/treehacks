@@ -1,0 +1,6498 @@
+{
+  "fps": 2.0,
+  "duration": 79.064,
+  "scene_cuts": [
+    3.44,
+    6.6,
+    7.68,
+    8.84,
+    9.8,
+    12.12,
+    16.08,
+    18.48,
+    20.64,
+    23.48,
+    25.16,
+    27.44,
+    31.28,
+    35.28,
+    37.16,
+    44.0,
+    46.24,
+    47.92,
+    51.36,
+    52.36,
+    53.64,
+    55.24,
+    57.16,
+    58.24,
+    60.72,
+    62.2,
+    64.24,
+    69.88,
+    72.0,
+    73.96,
+    76.6
+  ],
+  "captions": [
+    {
+      "id": 0,
+      "t": 0.0,
+      "caption": "A person enters a large dining room where several people are gathered around a table.",
+      "actions": [
+        "entering",
+        "sitting",
+        "gathering"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "large dining room",
+      "confidence": 0.9
+    },
+    {
+      "id": 1,
+      "t": 0.5,
+      "caption": "A person entering looks towards a group at a dining table surrounded by chairs and flowers.",
+      "actions": [
+        "entering",
+        "sitting",
+        "looking"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "id": 2,
+      "t": 1.0,
+      "caption": "Person entering the room where a group is gathered at a dining table.",
+      "actions": [
+        "entering",
+        "gathering"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "indoor elegant room",
+      "confidence": 0.9
+    },
+    {
+      "id": 3,
+      "t": 3.5,
+      "caption": "Person entering looks to the side while standing in a hallway.",
+      "actions": [
+        "looking to the side",
+        "standing"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "hallway",
+      "confidence": 0.9
+    },
+    {
+      "id": 4,
+      "t": 6.5,
+      "caption": "The person entering walks towards a dining table where a group at table is seated and engaged in conversation.",
+      "actions": [
+        "walking",
+        "sitting",
+        "talking"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers",
+        "backpack"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "formal dining room",
+      "confidence": 0.95
+    },
+    {
+      "id": 5,
+      "t": 7.5,
+      "caption": "A person is entering a room with a group seated at a dining table.",
+      "actions": [
+        "entering",
+        "sitting"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers",
+        "backpack"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "indoor, ornate room",
+      "confidence": 0.9
+    },
+    {
+      "id": 6,
+      "t": 9.0,
+      "caption": "The person entering is walking into a room with a dining table and chairs.",
+      "actions": [
+        "entering"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers",
+        "backpack"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "room with classic interior",
+      "confidence": 0.85
+    },
+    {
+      "id": 7,
+      "t": 10.0,
+      "caption": "Four forks and a plate are placed on the dining table.",
+      "actions": [
+        "placed"
+      ],
+      "objects": [
+        "forks",
+        "plate",
+        "dining table"
+      ],
+      "people": [],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "id": 8,
+      "t": 12.0,
+      "caption": "Person entering plays the piano while the group at table sits and talks.",
+      "actions": [
+        "playing piano",
+        "sitting",
+        "talking"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers",
+        "piano"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "indoors, formal dining area",
+      "confidence": 0.9
+    },
+    {
+      "id": 9,
+      "t": 16.0,
+      "caption": "A person entering smiles and looks downward.",
+      "actions": [
+        "smiling",
+        "looking downward"
+      ],
+      "objects": [],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor with plants",
+      "confidence": 0.9
+    },
+    {
+      "id": 10,
+      "t": 18.5,
+      "caption": "A person entering stands near a plant beside the restaurant sign.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "plant",
+        "restaurant sign"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "restaurant entrance",
+      "confidence": 0.9
+    },
+    {
+      "id": 11,
+      "t": 20.5,
+      "caption": "A person is smiling and talking to another person.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "id": 12,
+      "t": 21.0,
+      "caption": "A person entering smiles while interacting with another person.",
+      "actions": [
+        "smiling",
+        "interacting"
+      ],
+      "objects": [],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "id": 13,
+      "t": 22.5,
+      "caption": "The person entering is smiling while talking to another person.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "id": 14,
+      "t": 23.5,
+      "caption": "Person entering is having a conversation with another person.",
+      "actions": [
+        "talking"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "id": 15,
+      "t": 25.0,
+      "caption": "Person entering is interacting with a waiter while a group at table looks on.",
+      "actions": [
+        "person entering reaching out",
+        "waiter standing",
+        "group at table seated"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "glasses",
+        "napkin"
+      ],
+      "people": [
+        "person entering",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 16,
+      "t": 27.5,
+      "caption": "A person entering stands still in an elegant interior setting.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor elegant interior",
+      "confidence": 0.9
+    },
+    {
+      "id": 17,
+      "t": 31.5,
+      "caption": "A person is smiling and looking slightly upwards.",
+      "actions": [
+        "smiling",
+        "looking upwards"
+      ],
+      "objects": [],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "id": 18,
+      "t": 33.0,
+      "caption": "A group is seated at the dining table in a restaurant setting.",
+      "actions": [
+        "sitting"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "glasses",
+        "flowers"
+      ],
+      "people": [
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.7
+    },
+    {
+      "id": 19,
+      "t": 33.5,
+      "caption": "Waiter is serving food with a covered dish.",
+      "actions": [
+        "serving food",
+        "holding covered dish"
+      ],
+      "objects": [
+        "covered dish",
+        "napkin"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 20,
+      "t": 35.5,
+      "caption": "A waiter unveils a covered dish for a person entering at the dining table in a restaurant.",
+      "actions": [
+        "unveiling",
+        "sitting"
+      ],
+      "objects": [
+        "covered dish",
+        "glasses",
+        "dining table",
+        "napkin"
+      ],
+      "people": [
+        "person entering",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 21,
+      "t": 37.0,
+      "caption": "The waiter is holding and presenting a covered dish.",
+      "actions": [
+        "holding",
+        "presenting"
+      ],
+      "objects": [
+        "covered dish"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "id": 22,
+      "t": 43.0,
+      "caption": "The waiter is speaking or reacting with an expressive face.",
+      "actions": [
+        "speaking",
+        "reacting"
+      ],
+      "objects": [],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 23,
+      "t": 44.0,
+      "caption": "A person is seated at a dining table while waiters attend to the restaurant.",
+      "actions": [
+        "seated",
+        "attending"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plate",
+        "forks",
+        "napkin"
+      ],
+      "people": [
+        "person entering",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 24,
+      "t": 46.0,
+      "caption": "The person entering stands by the doorway looking into the room.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor room",
+      "confidence": 0.9
+    },
+    {
+      "id": 25,
+      "t": 48.0,
+      "caption": "A person is sitting at a dining table looking down at the plate in front of him while a waiter walks by in the background.",
+      "actions": [
+        "sitting",
+        "looking down",
+        "walking"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "glasses",
+        "forks",
+        "napkin"
+      ],
+      "people": [
+        "person entering",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 26,
+      "t": 51.5,
+      "caption": "A person is standing still, looking ahead.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person entering"
+      ],
+      "setting": "",
+      "confidence": 0.9
+    },
+    {
+      "id": 27,
+      "t": 52.5,
+      "caption": "Two women sit at a dining table, one holding a small dog.",
+      "actions": [
+        "sitting",
+        "holding dog"
+      ],
+      "objects": [
+        "dining table",
+        "flowers",
+        "glasses",
+        "napkin"
+      ],
+      "people": [
+        "group at table"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.95
+    },
+    {
+      "id": 28,
+      "t": 53.5,
+      "caption": "A person holds a bottle of ketchup at a dining table.",
+      "actions": [
+        "holding ketchup bottle"
+      ],
+      "objects": [
+        "dining table",
+        "bottle of ketchup",
+        "glass of water",
+        "plate",
+        "glass"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 29,
+      "t": 55.0,
+      "caption": "A person sitting at a dining table with a bottle of ketchup while a waiter stands nearby.",
+      "actions": [
+        "sitting",
+        "holding bottle",
+        "standing"
+      ],
+      "objects": [
+        "dining table",
+        "bottle of ketchup",
+        "glass",
+        "forks",
+        "plate"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "id": 30,
+      "t": 57.0,
+      "caption": "A person in a white chef outfit stands with arms crossed.",
+      "actions": [
+        "standing",
+        "crossing arms"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "id": 31,
+      "t": 58.0,
+      "caption": "Person sitting at a table applies condiment while waiter stands nearby.",
+      "actions": [
+        "applying condiment",
+        "standing"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass",
+        "forks",
+        "plate",
+        "napkin"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "id": 32,
+      "t": 60.5,
+      "caption": "A person in a white outfit is holding a small dog wearing a colorful necklace.",
+      "actions": [
+        "holding dog"
+      ],
+      "objects": [
+        "dog",
+        "colorful necklace"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "",
+      "confidence": 0.95
+    },
+    {
+      "id": 33,
+      "t": 62.0,
+      "caption": "Person in plaid shirt holding a bottle of ketchup while another person stands nearby, person sitting in the background.",
+      "actions": [
+        "holding",
+        "sitting",
+        "standing"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "glass of water",
+        "glass"
+      ],
+      "people": [
+        "person",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 34,
+      "t": 64.0,
+      "caption": "A person in a white outfit stands in a formal room with flowers nearby.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "flowers"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "formal room",
+      "confidence": 0.9
+    },
+    {
+      "id": 35,
+      "t": 70.0,
+      "caption": "Person is holding a bottle of ketchup over a plate at a dining table in a restaurant.",
+      "actions": [
+        "holding",
+        "looking at bottle"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "dining table",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "id": 36,
+      "t": 72.0,
+      "caption": "A person in a white outfit is standing still.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "id": 37,
+      "t": 74.0,
+      "caption": "Person is sitting at the dining table looking at the plate of food.",
+      "actions": [
+        "sitting",
+        "looking"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "bottle of ketchup",
+        "glasses",
+        "forks",
+        "cutlery",
+        "napkin"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "id": 38,
+      "t": 76.5,
+      "caption": "A bottle of Heinz tomato ketchup is placed on a dining table.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "glass of water",
+        "cutlery",
+        "plate"
+      ],
+      "people": [],
+      "setting": "dining table",
+      "confidence": 0.9
+    }
+  ],
+  "events": [
+    {
+      "t_start": 0.0,
+      "t_end": 0.5,
+      "caption_id": 0
+    },
+    {
+      "t_start": 0.5,
+      "t_end": 1.0,
+      "caption_id": 1
+    },
+    {
+      "t_start": 1.0,
+      "t_end": 3.5,
+      "caption_id": 2
+    },
+    {
+      "t_start": 3.5,
+      "t_end": 6.5,
+      "caption_id": 3
+    },
+    {
+      "t_start": 6.5,
+      "t_end": 7.5,
+      "caption_id": 4
+    },
+    {
+      "t_start": 7.5,
+      "t_end": 9.0,
+      "caption_id": 5
+    },
+    {
+      "t_start": 9.0,
+      "t_end": 10.0,
+      "caption_id": 6
+    },
+    {
+      "t_start": 10.0,
+      "t_end": 12.0,
+      "caption_id": 7
+    },
+    {
+      "t_start": 12.0,
+      "t_end": 16.0,
+      "caption_id": 8
+    },
+    {
+      "t_start": 16.0,
+      "t_end": 18.5,
+      "caption_id": 9
+    },
+    {
+      "t_start": 18.5,
+      "t_end": 20.5,
+      "caption_id": 10
+    },
+    {
+      "t_start": 20.5,
+      "t_end": 21.0,
+      "caption_id": 11
+    },
+    {
+      "t_start": 21.0,
+      "t_end": 22.5,
+      "caption_id": 12
+    },
+    {
+      "t_start": 22.5,
+      "t_end": 23.5,
+      "caption_id": 13
+    },
+    {
+      "t_start": 23.5,
+      "t_end": 25.0,
+      "caption_id": 14
+    },
+    {
+      "t_start": 25.0,
+      "t_end": 27.5,
+      "caption_id": 15
+    },
+    {
+      "t_start": 27.5,
+      "t_end": 31.5,
+      "caption_id": 16
+    },
+    {
+      "t_start": 31.5,
+      "t_end": 33.0,
+      "caption_id": 17
+    },
+    {
+      "t_start": 33.0,
+      "t_end": 33.5,
+      "caption_id": 18
+    },
+    {
+      "t_start": 33.5,
+      "t_end": 35.5,
+      "caption_id": 19
+    },
+    {
+      "t_start": 35.5,
+      "t_end": 37.0,
+      "caption_id": 20
+    },
+    {
+      "t_start": 37.0,
+      "t_end": 43.0,
+      "caption_id": 21
+    },
+    {
+      "t_start": 43.0,
+      "t_end": 44.0,
+      "caption_id": 22
+    },
+    {
+      "t_start": 44.0,
+      "t_end": 46.0,
+      "caption_id": 23
+    },
+    {
+      "t_start": 46.0,
+      "t_end": 48.0,
+      "caption_id": 24
+    },
+    {
+      "t_start": 48.0,
+      "t_end": 51.5,
+      "caption_id": 25
+    },
+    {
+      "t_start": 51.5,
+      "t_end": 52.5,
+      "caption_id": 26
+    },
+    {
+      "t_start": 52.5,
+      "t_end": 53.5,
+      "caption_id": 27
+    },
+    {
+      "t_start": 53.5,
+      "t_end": 55.0,
+      "caption_id": 28
+    },
+    {
+      "t_start": 55.0,
+      "t_end": 57.0,
+      "caption_id": 29
+    },
+    {
+      "t_start": 57.0,
+      "t_end": 58.0,
+      "caption_id": 30
+    },
+    {
+      "t_start": 58.0,
+      "t_end": 60.5,
+      "caption_id": 31
+    },
+    {
+      "t_start": 60.5,
+      "t_end": 62.0,
+      "caption_id": 32
+    },
+    {
+      "t_start": 62.0,
+      "t_end": 64.0,
+      "caption_id": 33
+    },
+    {
+      "t_start": 64.0,
+      "t_end": 70.0,
+      "caption_id": 34
+    },
+    {
+      "t_start": 70.0,
+      "t_end": 72.0,
+      "caption_id": 35
+    },
+    {
+      "t_start": 72.0,
+      "t_end": 74.0,
+      "caption_id": 36
+    },
+    {
+      "t_start": 74.0,
+      "t_end": 76.5,
+      "caption_id": 37
+    },
+    {
+      "t_start": 76.5,
+      "t_end": 79.064,
+      "caption_id": 38
+    }
+  ],
+  "dense_captions": [
+    {
+      "t": 0.0,
+      "caption": "Person entering the restaurant where a group is sitting at a dining table.",
+      "actions": [
+        "entering",
+        "sitting"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "chairs",
+        "flowers",
+        "plate",
+        "forks"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 0.5,
+      "caption": "Person entering a restaurant with a backpack, facing a group at a dining table.",
+      "actions": [
+        "person entering",
+        "group sitting"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "restaurant interior",
+      "confidence": 0.9
+    },
+    {
+      "t": 1.0,
+      "caption": "A person entering a restaurant with a backpack approaches a group at a dining table where a waiter is standing.",
+      "actions": [
+        "entering",
+        "standing"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "flowers",
+        "piano"
+      ],
+      "people": [
+        "person entering",
+        "group at table",
+        "waiter"
+      ],
+      "setting": "restaurant interior",
+      "confidence": 0.9
+    },
+    {
+      "t": 1.5,
+      "caption": "Person entering a restaurant with a backpack.",
+      "actions": [
+        "entering"
+      ],
+      "objects": [
+        "backpack",
+        "plant",
+        "flower"
+      ],
+      "people": [
+        "person entering",
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 2.0,
+      "caption": "A person entering a restaurant where a group is seated at a dining table.",
+      "actions": [
+        "entering",
+        "sitting"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "chairs",
+        "flowers",
+        "restaurant sign"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 2.5,
+      "caption": "Person entering looks ahead toward a group at a dining table in a restaurant.",
+      "actions": [
+        "entering",
+        "looking"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "chairs",
+        "flowers",
+        "restaurant sign",
+        "piano",
+        "plant"
+      ],
+      "people": [
+        "person entering",
+        "group at table",
+        "waiter",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 3.0,
+      "caption": "Person entering a dining area looking towards a group at a table in a restaurant.",
+      "actions": [
+        "person entering",
+        "group at table sitting",
+        "waiter serving"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "chairs",
+        "flowers",
+        "piano",
+        "restaurant sign"
+      ],
+      "people": [
+        "person entering",
+        "group at table",
+        "waiter"
+      ],
+      "setting": "restaurant dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 3.5,
+      "caption": "A person with a backpack is standing in a hallway looking to the side.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "hallway",
+      "confidence": 0.9
+    },
+    {
+      "t": 4.0,
+      "caption": "Person entering wearing a backpack looks around indoors.",
+      "actions": [
+        "entering",
+        "looking around"
+      ],
+      "objects": [
+        "backpack",
+        "plant",
+        "table"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor hallway or entrance",
+      "confidence": 0.9
+    },
+    {
+      "t": 4.5,
+      "caption": "A person with a backpack stands between two tables with plants.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "backpack",
+        "plant",
+        "table"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor hallway",
+      "confidence": 0.9
+    },
+    {
+      "t": 5.0,
+      "caption": "A person is standing in a hallway with a backpack.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "backpack",
+        "plant"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "hallway",
+      "confidence": 0.9
+    },
+    {
+      "t": 5.5,
+      "caption": "A person stands in a hallway with a backpack.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "backpack",
+        "plant"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor hallway",
+      "confidence": 0.9
+    },
+    {
+      "t": 6.0,
+      "caption": "A person with a backpack is standing indoors.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor hallway",
+      "confidence": 0.9
+    },
+    {
+      "t": 6.5,
+      "caption": "People are dining and walking around a busy elegant restaurant.",
+      "actions": [
+        "dining",
+        "walking",
+        "sitting",
+        "carrying bag"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers",
+        "backpack",
+        "plate",
+        "glasses",
+        "napkin"
+      ],
+      "people": [
+        "person entering",
+        "group at table",
+        "waiter",
+        "person sitting",
+        "person in white outfit",
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 7.0,
+      "caption": "People are dining and interacting in an elegant restaurant.",
+      "actions": [
+        "sitting",
+        "walking",
+        "serving",
+        "talking"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers",
+        "glass",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "person entering",
+        "group at table",
+        "waiter",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 7.5,
+      "caption": "A person entering a restaurant with ornate ceiling and lighting.",
+      "actions": [
+        "entering"
+      ],
+      "objects": [
+        "restaurant sign",
+        "light fixtures"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "restaurant interior",
+      "confidence": 0.85
+    },
+    {
+      "t": 8.0,
+      "caption": "A large chandelier is illuminated in an ornate room.",
+      "actions": [
+        "illuminated"
+      ],
+      "objects": [
+        "chandelier"
+      ],
+      "people": [],
+      "setting": "ornate room",
+      "confidence": 0.95
+    },
+    {
+      "t": 8.5,
+      "caption": "A chandelier is hanging from the ceiling in an ornate room.",
+      "actions": [
+        "hanging"
+      ],
+      "objects": [
+        "chandelier"
+      ],
+      "people": [],
+      "setting": "indoor",
+      "confidence": 0.95
+    },
+    {
+      "t": 9.0,
+      "caption": "The frame shows a decorated indoor wall with framed pictures.",
+      "actions": [],
+      "objects": [
+        "framed pictures",
+        "wall"
+      ],
+      "people": [],
+      "setting": "indoor room",
+      "confidence": 0.9
+    },
+    {
+      "t": 9.5,
+      "caption": "No people or actions are visible; the frame shows a decorated interior wall with framed artwork.",
+      "actions": [],
+      "objects": [
+        "framed artwork"
+      ],
+      "people": [],
+      "setting": "indoor decorated wall",
+      "confidence": 0.9
+    },
+    {
+      "t": 10.0,
+      "caption": "Four forks are arranged neatly on the dining table next to an empty plate.",
+      "actions": [
+        "forks arranged"
+      ],
+      "objects": [
+        "forks",
+        "plate",
+        "dining table",
+        "chair"
+      ],
+      "people": [],
+      "setting": "indoor dining area",
+      "confidence": 0.95
+    },
+    {
+      "t": 10.5,
+      "caption": "Cutlery is neatly arranged on a dining table with a napkin and a plate nearby.",
+      "actions": [],
+      "objects": [
+        "cutlery",
+        "napkin",
+        "plate",
+        "dining table"
+      ],
+      "people": [],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 11.0,
+      "caption": "A dining table is set with forks, knives, spoons, glasses, and a plate.",
+      "actions": [],
+      "objects": [
+        "dining table",
+        "forks",
+        "knives",
+        "spoons",
+        "glasses",
+        "plate",
+        "napkin",
+        "candle"
+      ],
+      "people": [],
+      "setting": "table setting",
+      "confidence": 0.95
+    },
+    {
+      "t": 11.5,
+      "caption": "A dining table is set with forks, a spoon, glasses, and a napkin.",
+      "actions": [
+        "table setting"
+      ],
+      "objects": [
+        "forks",
+        "spoon",
+        "glasses",
+        "napkin",
+        "plate"
+      ],
+      "people": [],
+      "setting": "restaurant or dining area",
+      "confidence": 0.95
+    },
+    {
+      "t": 12.0,
+      "caption": "A person in a white outfit is playing the piano while two people sit at a dining table in the background.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "glasses",
+        "flowers"
+      ],
+      "people": [
+        "person in white outfit",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 12.5,
+      "caption": "A person in a black tuxedo is playing the piano while two people sit at a dining table in the background.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "glasses",
+        "flowers"
+      ],
+      "people": [
+        "person in black tuxedo",
+        "group at table"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 13.0,
+      "caption": "A person in a white outfit is playing the piano while two people sit at a nearby table.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "glasses",
+        "flowers"
+      ],
+      "people": [
+        "person in white outfit",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 13.5,
+      "caption": "Person in white outfit is playing the piano in a restaurant.",
+      "actions": [
+        "playing piano"
+      ],
+      "objects": [
+        "piano"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 14.0,
+      "caption": "A person in a white outfit is playing the piano while a group at the table is seated.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "glasses"
+      ],
+      "people": [
+        "person in white outfit",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 14.5,
+      "caption": "Person in white outfit playing piano while group at table watches.",
+      "actions": [
+        "playing piano",
+        "watching"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "glasses"
+      ],
+      "people": [
+        "person in white outfit",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 15.0,
+      "caption": "Person in white outfit playing piano while group at table looks on.",
+      "actions": [
+        "playing piano",
+        "sitting",
+        "watching"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "glasses",
+        "forks"
+      ],
+      "people": [
+        "person in white outfit",
+        "group at table"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 15.5,
+      "caption": "A person in a white outfit is playing the piano while a group at table sits and talks in the background.",
+      "actions": [
+        "playing piano",
+        "sitting",
+        "talking"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "glasses"
+      ],
+      "people": [
+        "person in white outfit",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 16.0,
+      "caption": "A person in a white outfit is standing and smiling.",
+      "actions": [
+        "standing",
+        "smiling"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.8
+    },
+    {
+      "t": 16.5,
+      "caption": "Person in white outfit is sitting and looking down.",
+      "actions": [
+        "sitting",
+        "looking down"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.8
+    },
+    {
+      "t": 17.0,
+      "caption": "A person in a white outfit is standing and smiling indoors near a plant.",
+      "actions": [
+        "standing",
+        "smiling"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 17.5,
+      "caption": "A person in a tuxedo is standing near a dining area.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 18.0,
+      "caption": "Person in white outfit stands in profile near a plant.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor, formal event",
+      "confidence": 0.9
+    },
+    {
+      "t": 18.5,
+      "caption": "A person is entering a posh restaurant with plants nearby.",
+      "actions": [
+        "entering"
+      ],
+      "objects": [
+        "restaurant sign",
+        "plant"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "restaurant interior",
+      "confidence": 0.9
+    },
+    {
+      "t": 19.0,
+      "caption": "A person stands beside a podium near a plant in a restaurant.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "podium",
+        "plant"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 19.5,
+      "caption": "A person in a black dress stands near a podium while a person in a checkered shirt enters the room.",
+      "actions": [
+        "standing",
+        "entering"
+      ],
+      "objects": [
+        "podium",
+        "plant",
+        "flowers"
+      ],
+      "people": [
+        "person in black dress",
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 20.0,
+      "caption": "A person is greeting another person at the entrance of a restaurant.",
+      "actions": [
+        "person entering smiling",
+        "person smiling"
+      ],
+      "objects": [
+        "backpack",
+        "plant",
+        "flowers",
+        "restaurant sign"
+      ],
+      "people": [
+        "person entering",
+        "person"
+      ],
+      "setting": "restaurant entrance",
+      "confidence": 0.9
+    },
+    {
+      "t": 20.5,
+      "caption": "A person smiling and talking to another person.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [],
+      "people": [
+        "person",
+        "person entering"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 21.0,
+      "caption": "A person smiling and engaging in conversation with another person.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [
+        "colorful necklace"
+      ],
+      "people": [
+        "person",
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 21.5,
+      "caption": "A person in a black outfit is smiling and talking to another person wearing a checkered shirt.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 22.0,
+      "caption": "A person with a colorful necklace is smiling and talking to a person entering who is wearing a backpack.",
+      "actions": [],
+      "objects": [],
+      "people": [],
+      "setting": "",
+      "confidence": 0.0
+    },
+    {
+      "t": 22.5,
+      "caption": "A person in a black outfit smiles and talks to another person wearing a plaid shirt.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 23.0,
+      "caption": "A person in white outfit smiles and talks to another person.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit",
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 23.5,
+      "caption": "A person is looking at another person and smiling.",
+      "actions": [
+        "looking",
+        "smiling"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 24.0,
+      "caption": "A person with a backpack is looking and smiling at another person.",
+      "actions": [
+        "looking",
+        "smiling"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 24.5,
+      "caption": "Person with backpack is looking to the side indoors.",
+      "actions": [
+        "looking"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 25.0,
+      "caption": "A person in a plaid shirt is interacting with a waiter holding a napkin, while another waiter stands nearby.",
+      "actions": [
+        "interacting",
+        "holding napkin",
+        "standing"
+      ],
+      "objects": [
+        "napkin",
+        "glasses"
+      ],
+      "people": [
+        "person in plaid shirt",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 25.5,
+      "caption": "A person is sitting down while a waiter prepares a napkin nearby in a restaurant.",
+      "actions": [
+        "person sitting",
+        "waiter preparing napkin"
+      ],
+      "objects": [
+        "napkin",
+        "glasses",
+        "dining table",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 26.0,
+      "caption": "Waiter and waitress prepare table while person in checkered shirt sits, looking uncomfortable.",
+      "actions": [
+        "waiter covering person with napkin",
+        "waitress adjusting glassware",
+        "person sitting"
+      ],
+      "objects": [
+        "napkin",
+        "glassware",
+        "dining table",
+        "chairs"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "waitress"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 26.5,
+      "caption": "A waiter is placing a napkin on the table while a person sitting watches.",
+      "actions": [
+        "placing napkin",
+        "sitting"
+      ],
+      "objects": [
+        "napkin",
+        "glass",
+        "dining table",
+        "cutlery",
+        "glass of water"
+      ],
+      "people": [
+        "waiter",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 27.0,
+      "caption": "A person in a white outfit is seated at a dining table while two waiters are attending to him.",
+      "actions": [
+        "sitting",
+        "serving",
+        "attending"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "chair"
+      ],
+      "people": [
+        "person in white outfit",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 27.5,
+      "caption": "A person in a white outfit stands still in an indoor setting with decorative lighting.",
+      "actions": [
+        "standing still"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 28.0,
+      "caption": "A person in white outfit stands still, possibly speaking or listening.",
+      "actions": [
+        "standing",
+        "speaking or listening"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor, formal",
+      "confidence": 0.9
+    },
+    {
+      "t": 28.5,
+      "caption": "A person in white outfit is standing and speaking indoors.",
+      "actions": [
+        "standing",
+        "speaking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.95
+    },
+    {
+      "t": 29.0,
+      "caption": "Person in white outfit standing indoors, possibly speaking.",
+      "actions": [
+        "standing",
+        "speaking"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.8
+    },
+    {
+      "t": 29.5,
+      "caption": "A person in a white outfit stands indoors in a formal setting.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.8
+    },
+    {
+      "t": 30.0,
+      "caption": "Person in white outfit standing and speaking indoors.",
+      "actions": [
+        "standing",
+        "speaking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 30.5,
+      "caption": "A person in a white outfit is standing indoors.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 31.0,
+      "caption": "Person in white outfit stands inside a room with elegant lighting.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor, elegant room",
+      "confidence": 0.9
+    },
+    {
+      "t": 31.5,
+      "caption": "A person is smiling and looking slightly upward.",
+      "actions": [
+        "smiling",
+        "looking upward"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 32.0,
+      "caption": "Person in white outfit smiling and looking upward indoors.",
+      "actions": [
+        "smiling",
+        "looking upward"
+      ],
+      "objects": [
+        "colorful necklace"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 32.5,
+      "caption": "A person is smiling while looking slightly upward in an indoor setting.",
+      "actions": [
+        "smiling",
+        "looking upward"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 33.0,
+      "caption": "A person entering the restaurant.",
+      "actions": [
+        "entering"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "restaurant sign",
+      "confidence": 0.7
+    },
+    {
+      "t": 33.5,
+      "caption": "A waiter is presenting a covered dish in a restaurant setting.",
+      "actions": [
+        "presenting covered dish"
+      ],
+      "objects": [
+        "covered dish"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.85
+    },
+    {
+      "t": 34.0,
+      "caption": "A waiter presents a covered dish with a welcoming gesture in a restaurant.",
+      "actions": [
+        "holding covered dish",
+        "gesturing"
+      ],
+      "objects": [
+        "covered dish"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 34.5,
+      "caption": "A waiter gestures with one hand while holding a covered dish in the other.",
+      "actions": [
+        "gesturing",
+        "holding"
+      ],
+      "objects": [
+        "covered dish"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant interior",
+      "confidence": 0.95
+    },
+    {
+      "t": 35.0,
+      "caption": "A waiter is presenting a covered dish.",
+      "actions": [
+        "presenting dish"
+      ],
+      "objects": [
+        "covered dish"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 35.5,
+      "caption": "A waiter serves a covered dish to a person sitting at a dining table.",
+      "actions": [
+        "serving",
+        "sitting"
+      ],
+      "objects": [
+        "covered dish",
+        "dining table",
+        "glasses",
+        "plate"
+      ],
+      "people": [
+        "waiter",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 36.0,
+      "caption": "A person in a white outfit covers a person's plate with a covered dish at a dining table.",
+      "actions": [
+        "covering plate"
+      ],
+      "objects": [
+        "covered dish",
+        "plate",
+        "glasses",
+        "glass"
+      ],
+      "people": [
+        "person in white outfit",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 36.5,
+      "caption": "A person sitting at a dining table looks up at a waiter lifting a covered dish.",
+      "actions": [
+        "person sitting",
+        "waiter lifting covered dish"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plate",
+        "covered dish",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 37.0,
+      "caption": "A person in a white outfit stands indoors, looking slightly to the side.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 37.5,
+      "caption": "A person in a white outfit is standing with eyes closed.",
+      "actions": [
+        "standing",
+        "eyes closed"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 38.0,
+      "caption": "A person in a white outfit is standing indoors.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 38.5,
+      "caption": "Person in white outfit standing and looking to the side.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 39.0,
+      "caption": "A person in white outfit is standing and speaking inside a restaurant.",
+      "actions": [
+        "standing",
+        "speaking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 39.5,
+      "caption": "Person in white outfit speaking or reacting.",
+      "actions": [
+        "speaking",
+        "reacting"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 40.0,
+      "caption": "A person in white outfit is speaking or reacting indoors.",
+      "actions": [
+        "speaking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 40.5,
+      "caption": "A waiter stands attentively in a restaurant.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant sign",
+      "confidence": 0.9
+    },
+    {
+      "t": 41.0,
+      "caption": "A person in a white outfit is standing and speaking indoors.",
+      "actions": [
+        "standing",
+        "speaking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 41.5,
+      "caption": "Person in white outfit standing indoors with eyes closed.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 42.0,
+      "caption": "Person in white outfit speaking or singing indoors.",
+      "actions": [
+        "speaking or singing"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.85
+    },
+    {
+      "t": 42.5,
+      "caption": "The person in a white outfit is speaking with an expressive facial expression.",
+      "actions": [
+        "speaking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor, likely a restaurant or formal venue",
+      "confidence": 0.9
+    },
+    {
+      "t": 43.0,
+      "caption": "Person in white outfit is speaking or reacting with mouth open.",
+      "actions": [
+        "speaking",
+        "reacting"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 43.5,
+      "caption": "A person in a white outfit is standing and smiling.",
+      "actions": [
+        "standing",
+        "smiling"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "",
+      "confidence": 0.9
+    },
+    {
+      "t": 44.0,
+      "caption": "A person in a white outfit is serving a person sitting at a dining table in a restaurant.",
+      "actions": [
+        "serving",
+        "sitting",
+        "looking"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plate",
+        "cutlery"
+      ],
+      "people": [
+        "person in white outfit",
+        "person sitting",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 44.5,
+      "caption": "A person sits at a dining table with eyes closed while waiters move around.",
+      "actions": [
+        "sitting",
+        "waiting"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plate",
+        "cutlery"
+      ],
+      "people": [
+        "person",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 45.0,
+      "caption": "A person sits alone at a dining table, looking at their plate while waiters serve other guests.",
+      "actions": [
+        "sitting",
+        "looking"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "glass",
+        "forks",
+        "glasses"
+      ],
+      "people": [
+        "person",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 45.5,
+      "caption": "A person is sitting alone at a dining table in a restaurant.",
+      "actions": [
+        "sitting",
+        "eating"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "glasses",
+        "forks",
+        "glass of water"
+      ],
+      "people": [
+        "person",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 46.0,
+      "caption": "A person in white outfit is standing near a doorway, looking to the side.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 46.5,
+      "caption": "A person in white outfit is entering and adjusting their clothing.",
+      "actions": [
+        "entering",
+        "adjusting clothing"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor with plants",
+      "confidence": 0.9
+    },
+    {
+      "t": 47.0,
+      "caption": "A person in white outfit is entering through a door while another person is smiling in the foreground.",
+      "actions": [
+        "person entering",
+        "smiling"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person in white outfit",
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 47.5,
+      "caption": "A person in a white outfit stands near a doorway while another person is smiling in the foreground.",
+      "actions": [
+        "standing",
+        "smiling"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person in white outfit",
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 48.0,
+      "caption": "A person sitting at a dining table looking down at a plate of food while waiters move nearby.",
+      "actions": [
+        "person sitting",
+        "waiter walking"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 48.5,
+      "caption": "A person sitting at a dining table looks to the side while a group at another table engages in conversation.",
+      "actions": [
+        "looking to the side",
+        "sitting",
+        "talking"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "glass",
+        "glass of water"
+      ],
+      "people": [
+        "person sitting",
+        "group at table"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 49.0,
+      "caption": "Person in plaid shirt is bending down near dining table with glasses and a plate.",
+      "actions": [
+        "bending down"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plate"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 49.5,
+      "caption": "A person is bending down near a dining table while a group sits in the background.",
+      "actions": [
+        "bending down",
+        "sitting"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plate",
+        "flowers",
+        "cutlery"
+      ],
+      "people": [
+        "person",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 50.0,
+      "caption": "A person in plaid is reaching for a glass at a dining table in a restaurant.",
+      "actions": [
+        "reaching for glass"
+      ],
+      "objects": [
+        "glass",
+        "plate",
+        "dining table",
+        "forks"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 50.5,
+      "caption": "A person sitting at a dining table examines a bottle of ketchup.",
+      "actions": [
+        "sitting",
+        "holding",
+        "examining"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "glass of water",
+        "glass"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 51.0,
+      "caption": "A person is holding and examining a bottle of ketchup while sitting at a dining table.",
+      "actions": [
+        "holding bottle of ketchup",
+        "examining bottle"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "glass",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 51.5,
+      "caption": "A person in a white outfit is standing and looking forward.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 52.0,
+      "caption": "A person in a white outfit is standing and looking forward.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "",
+      "confidence": 0.9
+    },
+    {
+      "t": 52.5,
+      "caption": "Two people are seated at a dining table, with one person holding a small dog.",
+      "actions": [
+        "sitting",
+        "holding dog"
+      ],
+      "objects": [
+        "dining table",
+        "flowers",
+        "cups",
+        "dog",
+        "colorful necklace"
+      ],
+      "people": [
+        "person",
+        "person in white outfit"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.95
+    },
+    {
+      "t": 53.0,
+      "caption": "Two people sitting at a dining table, one holding a dog wearing a colorful necklace.",
+      "actions": [
+        "sitting",
+        "holding dog"
+      ],
+      "objects": [
+        "dining table",
+        "flowers",
+        "glass",
+        "glass of water",
+        "dog",
+        "colorful necklace"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.95
+    },
+    {
+      "t": 53.5,
+      "caption": "A person holds a bottle of ketchup at a dining table.",
+      "actions": [
+        "holding"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "glass"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 54.0,
+      "caption": "Person holding a bottle of ketchup at a dining table.",
+      "actions": [
+        "holding bottle of ketchup"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "glass of water"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 54.5,
+      "caption": "A person is holding a bottle of ketchup at a dining table.",
+      "actions": [
+        "holding"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass of water"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 55.0,
+      "caption": "A person sitting at a dining table is being served by a waiter.",
+      "actions": [
+        "person sitting",
+        "waiter standing",
+        "person holding bottle"
+      ],
+      "objects": [
+        "dining table",
+        "glass",
+        "bottle of ketchup",
+        "forks",
+        "plate",
+        "napkin"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 55.5,
+      "caption": "A person sitting at a dining table in a restaurant, holding a bottle of ketchup with a waiter standing nearby.",
+      "actions": [
+        "holding bottle",
+        "standing"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "chairs",
+        "glasses",
+        "napkin"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 56.0,
+      "caption": "A person sitting at a dining table is holding a bottle of ketchup while a waiter stands nearby.",
+      "actions": [
+        "holding bottle of ketchup",
+        "standing"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glasses",
+        "napkin",
+        "plate",
+        "cutlery",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 56.5,
+      "caption": "A person sitting at a dining table is looking at a bottle of ketchup while a waiter stands nearby.",
+      "actions": [
+        "looking at bottle",
+        "standing"
+      ],
+      "objects": [
+        "dining table",
+        "bottle of ketchup",
+        "glass",
+        "forks",
+        "napkin"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 57.0,
+      "caption": "Person in white outfit stands with arms crossed, looking ahead.",
+      "actions": [
+        "standing",
+        "crossing arms",
+        "looking ahead"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.95
+    },
+    {
+      "t": 57.5,
+      "caption": "A person in white outfit stands with arms crossed, looking forward.",
+      "actions": [
+        "standing",
+        "crossing arms",
+        "looking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor room",
+      "confidence": 0.9
+    },
+    {
+      "t": 58.0,
+      "caption": "A person at a dining table is looking at a bottle of ketchup while a waiter stands nearby.",
+      "actions": [
+        "holding bottle of ketchup",
+        "sitting",
+        "standing"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass",
+        "plate",
+        "cutlery"
+      ],
+      "people": [
+        "person",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 58.5,
+      "caption": "A person is squeezing sauce from a bottle onto a plate while a waiter stands nearby.",
+      "actions": [
+        "squeezing sauce",
+        "standing"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "glass",
+        "glass of water",
+        "cutlery",
+        "napkin"
+      ],
+      "people": [
+        "person",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 59.0,
+      "caption": "A person is squeezing sauce onto their plate while a waiter stands nearby.",
+      "actions": [
+        "squeezing sauce",
+        "standing"
+      ],
+      "objects": [
+        "plate",
+        "bottle of ketchup",
+        "glass",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "person",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 59.5,
+      "caption": "A person seated at a dining table adds ketchup to their plate while a waiter approaches.",
+      "actions": [
+        "sitting",
+        "adding ketchup",
+        "approaching"
+      ],
+      "objects": [
+        "plate",
+        "bottle of ketchup",
+        "glass",
+        "dining table",
+        "forks"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 60.0,
+      "caption": "A person in a plaid shirt is seasoning their food with a bottle of ketchup at a dining table in a restaurant.",
+      "actions": [
+        "seasoning food",
+        "sitting"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass",
+        "plate",
+        "glass of water"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 60.5,
+      "caption": "Person in white outfit holding a dog with a colorful necklace.",
+      "actions": [
+        "holding dog"
+      ],
+      "objects": [
+        "colorful necklace"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "",
+      "confidence": 0.9
+    },
+    {
+      "t": 61.0,
+      "caption": "A person in a white outfit is holding a small dog with a colorful necklace.",
+      "actions": [
+        "holding"
+      ],
+      "objects": [
+        "dog",
+        "colorful necklace"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "",
+      "confidence": 0.9
+    },
+    {
+      "t": 61.5,
+      "caption": "Person in white outfit is holding a dog wearing a colorful necklace.",
+      "actions": [
+        "holding"
+      ],
+      "objects": [
+        "colorful necklace"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "",
+      "confidence": 0.9
+    },
+    {
+      "t": 62.0,
+      "caption": "A person in a plaid shirt is holding a bottle of ketchup while another person in a white outfit stands nearby.",
+      "actions": [
+        "holding bottle of ketchup",
+        "standing"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "glass",
+        "glass of water",
+        "cutlery"
+      ],
+      "people": [
+        "person",
+        "person in white outfit"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 62.5,
+      "caption": "A person is holding and squeezing a bottle of ketchup over a plate while another person is partially visible nearby.",
+      "actions": [
+        "holding ketchup bottle",
+        "squeezing ketchup bottle"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "glass of water",
+        "glass",
+        "cutlery"
+      ],
+      "people": [
+        "person",
+        "person in white outfit"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 63.0,
+      "caption": "Person in checkered shirt is squeezing ketchup onto food while person in white outfit stands nearby.",
+      "actions": [
+        "squeezing ketchup",
+        "standing"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "glass",
+        "glass of water"
+      ],
+      "people": [
+        "person",
+        "person in white outfit"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 63.5,
+      "caption": "A person is squeezing ketchup onto food while another person sits at the table in the background.",
+      "actions": [
+        "squeezing ketchup",
+        "sitting"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "glass of water",
+        "glass",
+        "cutlery"
+      ],
+      "people": [
+        "person",
+        "person sitting"
+      ],
+      "setting": "dining table",
+      "confidence": 0.9
+    },
+    {
+      "t": 64.0,
+      "caption": "A person in a white shirt and black vest stands in a room with a large column and flowers.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "flowers",
+        "column"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor room with classical architecture",
+      "confidence": 0.9
+    },
+    {
+      "t": 64.5,
+      "caption": "A person in white outfit stands still in an elegant indoor setting.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "white outfit",
+        "plant"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor restaurant or banquet hall",
+      "confidence": 0.9
+    },
+    {
+      "t": 65.0,
+      "caption": "A person in a white outfit stands facing forward in a formal setting.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "flowers",
+        "plant"
+      ],
+      "people": [
+        "person in white outfit",
+        "person sitting"
+      ],
+      "setting": "indoor formal room",
+      "confidence": 0.9
+    },
+    {
+      "t": 65.5,
+      "caption": "A person in white outfit stands in a formal room with people sitting at tables.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "dining table",
+        "flowers",
+        "chairs"
+      ],
+      "people": [
+        "person in white outfit",
+        "group at table",
+        "person sitting"
+      ],
+      "setting": "formal room",
+      "confidence": 0.9
+    },
+    {
+      "t": 66.0,
+      "caption": "A person in a white shirt and black vest stands indoors with a solemn expression.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "interior with columns and lighting",
+      "confidence": 0.9
+    },
+    {
+      "t": 66.5,
+      "caption": "A person in formal attire is standing indoors with a surprised expression.",
+      "actions": [
+        "standing",
+        "expressing surprise"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor with classical columns and floral arrangement",
+      "confidence": 0.9
+    },
+    {
+      "t": 67.0,
+      "caption": "A person in formal attire is standing and looking forward with a serious expression.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor with classical architecture and flowers",
+      "confidence": 0.9
+    },
+    {
+      "t": 67.5,
+      "caption": "A man in a vest and tie stands indoors with a surprised expression.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "vest",
+        "tie"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor, formal room",
+      "confidence": 0.9
+    },
+    {
+      "t": 68.0,
+      "caption": "A person in a white outfit looks distressed indoors.",
+      "actions": [
+        "looking distressed"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 68.5,
+      "caption": "A person in white outfit stands still with a concerned expression.",
+      "actions": [
+        "standing",
+        "looking concerned"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor room",
+      "confidence": 0.9
+    },
+    {
+      "t": 69.0,
+      "caption": "A person in white outfit looks surprised or concerned while standing indoors.",
+      "actions": [
+        "standing",
+        "expressing surprise"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 69.5,
+      "caption": "A person in a white outfit with a vest looks concerned indoors.",
+      "actions": [
+        "standing",
+        "looking concerned"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 70.0,
+      "caption": "A person is holding a bottle of ketchup over a plate at a dining table in a restaurant.",
+      "actions": [
+        "holding",
+        "pouring"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "forks",
+        "glasses",
+        "cutlery",
+        "glass of water"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 70.5,
+      "caption": "A person is holding and examining a bottle of ketchup at a dining table in a restaurant.",
+      "actions": [
+        "holding bottle of ketchup",
+        "examining bottle"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "forks",
+        "glass"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 71.0,
+      "caption": "Person sitting is holding a bottle of ketchup over a plate at the dining table.",
+      "actions": [
+        "holding bottle of ketchup"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "dining table",
+        "forks",
+        "glass",
+        "glass of water",
+        "napkin"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 71.5,
+      "caption": "Person opening a bottle of ketchup at the dining table in a restaurant.",
+      "actions": [
+        "opening bottle",
+        "sitting"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "forks",
+        "cutlery",
+        "glass"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 72.0,
+      "caption": "A person in white outfit stands still, looking forward.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 72.5,
+      "caption": "A person in a white outfit looks to the side with a serious expression.",
+      "actions": [
+        "looking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 73.0,
+      "caption": "Person in white outfit is looking to the left while slightly smiling.",
+      "actions": [
+        "looking left",
+        "smiling"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 73.5,
+      "caption": "A person is walking through a restaurant with tables and chairs nearby.",
+      "actions": [
+        "walking"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "restaurant sign"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.85
+    },
+    {
+      "t": 74.0,
+      "caption": "Person sitting at the dining table, looking at their plate with a napkin tucked in.",
+      "actions": [
+        "sitting",
+        "looking at plate",
+        "holding napkin"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "bottle of ketchup",
+        "forks",
+        "glass",
+        "napkin"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 74.5,
+      "caption": "Person sitting at dining table is cutting food on plate.",
+      "actions": [
+        "cutting food",
+        "sitting"
+      ],
+      "objects": [
+        "plate",
+        "forks",
+        "glass",
+        "bottle of ketchup",
+        "glass of water",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 75.0,
+      "caption": "A person is cutting food on a plate at a dining table in a restaurant.",
+      "actions": [
+        "cutting food",
+        "sitting"
+      ],
+      "objects": [
+        "plate",
+        "fork",
+        "knife",
+        "bottle of ketchup",
+        "glasses",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 75.5,
+      "caption": "A person is slicing food on a plate at a dining table in a restaurant.",
+      "actions": [
+        "slicing food",
+        "sitting"
+      ],
+      "objects": [
+        "plate",
+        "forks",
+        "bottle of ketchup",
+        "glass of water",
+        "glass",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 76.0,
+      "caption": "A person is cutting food on a plate at a dining table.",
+      "actions": [
+        "cutting food",
+        "sitting"
+      ],
+      "objects": [
+        "plate",
+        "forks",
+        "knife",
+        "bottle of ketchup",
+        "glasses",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 76.5,
+      "caption": "A bottle of Heinz tomato ketchup sits on a table next to glasses and cutlery.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [],
+      "setting": "dining table",
+      "confidence": 0.95
+    },
+    {
+      "t": 77.0,
+      "caption": "A bottle of Heinz tomato ketchup on a dining table with glasses and a napkin nearby.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass",
+        "napkin"
+      ],
+      "people": [],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 77.5,
+      "caption": "A bottle of Heinz tomato ketchup is placed on a dining table with glasses nearby.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass",
+        "glass of water"
+      ],
+      "people": [],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 78.0,
+      "caption": "A bottle of Heinz tomato ketchup is on a dining table with glasses nearby.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass"
+      ],
+      "people": [],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 78.5,
+      "caption": "A bottle of Heinz tomato ketchup is placed on a dining table.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass"
+      ],
+      "people": [],
+      "setting": "restaurant",
+      "confidence": 0.9
+    }
+  ],
+  "scene_captions": [
+    {
+      "t": 0.0,
+      "caption": "Person entering a restaurant where a group is seated at a dining table.",
+      "actions": [
+        "entering"
+      ],
+      "objects": [
+        "backpack",
+        "chairs",
+        "dining table"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 3.44,
+      "caption": "Person entering hallway looking to the side.",
+      "actions": [
+        "entering",
+        "looking"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person entering"
+      ],
+      "setting": "indoor hallway",
+      "confidence": 0.9
+    },
+    {
+      "t": 6.6,
+      "caption": "People are dining and walking in a large, elegant restaurant.",
+      "actions": [
+        "dining",
+        "walking",
+        "sitting"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers",
+        "glass",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "group at table",
+        "person entering",
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 7.68,
+      "caption": "The restaurant ceiling features ornate architectural details with hanging lamps illuminated.",
+      "actions": [
+        "illuminating"
+      ],
+      "objects": [
+        "lanterns",
+        "ceiling",
+        "lights"
+      ],
+      "people": [],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 8.84,
+      "caption": "No visible actions or people in a decorated indoor setting.",
+      "actions": [],
+      "objects": [],
+      "people": [],
+      "setting": "indoor room with framed pictures on wall",
+      "confidence": 0.9
+    },
+    {
+      "t": 9.8,
+      "caption": "Four forks are placed aligned on a dining table next to an empty plate.",
+      "actions": [
+        "forks placed"
+      ],
+      "objects": [
+        "forks",
+        "plate",
+        "dining table"
+      ],
+      "people": [],
+      "setting": "dining table",
+      "confidence": 0.9
+    },
+    {
+      "t": 12.12,
+      "caption": "A person in a white outfit is playing the piano while two people sit at a dining table.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "flowers",
+        "glasses"
+      ],
+      "people": [
+        "person in white outfit",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 16.08,
+      "caption": "A person in a white outfit is smiling and looking down.",
+      "actions": [
+        "smiling",
+        "looking down"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 18.48,
+      "caption": "A person is peeking from behind the reception desk in a restaurant lobby with decorative plants.",
+      "actions": [
+        "peeking"
+      ],
+      "objects": [
+        "reception desk",
+        "plant",
+        "flowers",
+        "restaurant sign"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant lobby",
+      "confidence": 0.9
+    },
+    {
+      "t": 20.64,
+      "caption": "A person is smiling and talking to another person.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [
+        "colorful necklace"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.95
+    },
+    {
+      "t": 23.48,
+      "caption": "A person with red hair is looking at another person in conversation.",
+      "actions": [
+        "looking",
+        "talking"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 25.16,
+      "caption": "A person in a checkered shirt gestures toward a person in white outfit while a waiter holds a napkin.",
+      "actions": [
+        "gesturing",
+        "holding napkin"
+      ],
+      "objects": [
+        "napkin",
+        "glasses"
+      ],
+      "people": [
+        "person in white outfit",
+        "person",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 27.44,
+      "caption": "A person in formal attire stands quietly in an elegant room.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "elegant room",
+      "confidence": 0.9
+    },
+    {
+      "t": 31.28,
+      "caption": "Person looking up with a slight smile.",
+      "actions": [
+        "looking up",
+        "smiling"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor, likely restaurant",
+      "confidence": 0.85
+    },
+    {
+      "t": 35.28,
+      "caption": "A waiter is lifting a covered dish in front of a person sitting at a dining table in a restaurant.",
+      "actions": [
+        "lifting covered dish",
+        "sitting"
+      ],
+      "objects": [
+        "covered dish",
+        "dining table",
+        "glasses",
+        "forks",
+        "plate"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 37.16,
+      "caption": "Person in white outfit standing indoors, possibly speaking.",
+      "actions": [
+        "standing",
+        "speaking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor, possibly a restaurant or formal area",
+      "confidence": 0.9
+    },
+    {
+      "t": 44.0,
+      "caption": "A person in a white outfit is seated alone at a dining table, looking upwards, while waiters serve in the background.",
+      "actions": [
+        "sitting",
+        "looking up",
+        "serving"
+      ],
+      "objects": [
+        "dining table",
+        "glass of water",
+        "plate",
+        "glasses"
+      ],
+      "people": [
+        "person in white outfit",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 46.24,
+      "caption": "A person in white outfit is standing and looking forward inside a room.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor room",
+      "confidence": 0.85
+    },
+    {
+      "t": 47.92,
+      "caption": "A person sits at a dining table looking down at their plate while waiters move around in a restaurant setting.",
+      "actions": [
+        "sitting",
+        "looking down"
+      ],
+      "objects": [
+        "plate",
+        "glass",
+        "wine glass",
+        "cutlery"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 51.36,
+      "caption": "A person in white outfit stands still in an indoor setting.",
+      "actions": [
+        "standing still"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 52.36,
+      "caption": "Two people are sitting at a dining table with one person holding a dog wearing a colorful necklace.",
+      "actions": [
+        "sitting",
+        "holding dog"
+      ],
+      "objects": [
+        "dining table",
+        "flowers",
+        "glass of water",
+        "glass",
+        "dog",
+        "colorful necklace"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.95
+    },
+    {
+      "t": 53.64,
+      "caption": "Person holds a bottle of ketchup at the dining table.",
+      "actions": [
+        "holding"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "glass of water",
+        "dining table"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 55.24,
+      "caption": "A person sits at a dining table while a waiter stands nearby.",
+      "actions": [
+        "sitting",
+        "standing"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "forks",
+        "plate",
+        "napkin",
+        "bottle of ketchup"
+      ],
+      "people": [
+        "person",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 57.16,
+      "caption": "Person in white outfit stands with crossed arms looking forward.",
+      "actions": [
+        "standing",
+        "crossing arms",
+        "looking"
+      ],
+      "objects": [
+        "white outfit"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 58.24,
+      "caption": "A person sitting at a dining table inspects a bottle of ketchup while a waiter stands nearby.",
+      "actions": [
+        "sitting",
+        "inspecting bottle",
+        "standing"
+      ],
+      "objects": [
+        "dining table",
+        "bottle of ketchup",
+        "glass",
+        "forks",
+        "plate"
+      ],
+      "people": [
+        "person sitting",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 60.72,
+      "caption": "A person in white outfit is holding a dog wearing a colorful necklace.",
+      "actions": [
+        "holding"
+      ],
+      "objects": [
+        "colorful necklace"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "",
+      "confidence": 0.95
+    },
+    {
+      "t": 62.2,
+      "caption": "A person is holding a bottle of ketchup while sitting at a dining table in a restaurant.",
+      "actions": [
+        "holding",
+        "sitting"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 64.24,
+      "caption": "A waiter stands in a formal setting, looking forward.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "flower"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "formal room",
+      "confidence": 0.9
+    },
+    {
+      "t": 69.88,
+      "caption": "Person holding a bottle of ketchup over a plate at a dining table.",
+      "actions": [
+        "holding bottle",
+        "looking at bottle"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "forks",
+        "glass"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 72.0,
+      "caption": "Person in white outfit stands looking forward indoors.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 73.96,
+      "caption": "A person sitting at a dining table, looking at their plate and holding a napkin.",
+      "actions": [
+        "sitting",
+        "holding napkin",
+        "looking at plate"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "napkin",
+        "bottle of ketchup",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 76.6,
+      "caption": "A bottle of Heinz tomato ketchup is placed on a table with glasses and cutlery nearby.",
+      "actions": [
+        "placed"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "glass",
+        "cutlery"
+      ],
+      "people": [],
+      "setting": "dining table",
+      "confidence": 0.9
+    }
+  ],
+  "per_second_descriptions": [
+    {
+      "t": 0.0,
+      "description": "A person is entering a restaurant where a group is sitting at a dining table.",
+      "actions": [
+        "person entering",
+        "people sitting"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "restaurant interior",
+      "confidence": 0.9
+    },
+    {
+      "t": 1.0,
+      "description": "A person with a backpack is entering a large, elegant restaurant lobby with people standing near a dining table and a piano visible.",
+      "actions": [
+        "person entering",
+        "people standing"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "piano",
+        "flowers"
+      ],
+      "people": [
+        "person",
+        "group at table"
+      ],
+      "setting": "restaurant lobby",
+      "confidence": 0.9
+    },
+    {
+      "t": 2.0,
+      "description": "A person with a backpack stands in a large, elegant restaurant with a group seated at a dining table.",
+      "actions": [
+        "person entering",
+        "group sitting"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person entering",
+        "group at table"
+      ],
+      "setting": "restaurant interior",
+      "confidence": 0.9
+    },
+    {
+      "t": 3.0,
+      "description": "A person with a backpack enters a restaurant where groups of people are dining at tables.",
+      "actions": [
+        "entering",
+        "dining"
+      ],
+      "objects": [
+        "backpack",
+        "dining table",
+        "chairs",
+        "flowers",
+        "glasses",
+        "napkin"
+      ],
+      "people": [
+        "person entering",
+        "group at table",
+        "waiter",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 4.0,
+      "description": "A person with a backpack stands indoors between two tables with plants.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "backpack",
+        "plant",
+        "table"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor, corridor or hallway",
+      "confidence": 0.9
+    },
+    {
+      "t": 5.0,
+      "description": "A person wearing a checkered shirt and a backpack is standing in a hallway between two tables with white orchids.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "backpack",
+        "white orchids",
+        "tables"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "hallway indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 6.0,
+      "description": "A person with a backpack stands indoors between two tables with white orchid plants in pots.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "backpack",
+        "potted orchids",
+        "tables"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor hallway or room with decorative elements",
+      "confidence": 0.9
+    },
+    {
+      "t": 7.0,
+      "description": "People dining and walking inside an elegant restaurant with white columns and floral decorations.",
+      "actions": [],
+      "objects": [],
+      "people": [],
+      "setting": "",
+      "confidence": 0.0
+    },
+    {
+      "t": 8.0,
+      "description": "An ornate chandelier is hanging from a decorated ceiling in an elegant indoor setting.",
+      "actions": [],
+      "objects": [
+        "chandelier"
+      ],
+      "people": [],
+      "setting": "indoor, elegant",
+      "confidence": 0.9
+    },
+    {
+      "t": 9.0,
+      "description": "Interior wall of a room with framed pictures and decorative molding.",
+      "actions": [],
+      "objects": [
+        "framed pictures",
+        "decorative molding"
+      ],
+      "people": [],
+      "setting": "indoor room",
+      "confidence": 0.9
+    },
+    {
+      "t": 10.0,
+      "description": "Four forks and a small plate are arranged on a white table next to a chair.",
+      "actions": [],
+      "objects": [
+        "forks",
+        "plate",
+        "chair",
+        "table"
+      ],
+      "people": [],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 11.0,
+      "description": "A neatly set dining table with cutlery, glasses, and a napkin.",
+      "actions": [],
+      "objects": [
+        "dining table",
+        "forks",
+        "spoon",
+        "knives",
+        "glasses",
+        "napkin",
+        "plate"
+      ],
+      "people": [],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 12.0,
+      "description": "A person in a tuxedo is playing the piano in an elegant dining setting with two people sitting at a table in the background.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "flowers",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person playing piano",
+        "two persons sitting"
+      ],
+      "setting": "elegant dining room",
+      "confidence": 0.9
+    },
+    {
+      "t": 13.0,
+      "description": "A man in a tuxedo is playing the piano in a restaurant where two women are sitting at a table.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "glasses"
+      ],
+      "people": [
+        "person in white outfit",
+        "person sitting",
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 14.0,
+      "description": "A man in a tuxedo plays the piano in a restaurant where two women are seated at a table.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "glasses"
+      ],
+      "people": [
+        "man in tuxedo",
+        "two women"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 15.0,
+      "description": "A man in a tuxedo plays the piano while two women sit at a dining table in an elegant room.",
+      "actions": [
+        "playing piano",
+        "sitting"
+      ],
+      "objects": [
+        "piano",
+        "dining table",
+        "chairs",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "man in tuxedo",
+        "two women"
+      ],
+      "setting": "elegant dining room",
+      "confidence": 0.9
+    },
+    {
+      "t": 16.0,
+      "description": "A person in formal attire is sitting indoors with a plant in the background.",
+      "actions": [
+        "sitting"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.8
+    },
+    {
+      "t": 17.0,
+      "description": "A person in a tuxedo is sitting in a warmly lit indoor setting with plants in the background.",
+      "actions": [
+        "sitting"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 18.0,
+      "description": "A man in a tuxedo is standing indoors near a large plant, with a woman in the foreground.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "plant"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 19.0,
+      "description": "A person stands behind a podium with a 'Super Posh Restaurant' sign near a plant and white flowers in an elegant interior.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "podium",
+        "plant",
+        "flowers"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant interior",
+      "confidence": 0.9
+    },
+    {
+      "t": 20.0,
+      "description": "A person in a plaid shirt is talking to a person in a black dress near a plant and a Super Posh Restaurant sign.",
+      "actions": [
+        "talking"
+      ],
+      "objects": [
+        "plant",
+        "restaurant sign",
+        "backpack"
+      ],
+      "people": [
+        "person in black dress",
+        "person"
+      ],
+      "setting": "restaurant entrance",
+      "confidence": 0.9
+    },
+    {
+      "t": 21.0,
+      "description": "A person smiling and facing another person in an indoor setting.",
+      "actions": [
+        "smiling",
+        "facing"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 22.0,
+      "description": "A woman is smiling and talking to a person with a backpack.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 23.0,
+      "description": "A woman is smiling and talking to a man in a checkered shirt indoors.",
+      "actions": [
+        "smiling",
+        "talking"
+      ],
+      "objects": [],
+      "people": [
+        "woman",
+        "man"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 24.0,
+      "description": "A person with red hair and beard is looking at another person.",
+      "actions": [
+        "looking"
+      ],
+      "objects": [
+        "backpack"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 25.0,
+      "description": "A man in a plaid shirt interacts with a waitress while another waiter holds a napkin in an elegant dining room.",
+      "actions": [
+        "man interacting with waitress",
+        "waiter holding napkin"
+      ],
+      "objects": [
+        "napkin",
+        "glasses",
+        "dining table",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "man in plaid shirt",
+        "waitress",
+        "waiter"
+      ],
+      "setting": "elegant dining room",
+      "confidence": 0.9
+    },
+    {
+      "t": 26.0,
+      "description": "A waiter is placing a napkin on a person sitting at a dining table while a person in a white outfit looks on.",
+      "actions": [
+        "placing napkin",
+        "sitting",
+        "looking"
+      ],
+      "objects": [
+        "napkin",
+        "dining table",
+        "glass"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "person in white outfit"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 27.0,
+      "description": "A person in a checkered shirt is seated at a dining table while two waiters are attending to them in an elegant restaurant setting.",
+      "actions": [
+        "person sitting",
+        "waiters serving"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person",
+        "waiter",
+        "person in white outfit"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 28.0,
+      "description": "A man in a formal outfit is standing indoors, possibly speaking or reacting to something.",
+      "actions": [
+        "standing",
+        "speaking"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 29.0,
+      "description": "A person in a white shirt and black vest stands indoors with architectural details in the background.",
+      "actions": [],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 30.0,
+      "description": "A man in formal attire stands indoors with an ornate wall behind him.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 31.0,
+      "description": "A person in a white shirt and black vest stands indoors in a formal setting.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 32.0,
+      "description": "A person with red hair is looking upwards with a smile while others are seated in the background.",
+      "actions": [
+        "looking upwards",
+        "smiling"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 33.0,
+      "description": "A blurry indoor scene with people and furniture visible.",
+      "actions": [],
+      "objects": [
+        "chairs",
+        "table"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.4
+    },
+    {
+      "t": 34.0,
+      "description": "A waiter in a white shirt and black vest is holding a covered dish in a dining setting.",
+      "actions": [
+        "holding covered dish",
+        "gesturing"
+      ],
+      "objects": [
+        "covered dish"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 35.0,
+      "description": "A waiter in a white shirt and black vest is holding a covered dish in an elegant indoor setting.",
+      "actions": [
+        "holding covered dish"
+      ],
+      "objects": [
+        "covered dish"
+      ],
+      "people": [
+        "waiter"
+      ],
+      "setting": "indoor, elegant dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 36.0,
+      "description": "A waiter in a white outfit is covering the plate of a person sitting at a dining table in a restaurant.",
+      "actions": [
+        "covering plate"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "covered dish",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "person in white outfit"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 37.0,
+      "description": "A man in a white shirt and black vest stands indoors with warm lighting.",
+      "actions": [],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 38.0,
+      "description": "A man in a white shirt and black vest stands indoors with his eyes closed.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "vest",
+        "shirt"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 39.0,
+      "description": "A man in a white shirt and black vest stands indoors in front of an ornate wall with a large ring light.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "vest",
+        "shirt",
+        "neck tie"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor, ornate wall",
+      "confidence": 0.9
+    },
+    {
+      "t": 40.0,
+      "description": "A person in a white shirt and black vest is standing indoors with decorative arches and lighting.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "white shirt",
+        "black vest"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor, decorative arches, lighting",
+      "confidence": 0.9
+    },
+    {
+      "t": 41.0,
+      "description": "A person in a white shirt and black vest stands indoors with ornate architectural details in the background.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 42.0,
+      "description": "A man in a black vest and tie is standing indoors with eyes closed and mouth open.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 43.0,
+      "description": "A man wearing a white shirt, black vest, and black tie is making an expressive face indoors.",
+      "actions": [
+        "making expressive face"
+      ],
+      "objects": [
+        "white shirt",
+        "black vest",
+        "black tie"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoors",
+      "confidence": 0.95
+    },
+    {
+      "t": 44.0,
+      "description": "A person in a checkered shirt is sitting alone at a dining table in a restaurant with other diners and waiters nearby.",
+      "actions": [
+        "sitting",
+        "serving"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plate",
+        "cutlery",
+        "glass"
+      ],
+      "people": [
+        "person",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 45.0,
+      "description": "A person in a plaid shirt is sitting alone at a dining table in a restaurant with other diners and waiters present.",
+      "actions": [
+        "sitting"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plate",
+        "forks",
+        "glass of water"
+      ],
+      "people": [
+        "person",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 46.0,
+      "description": "A person in a white outfit stands near a doorway while others are seated nearby.",
+      "actions": [
+        "standing",
+        "sitting"
+      ],
+      "objects": [
+        "plant",
+        "dining table",
+        "chairs"
+      ],
+      "people": [
+        "person in white outfit",
+        "person sitting"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 47.0,
+      "description": "A person in a white outfit stands near a doorway in an indoor setting with plants, while another person is partially visible in the foreground.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "plant",
+        "doorway"
+      ],
+      "people": [
+        "person in white outfit",
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 48.0,
+      "description": "A person sitting alone at a dining table in a restaurant with food on the plate, while waiters move around in the background.",
+      "actions": [
+        "person sitting",
+        "waiter walking"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "forks",
+        "cutlery",
+        "glass",
+        "glass of water"
+      ],
+      "people": [
+        "person",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 49.0,
+      "description": "A person in a checkered shirt leans forward at a dining table in a restaurant with other groups dining in the background.",
+      "actions": [
+        "leaning forward"
+      ],
+      "objects": [
+        "dining table",
+        "glasses",
+        "plant",
+        "flowers",
+        "plate"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 50.0,
+      "description": "A person in a plaid shirt is sitting at a dining table in a restaurant with other people at tables in the background.",
+      "actions": [
+        "sitting",
+        "reaching for glass"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "glass",
+        "glass of water",
+        "cutlery",
+        "napkin",
+        "salt shaker"
+      ],
+      "people": [
+        "person",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 51.0,
+      "description": "A person in a checkered shirt is sitting at a dining table in a restaurant examining a bottle of ketchup.",
+      "actions": [
+        "sitting",
+        "examining bottle"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "bottle of ketchup",
+        "glass",
+        "wine glasses",
+        "forks"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 52.0,
+      "description": "A man in formal attire stands indoors with a neutral expression.",
+      "actions": [],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 53.0,
+      "description": "Two people sitting at a dining table indoors, one holding a small dog.",
+      "actions": [
+        "sitting",
+        "holding dog"
+      ],
+      "objects": [
+        "dining table",
+        "flowers",
+        "glass",
+        "cup",
+        "small dog",
+        "colorful necklace"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 54.0,
+      "description": "A person in a checkered shirt is holding a bottle of ketchup while sitting at a table with a glass of water.",
+      "actions": [
+        "holding ketchup bottle",
+        "sitting"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "glass of water",
+        "table"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor dining area",
+      "confidence": 0.9
+    },
+    {
+      "t": 55.0,
+      "description": "A man is sitting at a dining table in a restaurant while a waiter stands nearby.",
+      "actions": [
+        "sitting",
+        "standing",
+        "serving"
+      ],
+      "objects": [
+        "dining table",
+        "chairs",
+        "glasses",
+        "bottle of ketchup",
+        "napkin",
+        "forks",
+        "plate"
+      ],
+      "people": [
+        "person",
+        "waiter"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 56.0,
+      "description": "A man sitting at a dining table in a restaurant holding a bottle of ketchup, with a waiter standing nearby and other diners in the background.",
+      "actions": [
+        "holding bottle of ketchup",
+        "serving",
+        "dining"
+      ],
+      "objects": [
+        "dining table",
+        "bottle of ketchup",
+        "glass",
+        "cutlery",
+        "plate",
+        "napkin"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 57.0,
+      "description": "A person in a white outfit stands with arms crossed indoors.",
+      "actions": [
+        "standing",
+        "arms crossed"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 58.0,
+      "description": "A person sitting alone at a dining table in a restaurant while a waiter stands nearby.",
+      "actions": [
+        "sitting",
+        "holding bottle",
+        "standing"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "glass",
+        "bottle of ketchup",
+        "forks",
+        "glass of water"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "group at table",
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 59.0,
+      "description": "A person sitting alone at a dining table in a restaurant, using a ketchup bottle on food, with a waiter standing nearby and other groups dining in the background.",
+      "actions": [
+        "sitting",
+        "using ketchup",
+        "standing"
+      ],
+      "objects": [
+        "dining table",
+        "ketchup bottle",
+        "plate",
+        "glass",
+        "cutlery",
+        "napkin",
+        "chairs",
+        "flowers"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.95
+    },
+    {
+      "t": 60.0,
+      "description": "A person sitting at a dining table in a restaurant is holding a bottle of ketchup while other people are seated and waiters stand nearby.",
+      "actions": [
+        "sitting",
+        "holding",
+        "seated",
+        "standing"
+      ],
+      "objects": [
+        "dining table",
+        "bottle of ketchup",
+        "plate",
+        "glass",
+        "glass of water",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 61.0,
+      "description": "A dog wearing a colorful necklace is being held by a person in a white outfit.",
+      "actions": [
+        "holding"
+      ],
+      "objects": [
+        "dog",
+        "colorful necklace"
+      ],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "",
+      "confidence": 0.9
+    },
+    {
+      "t": 62.0,
+      "description": "A person is holding a bottle of ketchup at a dining table with another person sitting nearby.",
+      "actions": [
+        "holding bottle of ketchup"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "glass",
+        "cutlery",
+        "plate"
+      ],
+      "people": [
+        "person",
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 63.0,
+      "description": "A person is squeezing ketchup onto food at a dining table in a restaurant.",
+      "actions": [
+        "squeezing ketchup"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "glass of water",
+        "fork",
+        "glass"
+      ],
+      "people": [
+        "person sitting"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 64.0,
+      "description": "A man in a formal vest and tie stands in an elegant room with decorative columns and dim lighting.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "columns",
+        "flowers"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "elegant indoor room",
+      "confidence": 0.9
+    },
+    {
+      "t": 65.0,
+      "description": "A man in a black vest and white shirt stands in a grand interior with a large column and flowers in the background.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "column",
+        "flowers"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "grand interior",
+      "confidence": 0.9
+    },
+    {
+      "t": 66.0,
+      "description": "A man in a vest stands indoors with columns and flowers behind him.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "flowers",
+        "columns"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor, possibly formal venue",
+      "confidence": 0.9
+    },
+    {
+      "t": 67.0,
+      "description": "A person in formal attire stands inside a grand room with tall columns and floral decorations.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [
+        "flowers",
+        "columns"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor, grand room",
+      "confidence": 0.9
+    },
+    {
+      "t": 68.0,
+      "description": "A person in a white outfit and black vest stands indoors with a concerned expression.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person in white outfit"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 69.0,
+      "description": "A person in formal attire stands indoors with a concerned expression.",
+      "actions": [
+        "standing"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoor",
+      "confidence": 0.9
+    },
+    {
+      "t": 70.0,
+      "description": "A person is seated at a dining table holding a bottle of ketchup in a restaurant.",
+      "actions": [
+        "holding bottle of ketchup"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "plate",
+        "forks",
+        "glasses",
+        "napkin",
+        "cutlery"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 71.0,
+      "description": "A person sitting at a dining table in a restaurant is holding a bottle of ketchup while looking upward.",
+      "actions": [
+        "holding bottle of ketchup",
+        "looking upward"
+      ],
+      "objects": [
+        "bottle of ketchup",
+        "dining table",
+        "forks",
+        "plate",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person sitting",
+        "waiter",
+        "group at table"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 72.0,
+      "description": "A man in a white shirt and black vest stands indoors.",
+      "actions": [],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 73.0,
+      "description": "A person in formal attire is standing indoors looking to the side.",
+      "actions": [
+        "standing",
+        "looking"
+      ],
+      "objects": [],
+      "people": [
+        "person"
+      ],
+      "setting": "indoors",
+      "confidence": 0.9
+    },
+    {
+      "t": 74.0,
+      "description": "A person in a dining setting with a plate of food, ketchup bottle, and multiple glasses at the table.",
+      "actions": [
+        "sitting"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "bottle of ketchup",
+        "glasses",
+        "cutlery"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 75.0,
+      "description": "A man in a plaid shirt is sitting at a dining table in a restaurant, preparing to eat a meal with a bottle of ketchup nearby.",
+      "actions": [
+        "sitting",
+        "cutting food"
+      ],
+      "objects": [
+        "dining table",
+        "plate",
+        "cutlery",
+        "glass",
+        "bottle of ketchup",
+        "napkin",
+        "glass of water"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 76.0,
+      "description": "A man in a restaurant is sitting at a table and cutting his food with a knife and fork.",
+      "actions": [
+        "cutting food",
+        "sitting"
+      ],
+      "objects": [
+        "plate",
+        "forks",
+        "knife",
+        "glass",
+        "bottle of ketchup",
+        "napkin"
+      ],
+      "people": [
+        "person"
+      ],
+      "setting": "restaurant dining area",
+      "confidence": 0.95
+    },
+    {
+      "t": 77.0,
+      "description": "Close-up of a Heinz tomato ketchup bottle on a table with glasses and other tableware in the background.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "glass"
+      ],
+      "people": [],
+      "setting": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "t": 78.0,
+      "description": "A close-up of a bottle of Heinz tomato ketchup on a dining table with glasses and other tableware.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "glass"
+      ],
+      "people": [],
+      "setting": "dining table",
+      "confidence": 0.9
+    },
+    {
+      "t": 79.0,
+      "description": "A bottle of Heinz tomato ketchup is placed on a dining table with glasses and cutlery visible in the background.",
+      "actions": [],
+      "objects": [
+        "bottle of ketchup",
+        "glass",
+        "cutlery"
+      ],
+      "people": [],
+      "setting": "dining table",
+      "confidence": 0.9
+    }
+  ],
+  "scene_segments": [
+    {
+      "t_start": 0.0,
+      "t_end": 3.44,
+      "description": "A person wearing a backpack and a checkered shirt enters a bright restaurant area where groups of people are seated at dining tables with flowers and various table settings.",
+      "key_elements": [
+        "person entering",
+        "backpack",
+        "dining table",
+        "group at table",
+        "flowers",
+        "chairs",
+        "restaurant sign"
+      ],
+      "confidence": 0.0,
+      "id": 0
+    },
+    {
+      "t_start": 3.44,
+      "t_end": 6.6,
+      "description": "A person in a checkered shirt with a backpack is standing in a hallway with white walls and potted white flowers on either side, looking around.",
+      "key_elements": [
+        "person",
+        "backpack",
+        "flowers"
+      ],
+      "confidence": 0.95,
+      "id": 1
+    },
+    {
+      "t_start": 6.6,
+      "t_end": 7.68,
+      "description": "A spacious, elegant restaurant dining area with multiple groups seated at tables while waitstaff walk between them. The scene captures a calm dining atmosphere with ornate architectural details and soft lighting.",
+      "key_elements": [
+        "group at table",
+        "dining table",
+        "chairs",
+        "person in white outfit",
+        "waiter",
+        "flowers",
+        "restaurant sign",
+        "glass"
+      ],
+      "confidence": 0.0,
+      "id": 2
+    },
+    {
+      "t_start": 7.68,
+      "t_end": 8.84,
+      "description": "The camera focuses on an ornate chandelier hanging from a decorated ceiling, with no visible activity or people.",
+      "key_elements": [
+        "chandelier",
+        "decorated ceiling",
+        "lighting"
+      ],
+      "confidence": 0.0,
+      "id": 3
+    },
+    {
+      "t_start": 8.84,
+      "t_end": 9.8,
+      "description": "The camera focuses on a wall in an interior space where different paintings are displayed, with one large abstract painting appearing in the middle frame. No people or objects are visible.",
+      "key_elements": [
+        "paintings",
+        "wall",
+        "interior space"
+      ],
+      "confidence": 0.0,
+      "id": 4
+    },
+    {
+      "t_start": 9.8,
+      "t_end": 12.12,
+      "description": "The dining table is set with multiple forks, knives, a spoon, glasses, a plate, a napkin, and flowers, arranged neatly for a meal.",
+      "key_elements": [
+        "dining table",
+        "forks",
+        "knives",
+        "spoon",
+        "glasses",
+        "plate",
+        "napkin",
+        "flowers"
+      ],
+      "confidence": 0.0,
+      "id": 5
+    },
+    {
+      "t_start": 12.12,
+      "t_end": 16.08,
+      "description": "A person in a tuxedo is playing the piano with eyes closed, while two people are sitting at a dining table in the background.",
+      "key_elements": [
+        "person",
+        "piano",
+        "person sitting",
+        "dining table"
+      ],
+      "confidence": 0.0,
+      "id": 6
+    },
+    {
+      "t_start": 16.08,
+      "t_end": 18.48,
+      "description": "A person in a white outfit with a black bow tie is shown in profile, appearing thoughtful or focused, while part of another person's face with a colorful necklace is visible in the foreground.",
+      "key_elements": [
+        "person in white outfit",
+        "black bow tie",
+        "colorful necklace",
+        "plant in background"
+      ],
+      "confidence": 0.0,
+      "id": 7
+    },
+    {
+      "t_start": 18.48,
+      "t_end": 20.64,
+      "description": "A woman standing next to a podium labeled 'Super Posh Restaurant' smiles and interacts with a man who enters the scene, suggesting a welcoming or greeting moment.",
+      "key_elements": [
+        "woman",
+        "podium",
+        "Super Posh Restaurant",
+        "man entering",
+        "plant",
+        "flowers"
+      ],
+      "confidence": 0.0,
+      "id": 8
+    },
+    {
+      "t_start": 20.64,
+      "t_end": 23.48,
+      "description": "A person in a black top is smiling and speaking to another person wearing a checkered shirt and a backpack, in what appears to be an indoor setting.",
+      "key_elements": [
+        "person",
+        "person in white outfit",
+        "backpack"
+      ],
+      "confidence": 0.0,
+      "id": 9
+    },
+    {
+      "t_start": 23.48,
+      "t_end": 25.16,
+      "description": "A person with red hair and a plaid shirt interacts with two restaurant staff members dressed in black and white uniforms in an elegant dining room.",
+      "key_elements": [
+        "person",
+        "person in white outfit",
+        "waiter",
+        "dining table",
+        "chairs",
+        "restaurant sign"
+      ],
+      "confidence": 0.9,
+      "id": 10
+    },
+    {
+      "t_start": 25.16,
+      "t_end": 27.44,
+      "description": "A person in a plaid shirt sits down at a dining table while two waiters, one male and one female, prepare the table for the guest in a formal restaurant setting.",
+      "key_elements": [
+        "person sitting",
+        "group at table",
+        "dining table",
+        "chairs",
+        "waiter",
+        "person in white outfit",
+        "glasses",
+        "napkin"
+      ],
+      "confidence": 0.0,
+      "id": 11
+    },
+    {
+      "t_start": 27.44,
+      "t_end": 31.28,
+      "description": "A person in a white outfit with a black vest and tie is shown speaking or reacting in front of an elegant wall with pillars and lighting.",
+      "key_elements": [
+        "person in white outfit"
+      ],
+      "confidence": 0.0,
+      "id": 12
+    },
+    {
+      "t_start": 31.28,
+      "t_end": 35.28,
+      "description": "A man in a checkered shirt is looking up and smiling, while a waiter in a vest and tie presents a covered dish to a seated person in a restaurant setting.",
+      "key_elements": [
+        "person",
+        "waiter",
+        "covered dish",
+        "person sitting",
+        "restaurant sign"
+      ],
+      "confidence": 0.0,
+      "id": 13
+    },
+    {
+      "t_start": 35.28,
+      "t_end": 37.16,
+      "description": "A person sitting at a dining table in a restaurant has just had a covered dish served to him by a waiter, who then lifts the cover to reveal the food.",
+      "key_elements": [
+        "person sitting",
+        "waiter",
+        "dining table",
+        "covered dish",
+        "glass",
+        "restaurant"
+      ],
+      "confidence": 0.0,
+      "id": 14
+    },
+    {
+      "t_start": 37.16,
+      "t_end": 44.0,
+      "description": "A man dressed in a white shirt, black vest, and black tie is speaking with expressive facial gestures in an indoor setting.",
+      "key_elements": [
+        "person",
+        "white outfit",
+        "black vest",
+        "black tie",
+        "indoor setting"
+      ],
+      "confidence": 0.0,
+      "id": 15
+    },
+    {
+      "t_start": 44.0,
+      "t_end": 46.24,
+      "description": "A man in a checkered shirt sits alone at a dining table with food and drinks in front of him while waiters and other diners move around in the background. A waiter or chef in a white outfit stands nearby, observing the scene.",
+      "key_elements": [
+        "person sitting",
+        "dining table",
+        "plate",
+        "glasses",
+        "person in white outfit",
+        "waiter",
+        "group at table"
+      ],
+      "confidence": 0.0,
+      "id": 16
+    },
+    {
+      "t_start": 46.24,
+      "t_end": 47.92,
+      "description": "A person in a white outfit, likely a waiter or chef, is standing near a door and interacting with people seated at a table, while a woman with a colorful necklace is smiling in the foreground.",
+      "key_elements": [
+        "person in white outfit",
+        "woman with colorful necklace",
+        "door",
+        "table",
+        "people seated"
+      ],
+      "confidence": 0.9,
+      "id": 17
+    },
+    {
+      "t_start": 47.92,
+      "t_end": 51.36,
+      "description": "A person in a checkered shirt is sitting at a dining table in a restaurant, turning to look at a bottle of ketchup they are holding. In the background, a group of people is seated and engaged in conversation.",
+      "key_elements": [
+        "person",
+        "dining table",
+        "bottle of ketchup",
+        "glasses",
+        "group at table",
+        "chairs"
+      ],
+      "confidence": 0.0,
+      "id": 18
+    },
+    {
+      "t_start": 51.36,
+      "t_end": 52.36,
+      "description": "A person in a formal white shirt and black tie is looking downward with a serious expression.",
+      "key_elements": [
+        "person",
+        "white outfit"
+      ],
+      "confidence": 0.95,
+      "id": 19
+    },
+    {
+      "t_start": 52.36,
+      "t_end": 53.64,
+      "description": "Two women sit at a dining table; one woman is holding a small dog wearing a colorful necklace, while a person in a checkered shirt holds a bottle of Heinz tomato ketchup near the table.",
+      "key_elements": [
+        "person sitting",
+        "dining table",
+        "flowers",
+        "glass",
+        "white outfit",
+        "dog",
+        "colorful necklace",
+        "bottle of ketchup",
+        "person in checkered shirt"
+      ],
+      "confidence": 0.0,
+      "id": 20
+    },
+    {
+      "t_start": 53.64,
+      "t_end": 55.24,
+      "description": "A person in a checkered shirt is sitting at a dining table holding a bottle of Heinz tomato ketchup while a waiter stands nearby. The scene is set in a restaurant with multiple diners in the background.",
+      "key_elements": [
+        "person",
+        "dining table",
+        "bottle of ketchup",
+        "waiter",
+        "restaurant sign",
+        "glasses",
+        "plates",
+        "people sitting"
+      ],
+      "confidence": 0.0,
+      "id": 21
+    },
+    {
+      "t_start": 55.24,
+      "t_end": 57.16,
+      "description": "A man sitting alone at a dining table in a restaurant is holding a bottle of ketchup while a waiter stands nearby. In the background, other patrons are seated at tables, and a chef is seen observing with arms crossed.",
+      "key_elements": [
+        "person sitting",
+        "dining table",
+        "bottle of ketchup",
+        "waiter",
+        "group at table",
+        "restaurant sign",
+        "person in white outfit"
+      ],
+      "confidence": 0.0,
+      "id": 22
+    },
+    {
+      "t_start": 57.16,
+      "t_end": 58.24,
+      "description": "A man in a white chef's outfit is standing with his arms crossed in front of a group of people at a dining table, while in the background a person at a table is holding a bottle of ketchup and a waiter stands nearby.",
+      "key_elements": [
+        "person in white outfit",
+        "group at table",
+        "dining table",
+        "bottle of ketchup",
+        "waiter",
+        "person sitting"
+      ],
+      "confidence": 0.0,
+      "id": 23
+    },
+    {
+      "t_start": 58.24,
+      "t_end": 60.72,
+      "description": "A man in a checkered shirt is sitting alone at a dining table and applying a condiment from a bottle onto his food, while a waiter stands nearby. A small dog wearing a colorful necklace is being held by a person in a white outfit.",
+      "key_elements": [
+        "person sitting",
+        "dining table",
+        "forks",
+        "plate",
+        "bottle of ketchup",
+        "glass",
+        "waiter",
+        "dog",
+        "colorful necklace",
+        "person in white outfit"
+      ],
+      "confidence": 0.0,
+      "id": 24
+    },
+    {
+      "t_start": 60.72,
+      "t_end": 62.2,
+      "description": "A person in a white outfit is holding a small dog wearing a colorful necklace, while another person at the table is holding a bottle of ketchup over their plate.",
+      "key_elements": [
+        "dog",
+        "colorful necklace",
+        "person in white outfit",
+        "bottle of ketchup",
+        "plate",
+        "glass",
+        "cutlery"
+      ],
+      "confidence": 0.0,
+      "id": 25
+    },
+    {
+      "t_start": 62.2,
+      "t_end": 64.24,
+      "description": "A person wearing a checkered shirt is seen holding and squeezing a bottle of ketchup onto food at a dining table, while a waiter in formal attire stands nearby in a room with classical architecture and floral arrangements.",
+      "key_elements": [
+        "person",
+        "bottle of ketchup",
+        "dining table",
+        "waiter",
+        "flowers",
+        "formal attire"
+      ],
+      "confidence": 0.0,
+      "id": 26
+    },
+    {
+      "t_start": 64.24,
+      "t_end": 69.88,
+      "description": "A man dressed in a white shirt, black vest, and tie stands in front of a large column with flowers visible behind him, appearing emotional or distressed, while at least two people are seated behind him.",
+      "key_elements": [
+        "person",
+        "white outfit",
+        "flowers",
+        "person sitting",
+        "dining table"
+      ],
+      "confidence": 0.9,
+      "id": 27
+    },
+    {
+      "t_start": 69.88,
+      "t_end": 72.0,
+      "description": "A person in a plaid shirt is sitting at a dining table in a restaurant, holding and shaking a bottle of ketchup over a plate of food while looking to the side.",
+      "key_elements": [
+        "person",
+        "dining table",
+        "bottle of ketchup",
+        "plate",
+        "forks",
+        "glasses",
+        "restaurant sign",
+        "person sitting"
+      ],
+      "confidence": 0.0,
+      "id": 28
+    },
+    {
+      "t_start": 72.0,
+      "t_end": 73.96,
+      "description": "A person in a white shirt, black vest, and tie is looking around inside a room, then the camera view clears to show the architecture of the room.",
+      "key_elements": [
+        "person",
+        "white outfit",
+        "black vest",
+        "tie",
+        "room",
+        "architecture"
+      ],
+      "confidence": 0.0,
+      "id": 29
+    },
+    {
+      "t_start": 73.96,
+      "t_end": 76.6,
+      "description": "A person with a colorful necklace is sitting at a dining table in a restaurant, smiling while cutting food on a plate with a fork and knife.",
+      "key_elements": [
+        "person",
+        "colorful necklace",
+        "dining table",
+        "plate",
+        "forks",
+        "glass",
+        "bottle of ketchup",
+        "restaurant sign"
+      ],
+      "confidence": 0.0,
+      "id": 30
+    },
+    {
+      "t_start": 76.6,
+      "t_end": 79.064,
+      "description": "A close-up of a Heinz tomato ketchup bottle is shown on a dining table with an overlay text mentioning Ed Sheeran and Heinz.",
+      "key_elements": [
+        "bottle of ketchup",
+        "dining table",
+        "glass",
+        "forks",
+        "plate",
+        "Ed Sheeran",
+        "Heinz"
+      ],
+      "confidence": 0.0,
+      "id": 31
+    }
+  ],
+  "justification_timeline": [
+    {
+      "t": 0.0,
+      "justification": "Introduces the setting and main character entering the posh restaurant, establishing the environment and mood."
+    },
+    {
+      "t": 1.0,
+      "justification": "Shows more of the elegant restaurant interior and groups dining, emphasizing the upscale atmosphere."
+    },
+    {
+      "t": 2.0,
+      "justification": "Highlights the person with a backpack positioning in the restaurant, marking the beginning of the viewer\u2019s journey."
+    },
+    {
+      "t": 3.0,
+      "justification": "Shows activity of people dining and the social environment the main character is entering."
+    },
+    {
+      "t": 4.0,
+      "justification": "Focuses on the person standing in a hallway with elegant floral decorations, adding to the sophisticated ambiance."
+    },
+    {
+      "t": 5.0,
+      "justification": "Continues to emphasize the person\u2019s presence in an ornate and well-decorated indoor space, building setting immersion."
+    },
+    {
+      "t": 6.0,
+      "justification": "Highlights the decorative orchids and refined environment, reinforcing the posh setting."
+    },
+    {
+      "t": 7.0,
+      "justification": ""
+    },
+    {
+      "t": 8.0,
+      "justification": "Shows an ornate chandelier which symbolizes luxury, reinforcing the upscale nature of the restaurant."
+    },
+    {
+      "t": 9.0,
+      "justification": "Focuses on framed pictures and molding, emphasizing decorative details typical of a posh establishment."
+    },
+    {
+      "t": 10.0,
+      "justification": "Displays an elegantly set table with multiple forks and plates, underlining the restaurant\u2019s formal dining experience."
+    },
+    {
+      "t": 11.0,
+      "justification": "Shows more dining table details to reinforce the fine dining atmosphere."
+    },
+    {
+      "t": 12.0,
+      "justification": "Introduces a person playing piano, enhancing the classic and refined ambiance."
+    },
+    {
+      "t": 13.0,
+      "justification": "Continues to show the pianist and seated diners, highlighting the elegant social atmosphere."
+    },
+    {
+      "t": 14.0,
+      "justification": "Sustains the classical mood by repeating the piano performance and diners, emphasizing sophistication."
+    },
+    {
+      "t": 15.0,
+      "justification": "Further highlights the pianist and diners, reinforcing the posh experience."
+    },
+    {
+      "t": 16.0,
+      "justification": "Shows a person seated indoors with plants, adding to the warm and refined setting."
+    },
+    {
+      "t": 17.0,
+      "justification": "Focuses on a person in formal wear creating a calm and sophisticated indoor mood."
+    },
+    {
+      "t": 18.0,
+      "justification": "Displays a standing person near plants, continuing the elegant environment portrayal."
+    },
+    {
+      "t": 19.0,
+      "justification": "Shows a podium with a 'Super Posh Restaurant' sign which brands the setting clearly."
+    },
+    {
+      "t": 20.0,
+      "justification": "Depicts a warm social interaction at the restaurant entrance, welcoming the viewer."
+    },
+    {
+      "t": 21.0,
+      "justification": "Focuses on smiling faces to convey friendly, inviting atmosphere."
+    },
+    {
+      "t": 22.0,
+      "justification": "Emphasizes personal interaction, suggesting a warm greeting in the posh setting."
+    },
+    {
+      "t": 23.0,
+      "justification": "Continues the friendly conversation enhancing relatability and engagement."
+    },
+    {
+      "t": 24.0,
+      "justification": "Focuses on the main character's expression to build connection with the viewer."
+    },
+    {
+      "t": 25.0,
+      "justification": "Shows interaction with restaurant staff, highlighting attentive service."
+    },
+    {
+      "t": 26.0,
+      "justification": "Depicts the waiter placing a napkin, reinforcing high-level service and care."
+    },
+    {
+      "t": 27.0,
+      "justification": "Shows the main character sitting at the dining table being served, moving narrative forward."
+    },
+    {
+      "t": 28.0,
+      "justification": "Shows a person in formal attire speaking or reacting, possibly to the main character's actions."
+    },
+    {
+      "t": 29.0,
+      "justification": "Continues to emphasize a formally dressed person, adding to the sophisticated environment."
+    },
+    {
+      "t": 30.0,
+      "justification": "Highlights ornate indoor setting further emphasizing the posh atmosphere."
+    },
+    {
+      "t": 31.0,
+      "justification": "Sustains formal atmosphere with a well-dressed individual in an elegant space."
+    },
+    {
+      "t": 32.0,
+      "justification": "Focuses on the main character smiling upward, showing positive emotional response."
+    },
+    {
+      "t": 33.0,
+      "justification": ""
+    },
+    {
+      "t": 34.0,
+      "justification": "Shows waiter presenting covered dish, building anticipation for the meal reveal."
+    },
+    {
+      "t": 35.0,
+      "justification": "Continues focus on waiter holding covered dish, emphasizing formal presentation."
+    },
+    {
+      "t": 36.0,
+      "justification": "Reveals the plated food, a key moment in the dining experience narrative."
+    },
+    {
+      "t": 37.0,
+      "justification": "Shows formally dressed man with a neutral or reflective expression, contributing to the narrative mood."
+    },
+    {
+      "t": 38.0,
+      "justification": "Focuses on this person closing eyes, emphasizing emotional or contemplative moment."
+    },
+    {
+      "t": 39.0,
+      "justification": "Wide view of person in formal attire with ornate background, sustaining upscale vibe."
+    },
+    {
+      "t": 40.0,
+      "justification": "Continues to show the elegant setting with architectural details, reinforcing posh ambiance."
+    },
+    {
+      "t": 41.0,
+      "justification": "Maintains focus on formal indoor setting with architectural elegance."
+    },
+    {
+      "t": 42.0,
+      "justification": "Shows expressive emotion to build engagement and narrative tension."
+    },
+    {
+      "t": 43.0,
+      "justification": "Highlights the man's expressive facial reaction to emphasize key moment of the story."
+    },
+    {
+      "t": 44.0,
+      "justification": "Returns focus to main character sitting at the dining table, continuing the guest's experience."
+    },
+    {
+      "t": 45.0,
+      "justification": "Persists with portrayal of lone diner, emphasizing the setting and anticipation."
+    },
+    {
+      "t": 46.0,
+      "justification": "Shows staff member standing near doorway, adding to the service narrative."
+    },
+    {
+      "t": 47.0,
+      "justification": "Continues to show staff interaction and restaurant environment details."
+    },
+    {
+      "t": 48.0,
+      "justification": "Highlights the main character sitting with food on the plate while waiters move, maintaining dining context."
+    },
+    {
+      "t": 49.0,
+      "justification": "Focuses on main character leaning forward, suggesting engagement and personal involvement."
+    },
+    {
+      "t": 50.0,
+      "justification": "Shows main character reaching for glass, continuing candid dining behavior."
+    },
+    {
+      "t": 51.0,
+      "justification": "Shows main character examining ketchup bottle, signaling a key action in story."
+    },
+    {
+      "t": 52.0,
+      "justification": "Shows formal person with neutral expression, possibly reacting to main character's action."
+    },
+    {
+      "t": 53.0,
+      "justification": "Highlights two women and a dog adding warmth and diversity to scene."
+    },
+    {
+      "t": 54.0,
+      "justification": "Continues focus on main character holding ketchup, building toward the narrative climax."
+    },
+    {
+      "t": 55.0,
+      "justification": "Shows interaction between diner and waiter, enhancing service context."
+    },
+    {
+      "t": 56.0,
+      "justification": "Depicts main character holding ketchup and waiter nearby, reinforcing key action."
+    },
+    {
+      "t": 57.0,
+      "justification": "Shows person in white outfit with arms crossed, conveying observation or approval role."
+    },
+    {
+      "t": 58.0,
+      "justification": "Captures main character sitting with ketchup and waiter nearby, progressing story."
+    },
+    {
+      "t": 59.0,
+      "justification": "Shows main character applying ketchup, the climactic moment fulfilling narrative focus."
+    },
+    {
+      "t": 60.0,
+      "justification": "Depicts main character using ketchup with other diners and waiters present, emphasizing resolution and social context."
+    },
+    {
+      "t": 60.0,
+      "justification": "Introduces the dining setting and presence of ketchup, establishing the restaurant environment and social context."
+    },
+    {
+      "t": 61.0,
+      "justification": "Shows the small dog with a colorful necklace, adding warmth and personal touch to the scene."
+    },
+    {
+      "t": 62.0,
+      "justification": "Focuses on the action of holding the ketchup bottle, emphasizing the product prominently in use."
+    },
+    {
+      "t": 63.0,
+      "justification": "Highlights the squeezing of ketchup onto food, directly showcasing product usage."
+    },
+    {
+      "t": 64.0,
+      "justification": "Shifts to a formal character in an elegant setting, possibly to contrast or deepen the narrative."
+    },
+    {
+      "t": 65.0,
+      "justification": "Continues to establish the formal ambiance and character presence, enhancing the ad\u2019s atmosphere."
+    },
+    {
+      "t": 66.0,
+      "justification": "Maintains the focus on the formal indoor environment, reinforcing setting and mood."
+    },
+    {
+      "t": 67.0,
+      "justification": "Emphasizes the grand indoor setting and formal attire, suggesting importance or emotional content."
+    },
+    {
+      "t": 68.0,
+      "justification": "Shows the person in white outfit with a concerned expression, adding emotional depth."
+    },
+    {
+      "t": 69.0,
+      "justification": "Continues to portray the concerned expression indoors, building narrative tension."
+    },
+    {
+      "t": 70.0,
+      "justification": "Returns to the dining scene with ketchup bottle, keeping product central in a relatable context."
+    },
+    {
+      "t": 71.0,
+      "justification": "Person looking upward while holding ketchup creates engagement and curiosity, linking product to real human reactions."
+    },
+    {
+      "t": 72.0,
+      "justification": "Formally dressed person standing indoors continues to support narrative continuity and setting."
+    },
+    {
+      "t": 73.0,
+      "justification": "Shows person looking to the side, adding subtle narrative movement or anticipation."
+    },
+    {
+      "t": 74.0,
+      "justification": "Reestablishes the dining environment with food and ketchup bottle to reinforce the product\u2019s role."
+    },
+    {
+      "t": 75.0,
+      "justification": "Depicts a man actively preparing to eat with ketchup nearby, demonstrating everyday use."
+    },
+    {
+      "t": 76.0,
+      "justification": "Close-up of cutting food while ketchup bottle visible highlights product integration into meal experience."
+    },
+    {
+      "t": 77.0,
+      "justification": "Close-up of Heinz ketchup bottle focuses viewer attention on the product branding prominently."
+    },
+    {
+      "t": 78.0,
+      "justification": "Further close-up reinforcing brand recognition and product appeal on the dining table."
+    },
+    {
+      "t": 79.0,
+      "justification": "Final close-up of the Heinz ketchup bottle with tableware, likely concluding on product emphasis and brand association."
+    }
+  ],
+  "background_updates": [
+    {
+      "t": 0.0,
+      "narration": "A person enters a large, elegant dining room where a group is gathered around a table as someone humorously describes a fancy restaurant experience, culminating in pulling out a ketchup bottle to complete the meal."
+    },
+    {
+      "t": 5.0,
+      "narration": "The person narrates their idea for a Heinz Ketchup commercial, humorously describing a fancy restaurant experience that ends with pulling out a ketchup bottle to complete the meal, causing a dramatic reaction from the waiter."
+    },
+    {
+      "t": 10.0,
+      "narration": "The person continues humorously recounting their fancy restaurant experience, emphasizing the dramatic moment when they pull out a ketchup bottle to complete the meal, causing an intense reaction from the waiter. They then pitch this concept as a Heinz Ketchup commercial idea."
+    },
+    {
+      "t": 15.0,
+      "narration": "The person who previously told the ketchup story is now entering the room and walking toward a dining table where a group is seated, then begins playing the piano as the group continues their conversation."
+    },
+    {
+      "t": 20.0,
+      "narration": "The person who entered is now standing near a plant by the restaurant sign, smiling and looking downward after playing the piano for the group seated at the dining table."
+    },
+    {
+      "t": 25.0,
+      "narration": "The person who entered is now smiling and having a conversation with another individual, possibly the waiter, while the group at the dining table observes."
+    },
+    {
+      "t": 30.0,
+      "narration": "The person entering continues smiling and engaging in conversation with the waiter while the group at the dining table attentively watches."
+    },
+    {
+      "t": 35.0,
+      "narration": "The person entering continues smiling and engaging with the waiter as the waiter serves food with a covered dish to the group at the dining table."
+    },
+    {
+      "t": 40.0,
+      "narration": "The waiter unveils the covered dish to the person entering, who continues to smile and engage with the group seated at the dining table in the restaurant."
+    },
+    {
+      "t": 45.0,
+      "narration": "The waiter presents the unveiled dish with enthusiasm while the person entering and the seated group continue their cheerful interaction at the dining table."
+    },
+    {
+      "t": 50.0,
+      "narration": "The waiter continues to react expressively while the person seated at the table focuses on their plate, and the person entering remains standing by the doorway observing the room."
+    },
+    {
+      "t": 55.0,
+      "narration": "The person sitting at the dining table now holds a bottle of ketchup while the waiter stands nearby, and two women are seated with one holding a small dog. The person entering remains standing by the doorway observing the scene."
+    },
+    {
+      "t": 60.0,
+      "narration": "The person sitting at the dining table continues to apply ketchup to their food while the waiter stands nearby, and the person in the white chef outfit remains standing with arms crossed. The two women and the small dog remain seated at the table."
+    },
+    {
+      "t": 65.0,
+      "narration": "The person in the white outfit is now holding a small dog wearing a colorful necklace, while the person at the table continues to apply ketchup and the waiter remains nearby. The atmosphere remains calm with the group seated at the dining table."
+    },
+    {
+      "t": 70.0,
+      "narration": "The person in the plaid shirt continues to hold and pour ketchup onto a plate at the dining table while the person in the white outfit stands holding the small dog. The scene remains focused on the calm interaction around the dining table."
+    },
+    {
+      "t": 75.0,
+      "narration": "The person in the plaid shirt continues preparing the plate with ketchup, while the person in the white outfit remains standing, still holding the small dog, and the group stays gathered calmly at the dining table."
+    }
+  ],
+  "audio_segments": [
+    {
+      "start": 0.0,
+      "end": 0.0,
+      "text": "I've got an idea for a Heinz Ketchup commercial. I was at this super posh restaurant, super posh. The type of place that has chandeliers and paintings on the wall and way too many forks. I think classical music was playing, but maybe it was jazz. No, definitely classical. The hostess walks up to me and she says, Mr. Sheeran, is this your first time dining with us? And I say, yep. The waiter comes over. He's telling me about the specials. Super fancy, fancy vegetables, fancy sauces. I said, sounds fancy. So fast forward and the food comes. The waiter goes on to tell me, we are proud to present this farm to table blah, blah, blah, posh and fancy blah, blah, blah with a side of blah, blah, blah. You know, the food looked good. I just thought there was something missing. So I reach into my bag and I take out the only thing that can complete me. And at that point, the whole world came to a stop. And the waiter was screaming through his eyes. So that's my idea. Do you wanna do it?"
+    }
+  ]
+}

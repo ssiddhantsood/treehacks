@@ -17,6 +17,7 @@
 
 Endpoints:
 - `POST /api/transform` (multipart form, field name `video`)
+- `POST /api/market-research` (JSON body with `description`, optional `product`, `region`, `goal`)
 - `GET /media/original/*` and `GET /media/processed/*`
 - `GET /media/analysis/*` (JSON action timeline)
 - `POST /api/auth/register`

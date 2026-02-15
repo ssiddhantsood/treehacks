@@ -17,6 +17,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from ai_agents.agent import COMBOS, run_combo_agent, run_speedup_agent
 from ai_agents.action_timeline import analyze_video
+from ai_agents.market_research import run_market_research_agent
 from auth import create_access_token, decode_token, hash_password, verify_password
 from db import (
     add_variant,
@@ -244,6 +245,34 @@ async def transform(video: UploadFile = File(...), user=Depends(get_current_user
         "analysisUrl": analysis_url,
         "variants": variants,
     }
+
+
+@app.post("/api/market-research")
+async def market_research(payload: dict, user=Depends(get_current_user)):
+    description = (payload.get("description") or payload.get("audienceDescription") or "").strip()
+    if not description:
+        raise HTTPException(status_code=400, detail="description is required")
+
+    product = payload.get("product")
+    region = payload.get("region")
+    goal = payload.get("goal")
+    extra_focus = payload.get("extraFocus") or payload.get("extra_focus")
+    language = payload.get("language")
+
+    result = await run_in_threadpool(
+        run_market_research_agent,
+        description,
+        product,
+        region,
+        goal,
+        extra_focus,
+        language,
+    )
+
+    if not result.get("ok"):
+        raise HTTPException(status_code=500, detail=result.get("error", "Market research failed"))
+
+    return {"ok": True, "result": result}
 
 
 if __name__ == "__main__":
