@@ -2,8 +2,6 @@ services:
   - type: web
     name: adapt-video-editor
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
     plan: free
     envVars:
       - key: OPENAI_API_KEY
