@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import type { Video } from "@/lib/types";
+import { getMockCampaigns } from "@/lib/mock";
 
 export function CampaignList() {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -12,8 +13,13 @@ export function CampaignList() {
   useEffect(() => {
     api.videos
       .list()
-      .then((res) => setVideos(res.videos))
-      .catch(() => {})
+      .then((res) => {
+        const padded = [...res.videos, ...getMockCampaigns()];
+        setVideos(padded);
+      })
+      .catch(() => {
+        setVideos(getMockCampaigns());
+      })
       .finally(() => setLoading(false));
   }, []);
 

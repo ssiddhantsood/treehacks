@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
 import type { Campaign, AnalysisData, TimelineEvent } from "@/lib/types";
+import { getMockAnalysisById, getMockCampaignById } from "@/lib/mock";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000";
 
@@ -41,7 +42,16 @@ export default function CampaignDetailPage() {
           }
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        const mockCampaign = getMockCampaignById(params.id);
+        if (mockCampaign) {
+          setCampaign(mockCampaign);
+          const mockAnalysis = getMockAnalysisById(params.id);
+          if (mockAnalysis) {
+            setAnalysis(mockAnalysis);
+          }
+        }
+      })
       .finally(() => setLoading(false));
   }, [params.id]);
 
@@ -99,14 +109,22 @@ export default function CampaignDetailPage() {
           <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
             Base creative
           </span>
-          <div className="mt-4 border border-border bg-foreground/5">
-            <video
-              ref={videoRef}
-              src={mediaUrl(campaign.originalUrl)}
-              controls
-              className="w-full"
-            />
-          </div>
+          {campaign.originalUrl ? (
+            <div className="mt-4 border border-border bg-foreground/5">
+              <video
+                ref={videoRef}
+                src={mediaUrl(campaign.originalUrl)}
+                controls
+                className="w-full"
+              />
+            </div>
+          ) : (
+            <div className="mt-4 flex h-56 items-center justify-center border border-dashed border-border bg-foreground/5">
+              <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
+                Demo asset placeholder
+              </span>
+            </div>
+          )}
 
           {campaign.variants.length > 0 && (
             <div className="mt-16">
