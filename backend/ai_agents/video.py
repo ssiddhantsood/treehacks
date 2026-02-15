@@ -92,7 +92,32 @@ def _atempo_filter(factor: float) -> str:
 
 
 def _escape_drawtext(text: str) -> str:
+    """Escape text for FFmpeg drawtext filter values."""
     return text.replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+
+
+def _escape_drawtext_path(path: str) -> str:
+    """Escape a file path for FFmpeg drawtext fontfile= value.
+
+    On Windows the drive-letter colon must be escaped *and* the whole path
+    must be single-quoted so FFmpeg's filter parser treats it as one token.
+    """
+    cleaned = path.replace("\\", "/")
+    escaped = cleaned.replace(":", "\\:")
+    return f"'{escaped}'"
+
+
+def _default_font_path() -> str | None:
+    """Return a usable font file path, especially needed on Windows where fontconfig is broken."""
+    if platform.system().lower() == "windows":
+        candidates = [
+            os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts", f)
+            for f in ("arial.ttf", "Arial.ttf", "segoeui.ttf", "calibri.ttf")
+        ]
+        for c in candidates:
+            if os.path.isfile(c):
+                return c
+    return None
 
 
 def change_speed_video(input_path: str, output_path: str, factor: float = 1.05) -> None:
@@ -231,14 +256,23 @@ def add_text_overlay_video(
 ) -> None:
     if not _has_filter("drawtext"):
         raise RuntimeError("ffmpeg build missing drawtext filter. Install ffmpeg with libfreetype.")
+
+    # Auto-resolve font on Windows where fontconfig is broken
+    resolved_font = font_path or _default_font_path()
+
     safe_text = _escape_drawtext(text)
-    drawtext = (
-        f"drawtext=text='{safe_text}':x={x}:y={y}:fontsize={font_size}:"
-        f"fontcolor={color}:box={box}:boxcolor={box_color}"
-    )
-    if font_path:
-        drawtext = f"drawtext=fontfile={font_path}:text='{safe_text}':x={x}:y={y}:fontsize={font_size}:" \
-                   f"fontcolor={color}:box={box}:boxcolor={box_color}"
+    if resolved_font:
+        safe_font = _escape_drawtext_path(resolved_font)
+        drawtext = (
+            f"drawtext=fontfile={safe_font}:text='{safe_text}':"
+            f"x={x}:y={y}:fontsize={font_size}:"
+            f"fontcolor={color}:box={box}:boxcolor={box_color}"
+        )
+    else:
+        drawtext = (
+            f"drawtext=text='{safe_text}':x={x}:y={y}:fontsize={font_size}:"
+            f"fontcolor={color}:box={box}:boxcolor={box_color}"
+        )
     if start is not None or end is not None:
         start_time = 0.0 if start is None else float(start)
         end_time = 10_000.0 if end is None else float(end)
