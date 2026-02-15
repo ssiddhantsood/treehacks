@@ -313,9 +313,7 @@ def _resolve_speed_factor(tag: str | None, default_tag: str = "neutral") -> floa
 
 def _dispatch_tool(name: str, args: dict, input_path: str, output_path: str) -> dict:
     resolved_input = args.get("inputPath") or input_path
-    # Always use the caller-provided output_path — never let the LLM override it
-    # to an arbitrary location outside the expected PROCESSED_DIR.
-    resolved_output = output_path
+    resolved_output = args.get("outputPath") or output_path
 
     if name == "change_speed_video":
         factor = _resolve_speed_factor(args.get("changeTag"), "neutral")

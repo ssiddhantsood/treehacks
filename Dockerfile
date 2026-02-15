@@ -1,12 +1,8 @@
 FROM python:3.12-slim
 
-# Install FFmpeg with full codec support
-# Note: On Debian Bookworm, ffmpeg + libavcodec-extra* provides libx264/aac/etc.
+# Install FFmpeg
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ffmpeg && \
-    apt-get install -y libavcodec-extra* || true && \
-    ffmpeg -version && \
-    ffmpeg -encoders 2>/dev/null | grep -i "264\|aac" || true && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

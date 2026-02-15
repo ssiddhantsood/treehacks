@@ -9,19 +9,7 @@ from PIL import Image, ImageColor, ImageDraw, ImageFont
 
 
 def _run_ffmpeg(args: list[str]) -> None:
-    result = subprocess.run(args, capture_output=True, text=True)
-    if result.returncode != 0:
-        stderr = result.stderr or "(no stderr)"
-        # Log full stderr for server-side debugging
-        print(f"[ffmpeg] FAILED (exit {result.returncode})")
-        print(f"[ffmpeg] cmd: {' '.join(args)}")
-        print(f"[ffmpeg] stderr:\n{stderr[-2000:]}")
-        raise subprocess.CalledProcessError(
-            result.returncode,
-            args,
-            output=result.stdout,
-            stderr=result.stderr,
-        )
+    subprocess.run(args, check=True)
 
 
 def _normalize_flag(value: str | None) -> str | None:
@@ -48,40 +36,8 @@ def _ffmpeg_filters() -> str:
         return ""
 
 
-@lru_cache(maxsize=1)
-def _ffmpeg_encoders() -> str:
-    try:
-        result = subprocess.run(
-            ["ffmpeg", "-encoders"],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        return result.stdout
-    except Exception:
-        return ""
-
-
-def _has_encoder(name: str) -> bool:
-    return name in _ffmpeg_encoders()
-
-
 def _has_filter(name: str) -> bool:
     return f" {name} " in _ffmpeg_filters() or f"\n{name} " in _ffmpeg_filters()
-
-
-def _detect_best_encoder() -> str:
-    """Auto-detect the best available H.264 encoder."""
-    # Prefer libx264 (best quality/compat), fall back through alternatives
-    for candidate in ("libx264", "libopenh264", "libx264rgb", "h264_v4l2m2m"):
-        if _has_encoder(candidate):
-            return candidate
-    # If no H.264 encoder found, try mpeg4 as last resort
-    if _has_encoder("mpeg4"):
-        return "mpeg4"
-    # Absolute fallback
-    return "libx264"
 
 
 _RAW_HWACCEL = os.getenv("VIDEO_HWACCEL")
@@ -96,12 +52,7 @@ if HWACCEL is None and _RAW_HWACCEL is None and platform.system().lower() == "da
     HWACCEL = "videotoolbox"
 
 if ENCODER is None:
-    if HWACCEL == "videotoolbox":
-        ENCODER = "h264_videotoolbox"
-    else:
-        ENCODER = _detect_best_encoder()
-
-print(f"[video] Encoder: {ENCODER}, HWACCEL: {HWACCEL}, Preset: {PRESET}")
+    ENCODER = "h264_videotoolbox" if HWACCEL == "videotoolbox" else "libx264"
 
 
 def _base_args(input_path: str) -> list[str]:
@@ -114,17 +65,11 @@ def _base_args(input_path: str) -> list[str]:
 
 def _encode_args() -> list[str]:
     args = ["-c:v", ENCODER, "-c:a", "aac"]
-    if ENCODER in ("libx264", "libx264rgb"):
+    if ENCODER == "libx264":
         if PRESET:
             args += ["-preset", PRESET]
         if CRF:
             args += ["-crf", str(CRF)]
-    elif ENCODER == "libopenh264":
-        # libopenh264 doesn't support crf, use -b:v instead
-        args += ["-b:v", "2M"]
-    elif ENCODER == "mpeg4":
-        # mpeg4 uses -q:v (1-31, lower=better)
-        args += ["-q:v", "5"]
     if THREADS:
         args += ["-threads", str(THREADS)]
     if FASTSTART:
