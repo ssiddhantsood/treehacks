@@ -1,0 +1,9 @@
+{
+  "id": "5a657bf20cb24beaac992d5e85219e24",
+  "job_type": "background_replace",
+  "inputVideo": "/Users/siddhantsood/Desktop/treehacks/tests/video.mp4",
+  "outputVideo": "/Users/siddhantsood/Desktop/treehacks/tests/tool_smoke/background_replace.mp4",
+  "prompt": "soft sunrise city skyline",
+  "subject": "person",
+  "seed": 42
+}

@@ -1,0 +1,10 @@
+{
+  "id": "73524b1858a14a7cab8408e80774a668",
+  "job_type": "text_replace",
+  "inputVideo": "/Users/siddhantsood/Desktop/treehacks/tests/video.mp4",
+  "outputVideo": "/Users/siddhantsood/Desktop/treehacks/tests/tool_smoke/text_replace.mp4",
+  "targetText": "SALE",
+  "newText": "DROP",
+  "fontSize": 48,
+  "seed": 3
+}

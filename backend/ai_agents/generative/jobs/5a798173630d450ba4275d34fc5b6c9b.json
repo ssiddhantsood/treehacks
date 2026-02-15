@@ -1,0 +1,10 @@
+{
+  "id": "5a798173630d450ba4275d34fc5b6c9b",
+  "job_type": "object_erase",
+  "inputVideo": "/Users/siddhantsood/Desktop/treehacks/tests/video.mp4",
+  "outputVideo": "/Users/siddhantsood/Desktop/treehacks/tests/tool_smoke/object_erase.mp4",
+  "objectPrompt": "logo in corner",
+  "boxThreshold": 0.35,
+  "textThreshold": 0.25,
+  "seed": 7
+}
