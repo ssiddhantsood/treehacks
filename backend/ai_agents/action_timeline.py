@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import tempfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
@@ -27,6 +28,18 @@ INCLUDE_AUDIO = os.getenv("ACTION_INCLUDE_AUDIO", "1") == "1"
 FRAME_SCALE = int(os.getenv("ACTION_FRAME_SCALE", "512"))
 SCENE_THRESHOLD = float(os.getenv("ACTION_SCENE_THRESHOLD", "0.3"))
 DENSE_INTERVAL = float(os.getenv("ACTION_DENSE_INTERVAL", "0.5"))
+PER_SECOND_FPS = float(os.getenv("ACTION_PER_SECOND_FPS", "1"))
+SCENE_SAMPLE_COUNT = int(os.getenv("ACTION_SCENE_SAMPLE_COUNT", "3"))
+JUSTIFY_CHUNK_SEC = float(os.getenv("ACTION_JUSTIFY_CHUNK_SEC", "60"))
+def _coerce_int(value, default: int, min_value: int = 1) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(min_value, parsed)
+
+
+VLM_CONCURRENCY = _coerce_int(os.getenv("ACTION_VLM_CONCURRENCY", "4"), 4, 1)
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -90,6 +103,18 @@ def _frame_signature(path: Path) -> np.ndarray:
 
 def _diff_score(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.mean(np.abs(a - b)))
+
+
+def _parallel_map(items: list, func, max_workers: int) -> list:
+    if max_workers <= 1 or len(items) <= 1:
+        return [func(item) for item in items]
+    results = [None] * len(items)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_index = {executor.submit(func, item): idx for idx, item in enumerate(items)}
+        for future in as_completed(future_to_index):
+            idx = future_to_index[future]
+            results[idx] = future.result()
+    return results
 
 
 def _image_to_data_url(path: Path) -> str:
@@ -161,7 +186,7 @@ def _caption_frames_at_times(
     if not frame_files or not timestamps:
         return []
 
-    captions = []
+    requests: list[tuple[float, Path]] = []
     last_index = None
     frame_count = len(frame_files)
 
@@ -169,11 +194,15 @@ def _caption_frames_at_times(
         index = _frame_index_for_timestamp(timestamp, frame_count)
         if index == last_index:
             continue
-        payload = _caption_frame(frame_files[index], known_entities)
-        captions.append({"t": round(timestamp, 3), **payload})
+        requests.append((timestamp, frame_files[index]))
         last_index = index
 
-    return captions
+    def _run(request: tuple[float, Path]) -> dict:
+        t_value, frame_path = request
+        payload = _caption_frame(frame_path, known_entities)
+        return {"t": round(t_value, 3), **payload}
+
+    return _parallel_map(requests, _run, VLM_CONCURRENCY)
 
 
 def _strip_code_fences(text: str) -> str:
@@ -210,10 +239,29 @@ def _extract_caption_field(text: str) -> str:
     return ""
 
 
+def _extract_json_field(text: str, field: str) -> str:
+    if not text or not field:
+        return ""
+    escaped = re.escape(field)
+    patterns = [
+        rf'"{escaped}"\s*:\s*"([^"]+)"',
+        rf"'{escaped}'\s*:\s*'([^']+)'",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1).strip()
+    return ""
+
+
 def _fallback_caption_text(text: str) -> str:
     cleaned = _strip_code_fences(text)
     extracted = _extract_caption_field(cleaned)
     return extracted or cleaned
+
+
+def _fallback_text(text: str) -> str:
+    return _strip_code_fences(text or "").strip()
 
 
 def _coerce_list(value) -> list[str]:
@@ -284,6 +332,29 @@ def _normalize_caption_payload(payload: dict, fallback_caption: str) -> dict:
     }
 
 
+def _normalize_description_payload(payload: dict, fallback_text: str) -> dict:
+    description = payload.get("description") or payload.get("caption") or ""
+    if isinstance(description, (dict, list)):
+        description = json.dumps(description)
+    description = str(description or "").strip()
+
+    if not description:
+        extracted = _extract_json_field(fallback_text, "description")
+        description = extracted or _fallback_text(fallback_text)
+
+    if description.lower() in {"unknown", "unclear", "n/a", "not sure"}:
+        description = ""
+
+    return {
+        "description": description,
+        "actions": _coerce_list(payload.get("actions")),
+        "objects": _coerce_list(payload.get("objects")),
+        "people": _coerce_list(payload.get("people")),
+        "setting": _coerce_setting(payload.get("setting")),
+        "confidence": _coerce_confidence(payload.get("confidence")),
+    }
+
+
 def _caption_frame(image_path: Path, known_entities: list[str]) -> dict:
     system_prompt = (
         "You are a vision model that describes visible actions. "
@@ -318,6 +389,268 @@ def _caption_frame(image_path: Path, known_entities: list[str]) -> dict:
     if not isinstance(payload, dict):
         payload = {}
     return _normalize_caption_payload(payload, cleaned)
+
+
+def _describe_frame(image_path: Path, known_entities: list[str]) -> dict:
+    system_prompt = (
+        "You are a vision model that describes the scene succinctly. "
+        "Be precise and avoid guessing."
+    )
+    user_text = (
+        "Describe the overall scene in 1 short sentence. "
+        "Focus on what's visible and what's happening. "
+        "If something is unknown, leave it out. "
+        "Return ONLY valid JSON with keys: description, actions, objects, people, setting, confidence. "
+        "Do not wrap in code fences or add extra text. "
+        "confidence is 0-1. actions/objects/people are arrays of short strings."
+    )
+    if known_entities:
+        user_text += f" Known entities: {', '.join(known_entities)}."
+
+    response = client.chat.completions.create(
+        model=VLM_MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_text},
+                    {"type": "image_url", "image_url": {"url": _image_to_data_url(image_path)}},
+                ],
+            },
+        ],
+    )
+
+    content = response.choices[0].message.content or ""
+    payload, cleaned = _parse_caption_payload(content)
+    if not isinstance(payload, dict):
+        payload = {}
+    return _normalize_description_payload(payload, cleaned)
+
+
+def _describe_frames_at_times(
+    frame_files: list[Path],
+    timestamps: list[float],
+    known_entities: list[str],
+) -> list[dict]:
+    if not frame_files or not timestamps:
+        return []
+
+    requests: list[tuple[float, Path]] = []
+    last_index = None
+    frame_count = len(frame_files)
+
+    for timestamp in timestamps:
+        index = _frame_index_for_timestamp(timestamp, frame_count)
+        if index == last_index:
+            continue
+        requests.append((timestamp, frame_files[index]))
+        last_index = index
+
+    def _run(request: tuple[float, Path]) -> dict:
+        t_value, frame_path = request
+        payload = _describe_frame(frame_path, known_entities)
+        return {"t": round(t_value, 3), **payload}
+
+    return _parallel_map(requests, _run, VLM_CONCURRENCY)
+
+
+def _sample_segment_times(start: float, end: float, count: int) -> list[float]:
+    if end <= start:
+        return [start]
+    if count <= 1:
+        return [start + (end - start) * 0.5]
+    step = (end - start) / count
+    samples = [start + (i + 0.5) * step for i in range(count)]
+    deduped = []
+    seen = set()
+    for t in samples:
+        rounded = round(t, 3)
+        if rounded in seen:
+            continue
+        seen.add(rounded)
+        deduped.append(t)
+    return deduped
+
+
+def _normalize_scene_payload(payload: dict, fallback_text: str) -> dict:
+    description = payload.get("description") or ""
+    if isinstance(description, (dict, list)):
+        description = json.dumps(description)
+    description = str(description or "").strip()
+    if not description:
+        description = _extract_json_field(fallback_text, "description") or _fallback_text(fallback_text)
+    if description.lower() in {"unknown", "unclear", "n/a", "not sure"}:
+        description = ""
+
+    return {
+        "description": description,
+        "key_elements": _coerce_list(payload.get("key_elements") or payload.get("elements")),
+        "confidence": _coerce_confidence(payload.get("confidence")),
+    }
+
+
+def _describe_scene_segment(
+    frame_paths: list[Path],
+    known_entities: list[str],
+    t_start: float,
+    t_end: float,
+) -> dict:
+    system_prompt = (
+        "You describe a single camera angle segment of a video. "
+        "Use only what is visible across the provided frames."
+    )
+    user_text = (
+        f"These frames come from the same camera angle between {t_start:.3f}s and {t_end:.3f}s. "
+        "Explain what's there and what's going on in 1-2 sentences. "
+        "If something is unknown, leave it out. "
+        "Return ONLY valid JSON with keys: description, key_elements, confidence. "
+        "Do not wrap in code fences or add extra text. "
+        "key_elements is an array of short strings."
+    )
+    if known_entities:
+        user_text += f" Known entities: {', '.join(known_entities)}."
+
+    content_parts = [{"type": "text", "text": user_text}]
+    for frame in frame_paths:
+        content_parts.append({"type": "image_url", "image_url": {"url": _image_to_data_url(frame)}})
+
+    response = client.chat.completions.create(
+        model=VLM_MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": content_parts},
+        ],
+    )
+
+    content = response.choices[0].message.content or ""
+    payload, cleaned = _parse_caption_payload(content)
+    if not isinstance(payload, dict):
+        payload = {}
+    return _normalize_scene_payload(payload, cleaned)
+
+
+def _extract_json_array(text: str) -> str:
+    if not text:
+        return ""
+    start = text.find("[")
+    end = text.rfind("]")
+    if start == -1 or end == -1 or end <= start:
+        return ""
+    return text[start : end + 1]
+
+
+def _parse_json_list(content: str) -> list:
+    cleaned = _strip_code_fences(content or "")
+    for candidate in (cleaned, _extract_json_array(cleaned), _extract_json_object(cleaned)):
+        if not candidate:
+            continue
+        try:
+            payload = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(payload, list):
+            return payload
+        if isinstance(payload, dict):
+            items = payload.get("items") or payload.get("justifications") or payload.get("timeline")
+            if isinstance(items, list):
+                return items
+    return []
+
+
+def _justify_chunk(
+    seconds: list[dict],
+    scene_segments: list[dict],
+    audio_segments: list[dict],
+    chunk_start: float,
+    chunk_end: float,
+) -> list[dict]:
+    if not seconds:
+        return []
+
+    system_prompt = (
+        "You are analyzing an advertisement video. "
+        "For each second, justify why that moment is likely included. "
+        "Be specific, grounded in the provided visual/audio evidence, and concise. "
+        "If you cannot justify a second, return an empty string for its justification."
+    )
+
+    user_payload = {
+        "chunk_start": round(chunk_start, 3),
+        "chunk_end": round(chunk_end, 3),
+        "seconds": seconds,
+        "scene_segments": scene_segments,
+        "audio_segments": audio_segments,
+        "instructions": (
+            "Return ONLY valid JSON as an array of objects with keys: t, justification. "
+            "Use the same t values provided in seconds. Do not add extra text."
+        ),
+    }
+
+    response = client.chat.completions.create(
+        model=TEXT_MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": json.dumps(user_payload)},
+        ],
+    )
+
+    items = _parse_json_list(response.choices[0].message.content or "")
+    allowed = {round(float(item.get("t", 0.0)), 3) for item in seconds if "t" in item}
+    justification_map = {}
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        try:
+            t_value = round(float(item.get("t", 0.0)), 3)
+        except (TypeError, ValueError):
+            continue
+        if t_value not in allowed:
+            continue
+        text = str(item.get("justification") or "").strip()
+        justification_map[t_value] = text
+
+    timeline = []
+    for item in seconds:
+        try:
+            t_value = round(float(item.get("t", 0.0)), 3)
+        except (TypeError, ValueError):
+            continue
+        timeline.append({"t": t_value, "justification": justification_map.get(t_value, "")})
+    return timeline
+
+
+def _build_justification_timeline(
+    per_second_descriptions: list[dict],
+    scene_segments: list[dict],
+    audio_segments: list[dict],
+    duration: float,
+) -> list[dict]:
+    if not per_second_descriptions:
+        return []
+
+    timeline = []
+    chunk = max(1.0, float(JUSTIFY_CHUNK_SEC))
+    t = 0.0
+    while t <= duration:
+        chunk_start = t
+        chunk_end = min(duration, t + chunk)
+        seconds = [s for s in per_second_descriptions if chunk_start <= s["t"] <= chunk_end]
+        scenes = [
+            s
+            for s in scene_segments
+            if s.get("t_end", 0.0) >= chunk_start and s.get("t_start", 0.0) <= chunk_end
+        ]
+        audio = [
+            s
+            for s in audio_segments
+            if s.get("end", 0.0) >= chunk_start and s.get("start", 0.0) <= chunk_end
+        ]
+
+        timeline.extend(_justify_chunk(seconds, scenes, audio, chunk_start, chunk_end))
+        t += chunk
+
+    return timeline
 
 
 def _transcribe_audio(audio_path: Path) -> list[dict]:
@@ -417,6 +750,9 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
         captions = []
         events = []
         known_entities: list[str] = []
+        per_second_descriptions = []
+        scene_segments = []
+        justification_timeline = []
 
         prev_signature = None
         last_caption_time = -999.0
@@ -495,6 +831,45 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
             scene_marks = sorted(set([0.0] + scene_cuts))
             scene_captions = _caption_frames_at_times(frame_files, scene_marks, known_entities)
 
+        if PER_SECOND_FPS > 0 and frame_files:
+            step = 1.0 / PER_SECOND_FPS
+            per_second_times = []
+            t = 0.0
+            while t <= duration:
+                per_second_times.append(round(t, 3))
+                t += step
+            per_second_descriptions = _describe_frames_at_times(frame_files, per_second_times, known_entities)
+
+        if frame_files:
+            scene_marks = sorted(set([0.0] + scene_cuts + [duration]))
+            frame_count = len(frame_files)
+            segment_requests: list[tuple[float, float, list[Path]]] = []
+
+            for idx in range(len(scene_marks) - 1):
+                t_start = float(scene_marks[idx])
+                t_end = float(scene_marks[idx + 1])
+                if t_end <= t_start:
+                    continue
+                sample_times = _sample_segment_times(t_start, t_end, SCENE_SAMPLE_COUNT)
+                frame_paths = []
+                for t in sample_times:
+                    frame_idx = _frame_index_for_timestamp(t, frame_count)
+                    frame_paths.append(frame_files[frame_idx])
+                segment_requests.append((t_start, t_end, frame_paths))
+
+            def _run_segment(request: tuple[float, float, list[Path]]) -> dict:
+                t_start, t_end, frame_paths = request
+                payload = _describe_scene_segment(frame_paths, known_entities, t_start, t_end)
+                return {
+                    "t_start": round(t_start, 3),
+                    "t_end": round(t_end, 3),
+                    **payload,
+                }
+
+            scene_segments = _parallel_map(segment_requests, _run_segment, VLM_CONCURRENCY)
+            for idx, segment in enumerate(scene_segments):
+                segment["id"] = idx
+
         background_updates = []
         state = {"summary": "", "entities": known_entities}
         last_caption_marker = -1
@@ -519,6 +894,13 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
 
                 t += BG_UPDATE_SEC
 
+        justification_timeline = _build_justification_timeline(
+            per_second_descriptions,
+            scene_segments,
+            audio_segments,
+            duration,
+        )
+
         result = {
             "fps": FPS,
             "duration": round(duration, 3),
@@ -527,6 +909,9 @@ def analyze_video(video_path: str, output_json_path: str) -> dict:
             "events": events,
             "dense_captions": dense_captions,
             "scene_captions": scene_captions,
+            "per_second_descriptions": per_second_descriptions,
+            "scene_segments": scene_segments,
+            "justification_timeline": justification_timeline,
             "background_updates": background_updates,
             "audio_segments": audio_segments,
         }

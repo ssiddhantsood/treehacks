@@ -12,9 +12,7 @@ from .video import (
     add_text_overlay_video,
     blur_backdrop_video,
     reframe_vertical_video,
-    redact_region_video,
     replace_text_region_video,
-    reverse_video,
     speed_up_video,
     trim_video,
 )
@@ -25,12 +23,51 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-5")
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+MAX_SPEED_DELTA = 0.06
+SPEED_CHANGE_TAGS = [
+    "slow_6",
+    "slow_4",
+    "slow_2",
+    "neutral",
+    "fast_2",
+    "fast_4",
+    "fast_6",
+]
+SPEED_CHANGE_PRESETS = {
+    "slow_6": 1.0 - MAX_SPEED_DELTA,
+    "slow_4": 0.96,
+    "slow_2": 0.98,
+    "neutral": 1.0,
+    "fast_2": 1.02,
+    "fast_4": 1.04,
+    "fast_6": 1.0 + MAX_SPEED_DELTA,
+}
+
+COLOR_GRADE_STYLES = [
+    "neutral_clean",
+    "bright_airy",
+    "moody_dark",
+    "warm_glow",
+    "cool_urban",
+    "vibrant_pop",
+    "soft_pastel",
+]
+COLOR_GRADE_PRESETS = {
+    "neutral_clean": {"contrast": 1.05, "brightness": 0.02, "saturation": 1.0},
+    "bright_airy": {"contrast": 1.02, "brightness": 0.06, "saturation": 1.05},
+    "moody_dark": {"contrast": 1.12, "brightness": -0.03, "saturation": 0.92},
+    "warm_glow": {"contrast": 1.06, "brightness": 0.03, "saturation": 1.08},
+    "cool_urban": {"contrast": 1.08, "brightness": 0.0, "saturation": 0.98},
+    "vibrant_pop": {"contrast": 1.1, "brightness": 0.02, "saturation": 1.18},
+    "soft_pastel": {"contrast": 0.98, "brightness": 0.04, "saturation": 0.9},
+}
+
 SPEED_TOOLS = [
     {
         "type": "function",
         "function": {
             "name": "speed_up_video",
-            "description": "Speed up a video by a given factor and write it to a new path.",
+            "description": "Adjust playback speed with a small, bounded change (+/-6%).",
             "parameters": {
                 "type": "object",
                 "additionalProperties": False,
@@ -43,12 +80,17 @@ SPEED_TOOLS = [
                         "type": "string",
                         "description": "Absolute path for the output video file.",
                     },
-                    "factor": {
-                        "type": "number",
-                        "description": "Speed factor (e.g. 1.05 for +5%).",
+                    "changeTag": {
+                        "type": "string",
+                        "enum": SPEED_CHANGE_TAGS,
+                        "description": "Pick a bounded change tag. Use fast_* or slow_* for +/-2/4/6%.",
+                    },
+                    "changeNote": {
+                        "type": "string",
+                        "description": "Explain what should change and why, based on the request.",
                     },
                 },
-                "required": ["inputPath", "outputPath", "factor"],
+                "required": ["inputPath", "outputPath", "changeTag", "changeNote"],
             },
         },
     }
@@ -56,7 +98,7 @@ SPEED_TOOLS = [
 
 SYSTEM_PROMPT = (
     "You are a video processing agent. "
-    "Always call the speed_up_video tool to perform the work."
+    "Always call the speed_up_video tool and choose a bounded changeTag."
 )
 
 COMBOS = [
@@ -72,16 +114,17 @@ EDIT_TOOLS = [
         "type": "function",
         "function": {
             "name": "change_speed_video",
-            "description": "Change the speed of a video by a factor (e.g. 1.1 faster, 0.9 slower).",
+            "description": "Change speed using a small, bounded preset (+/-6%).",
             "parameters": {
                 "type": "object",
                 "additionalProperties": False,
                 "properties": {
                     "inputPath": {"type": "string"},
                     "outputPath": {"type": "string"},
-                    "factor": {"type": "number"},
+                    "changeTag": {"type": "string", "enum": SPEED_CHANGE_TAGS},
+                    "changeNote": {"type": "string"},
                 },
-                "required": ["inputPath", "outputPath", "factor"],
+                "required": ["inputPath", "outputPath", "changeTag", "changeNote"],
             },
         },
     },
@@ -89,18 +132,17 @@ EDIT_TOOLS = [
         "type": "function",
         "function": {
             "name": "color_grade_video",
-            "description": "Apply basic color grading via contrast/brightness/saturation.",
+            "description": "Apply a color grade preset selected from a small curated set.",
             "parameters": {
                 "type": "object",
                 "additionalProperties": False,
                 "properties": {
                     "inputPath": {"type": "string"},
                     "outputPath": {"type": "string"},
-                    "contrast": {"type": "number"},
-                    "brightness": {"type": "number"},
-                    "saturation": {"type": "number"},
+                    "gradeStyle": {"type": "string", "enum": COLOR_GRADE_STYLES},
+                    "gradeNote": {"type": "string"},
                 },
-                "required": ["inputPath", "outputPath"],
+                "required": ["inputPath", "outputPath", "gradeStyle", "gradeNote"],
             },
         },
     },
@@ -117,22 +159,6 @@ EDIT_TOOLS = [
                     "outputPath": {"type": "string"},
                     "start": {"type": "number"},
                     "duration": {"type": "number"},
-                },
-                "required": ["inputPath", "outputPath"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "reverse_video",
-            "description": "Reverse a video (and audio if present).",
-            "parameters": {
-                "type": "object",
-                "additionalProperties": False,
-                "properties": {
-                    "inputPath": {"type": "string"},
-                    "outputPath": {"type": "string"},
                 },
                 "required": ["inputPath", "outputPath"],
             },
@@ -269,20 +295,32 @@ def _parse_args(raw: str) -> dict:
         return {}
 
 
+def _resolve_speed_factor(tag: str | None, default_tag: str = "neutral") -> float:
+    key = (tag or default_tag).strip().lower()
+    if key not in SPEED_CHANGE_PRESETS:
+        key = default_tag
+    factor = SPEED_CHANGE_PRESETS.get(key, 1.0)
+    lower = 1.0 - MAX_SPEED_DELTA
+    upper = 1.0 + MAX_SPEED_DELTA
+    return max(lower, min(upper, float(factor)))
+
+
 def _dispatch_tool(name: str, args: dict, input_path: str, output_path: str) -> dict:
     resolved_input = args.get("inputPath") or input_path
     resolved_output = args.get("outputPath") or output_path
 
     if name == "change_speed_video":
-        factor = args.get("factor", 1.0)
-        change_speed_video(resolved_input, resolved_output, float(factor))
+        factor = _resolve_speed_factor(args.get("changeTag"), "neutral")
+        change_speed_video(resolved_input, resolved_output, factor)
     elif name == "color_grade_video":
+        style = (args.get("gradeStyle") or "neutral_clean").strip().lower()
+        grade = COLOR_GRADE_PRESETS.get(style, COLOR_GRADE_PRESETS["neutral_clean"])
         color_grade_video(
             resolved_input,
             resolved_output,
-            contrast=float(args.get("contrast", 1.1)),
-            brightness=float(args.get("brightness", 0.03)),
-            saturation=float(args.get("saturation", 1.15)),
+            contrast=float(grade["contrast"]),
+            brightness=float(grade["brightness"]),
+            saturation=float(grade["saturation"]),
         )
     elif name == "trim_video":
         trim_video(
@@ -291,8 +329,6 @@ def _dispatch_tool(name: str, args: dict, input_path: str, output_path: str) -> 
             start=float(args.get("start", 0.0)),
             duration=float(args.get("duration", 6.0)),
         )
-    elif name == "reverse_video":
-        reverse_video(resolved_input, resolved_output)
     elif name == "apply_combo":
         combo = args.get("comboName") or "warm_boost"
         apply_combo(resolved_input, resolved_output, combo)
@@ -346,22 +382,28 @@ def _dispatch_tool(name: str, args: dict, input_path: str, output_path: str) -> 
             strength=float(args.get("strength", 15.0)),
         )
     elif name == "speed_up_video":
-        factor = args.get("factor", 1.05)
-        speed_up_video(resolved_input, resolved_output, float(factor))
+        factor = _resolve_speed_factor(args.get("changeTag"), "fast_4")
+        speed_up_video(resolved_input, resolved_output, factor)
     else:
         raise ValueError(f"Unknown tool: {name}")
 
     return {"ok": True, "outputPath": resolved_output}
 
 
-def run_speedup_agent(input_path: str, output_path: str, factor: float = 1.05) -> dict:
+def run_speedup_agent(
+    input_path: str,
+    output_path: str,
+    change_note: str = "Add a subtle energy lift while staying within +/-6% speed change.",
+) -> dict:
     input_messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {
             "role": "user",
             "content": (
-                f"Speed up the video by factor {factor}. "
-                f"Use inputPath {input_path} and outputPath {output_path}."
+                "Adjust playback speed using a bounded preset (+/-6%).\n"
+                f"Change note: {change_note}\n"
+                f"Use inputPath {input_path} and outputPath {output_path}.\n"
+                f"Available changeTag options: {', '.join(SPEED_CHANGE_TAGS)}."
             ),
         },
     ]
@@ -386,11 +428,7 @@ def run_speedup_agent(input_path: str, output_path: str, factor: float = 1.05) -
 
             resolved_input = args.get("inputPath") or input_path
             resolved_output = args.get("outputPath") or output_path
-            resolved_factor = args.get("factor")
-
-            if not isinstance(resolved_factor, (int, float)):
-                resolved_factor = factor
-
+            resolved_factor = _resolve_speed_factor(args.get("changeTag"), "fast_4")
             speed_up_video(resolved_input, resolved_output, resolved_factor)
 
             function_outputs.append(

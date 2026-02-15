@@ -155,20 +155,20 @@ async def transform(video: UploadFile = File(...), user=Depends(get_current_user
     variants = []
     chosen_combos = []
 
+    analysis_result = None
+
     try:
-        await asyncio.gather(
-            run_in_threadpool(
-                run_speedup_agent,
-                str(original_path),
-                str(processed_path),
-                1.05,
-            ),
-            run_in_threadpool(
-                analyze_video,
-                str(original_path),
-                str(analysis_path),
-            ),
+        speed_task = run_in_threadpool(
+            run_speedup_agent,
+            str(original_path),
+            str(processed_path),
         )
+        analysis_task = run_in_threadpool(
+            analyze_video,
+            str(original_path),
+            str(analysis_path),
+        )
+        _, analysis_result = await asyncio.gather(speed_task, analysis_task)
 
         variants.append(
             {
@@ -214,15 +214,23 @@ async def transform(video: UploadFile = File(...), user=Depends(get_current_user
     original_url = f"/media/original/{original_filename}"
     analysis_url = f"/media/analysis/{analysis_filename}"
 
+    metadata_payload = {
+        "speedFactor": 1.05,
+        "combos": chosen_combos,
+    }
+    if isinstance(analysis_result, dict):
+        metadata_payload["analysis"] = {
+            "perSecondDescriptions": analysis_result.get("per_second_descriptions", []),
+            "sceneSegments": analysis_result.get("scene_segments", []),
+            "justificationTimeline": analysis_result.get("justification_timeline", []),
+        }
+
     create_video(
         upload_id,
         user["id"],
         original_url=original_url,
         analysis_url=analysis_url,
-        metadata={
-            "speedFactor": 1.05,
-            "combos": chosen_combos,
-        },
+        metadata=metadata_payload,
     )
 
     for variant in variants:
