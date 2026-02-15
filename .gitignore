@@ -8,3 +8,6 @@ frontend/dist
 frontend/.next
 backend/storage
 backend/generative/jobs/*.json
+tests/graded/
+tests/tool_smoke/
+tests/*.mp4
